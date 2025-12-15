@@ -1,0 +1,97 @@
+﻿Index,Locus,Type,Locus,Associated Diseases,Allele,Mut_type,Position,aaΔ or RNA,Last Status Update
+1,tRNA,MT,TF,MELAS / MM & EXIT,m.583G>A,SNV,583,tRNA Phe,2018.04.18
+2,tRNA,MT,TF,Maternally inherited epilepsy / mito tubulointerstitial kidney disease (MITKD),m.616T>C,SNV,616,tRNA Phe,2019.01.19
+3,tRNA,MT,RNR1,DEAF,m.1494C>T,SNV,1494,12S rRNA,2018.04.18
+4,tRNA,MT,RNR1,DEAF; autism spectrum intellectual disability; possibly antiatherosclerotic,m.1555A>G,SNV,1555,12S rRNA,2018.04.18
+5,tRNA,MT,TV,AMDF,m.1606G>A,SNV,1606,tRNA Val,2018.04.18
+6,tRNA,MT,TV,MNGIElike disease / MELAS,m.1630A>G,SNV,1630,tRNA Val,2018.04.18
+7,tRNA,MT,TV,Leigh Syndrome / HCM / MELAS,m.1644G>A,SNV,1644,tRNA Val,2018.04.18
+8,tRNA,MT,TL1,MELAS / Leigh Syndrome / DMDF / MIDD / SNHL / CPEO / MM / FSGS / ASD / Cardiac+multilike disease / MELAS,m.3243A>G,SNV,3243,tRNA Leu (UUR),2018.04.18
+9,tRNA,MT,TL1,MM / MELAS / SNHL / CPEO,m.3243A>T,SNV,3243,tRNA Leu (UUR),2018.04.18
+10,tRNA,MT,TL1,MELAS; possible atherosclerosis risk,m.3256C>T,SNV,3256,tRNA Leu (UUR),2018.04.18
+11,tRNA,MT,TL1,MELAS / Myopathy,m.3258T>C,SNV,3258,tRNA Leu (UUR),2018.04.18
+12,tRNA,MT,TL1,MMC / MELAS,m.3260A>G,SNV,3260,tRNA Leu (UUR),2018.04.18
+13,tRNA,MT,TL1,MELAS / DM,m.3271T>C,SNV,3271,tRNA Leu (UUR),2018.04.18
+14,tRNA,MT,TL1,PEM / retinal dystrophy in MELAS,m.3273delT,Indel,3273,tRNA Leu (UUR),2018.04.18
+15,tRNA,MT,TL1,Myopathy,m.3280A>G,SNV,3280,tRNA Leu (UUR),2018.04.18
+16,tRNA,MT,TL1,MELAS / Myopathy / Deafness+Cognitive Impairment,m.3291T>C,SNV,3291,tRNA Leu (UUR),2018.04.18
+17,tRNA,MT,TL1,MM,m.3302A>G,SNV,3302,tRNA Leu (UUR),2018.04.18
+18,tRNA,MT,TL1,MMC,m.3303C>T,SNV,3303,tRNA Leu (UUR),2018.04.18
+19,Coding,MT,ND1,LHON MELAS overlap,m.3376G>A,SNV,3376,E24K,2018.04.18
+20,Coding,MT,ND1,LHON,m.3460G>A,SNV,3460,A52T,2018.04.18
+21,Coding,MT,ND1,LHON,m.3635G>A,SNV,3635,S110N,2018.04.18
+22,Coding,MT,ND1,MELAS / Leigh Syndrome / LDYT / BSN,m.3697G>A,SNV,3697,G131S,2018.04.18
+23,Coding,MT,ND1,LHON,m.3700G>A,SNV,3700,A132T,2018.04.18
+24,Coding,MT,ND1,LHON,m.3733G>A,SNV,3733,E143K,2018.04.18
+25,Coding,MT,ND1,Progressive Encephalomyopathy / Leigh Syndrome / Optic Atrophy,m.3890G>A,SNV,3890,R195Q,2018.04.18
+26,Coding,MT,ND1,EXIT+myalgia / severe LA+cardiac / 3MGA aciduria / nephropathy+deafness+diabetes,m.3902_3908ACCTTGCinv,Inv,3902,DLA-GKV,2018.04.18
+27,Coding,MT,ND1,LHON / Leigh-like phenotype,m.4171C>A,SNV,4171,L289M,2018.04.18
+28,tRNA,MT,TI,CPEO / MS,m.4298G>A,SNV,4298,tRNA Ile,2018.04.18
+29,tRNA,MT,TI,MICM,m.4300A>G,SNV,4300,tRNA Ile,2018.04.18
+30,tRNA,MT,TI,CPEO,m.4308G>A,SNV,4308,tRNA Ile,2018.04.18
+31,tRNA,MT,TQ,Encephalopathy / MELAS,m.4332G>A,SNV,4332,tRNA Gln,2018.04.18
+32,tRNA,MT,TM,Myopathy / MELAS / Leigh Syndrome,m.4450G>A,SNV,4450,tRNA Met,2019.03.06
+33,tRNA,MT,TW,Mitochondrial myopathy,m.5521G>A,SNV,5521,tRNA Trp,2018.04.18
+34,tRNA,MT,TW,Leigh Syndrome,m.5537_5538insT,Indel,5537,tRNA Trp,2018.04.18
+35,tRNA,MT,TA,Myopathy,m.5650G>A,SNV,5650,tRNA Ala,2018.04.18
+36,tRNA,MT,TN,CPEO+ptosis+proximal myopathy,m.5690A>G,SNV,5690,tRNA Asn,2018.04.18
+37,tRNA,MT,TN,CPEO / MM,m.5703G>A,SNV,5703,tRNA Asn,2018.04.18
+38,tRNA,MT,TN,Multiorgan failure / myopathy,m.5728T>C,SNV,5728,tRNA Asn,2019.08.23
+39,Coding,MT,CO1,SNHL,m.7445A>G,SNV,7445,term514term,2018.04.18
+40,tRNA,MT,TS1 precursor,SNHL,m.7445A>G,SNV,7445,tRNA Ser (UCN) precursor,2018.04.18
+41,tRNA,MT,TS1,PEM / AMDF / Motor neuron disease-Like,m.7471_7472insC,Indel,7471,tRNA Ser (UCN),2018.04.18
+42,tRNA,MT,TS1,MM / EXIT,m.7497G>A,SNV,7497,tRNA Ser (UCN),2018.04.18
+43,tRNA,MT,TS1,SNHL,m.7510T>C,SNV,7510,tRNA Ser (UCN),2018.04.18
+44,tRNA,MT,TS1,SNHL/Deafness,m.7511T>C,SNV,7511,tRNA Ser (UCN),2018.04.18
+45,tRNA,MT,TK,Severe adult-onset multisymptom myopathy / Myoclonic epilepsy,m.8306T>C,SNV,8306,tRNA Lys,2020.02.04
+46,tRNA,MT,TK,MNGIE / Progressive mito cytopathy,m.8313G>A,SNV,8313,tRNA Lys,2020.02.10
+47,tRNA,MT,TK,Myopathy / Exercise Intolerance / Eye disease+SNHL,m.8340G>A,SNV,8340,tRNA Lys,2019.08.23
+48,tRNA,MT,TK,MERRF; Other  LD / Depressive mood disorder / leukoencephalopathy / HiCM,m.8344A>G,SNV,8344,tRNA Lys,2018.04.18
+49,tRNA,MT,TK,MERRF,m.8356T>C,SNV,8356,tRNA Lys,2018.04.18
+50,tRNA,MT,TK,MICM+DEAF / MERRF / Autism / Leigh Syndrome / Ataxia+Lipomas,m.8363G>A,SNV,8363,tRNA Lys,2018.04.18
+51,Coding,MT,ATP8/6,Infantile cardiomyopathy,m.8528T>C,SNV,8528,ATP8:W55R ATP6:M1T,2018.04.18
+52,Coding,MT,ATP6,BSN / Leigh syndrome,m.8851T>C,SNV,8851,W109R,2018.04.18
+53,Coding,MT,ATP6,"Mitochondrial myopathy, lactic acidosis and sideroblastic anemia (MLASA) / IgG nephropathy",m.8969G>A,SNV,8969,S148N,2018.04.18
+54,Coding,MT,ATP6,NARP / Leigh Disease / MILS / other,m.8993T>C,SNV,8993,L156P,2018.04.18
+55,Coding,MT,ATP6,NARP / Leigh Disease / MILS / other,m.8993T>G,SNV,8993,L156R,2018.04.18
+56,Coding,MT,ATP6,Ataxia syndromes,m.9035T>C,SNV,9035,L170P,2018.04.18
+57,Coding,MT,ATP6,"MIDD, renal insufficiency",m.9155A>G,SNV,9155,Q210R,2019.12.09
+58,Coding,MT,ATP6,FBSN / Leigh Disease / Spinocerebellar Ataxia,m.9176T>C,SNV,9176,L217P,2018.04.18
+59,Coding,MT,ATP6,Leigh Disease / Spastic Paraplegia / Spinocerebellar Ataxia,m.9176T>G,SNV,9176,L217R,2018.04.18
+60,Coding,MT,ATP6,Leigh Disease / Ataxia syndromes / NARP like disease / Episodic weakness and Charcot Marie Tooth,m.9185T>C,SNV,9185,L220P,2018.04.18
+61,Coding,MT,ATP6,Encephalopathy / Seizures / Lacticacidemia,m.9205_9206delTA,Indel,9205,TerM,2018.04.18
+62,tRNA,MT,TG,PEM,m.10010T>C,SNV,10010,tRNA Gly,2018.04.18
+63,Coding,MT,ND3,Leigh Disease / MELAS,m.10158T>C,SNV,10158,S34P,2018.04.18
+64,Coding,MT,ND3,Leigh Disease / Leigh like Disease / ESOC,m.10191T>C,SNV,10191,S45P,2018.04.18
+65,Coding,MT,ND3,Leigh Disease / Dystonia / Stroke / LDYT,m.10197G>A,SNV,10197,A47T,2018.04.18
+66,Coding,MT,ND4L,LHON,m.10663T>C,SNV,10663,V65A,2018.04.18
+67,Coding,MT,ND4,Leigh Disease,m.11777C>A,SNV,11777,R340S,2018.04.18
+68,Coding,MT,ND4,LHON / Progressive Dystonia,m.11778G>A,SNV,11778,R340H,2018.04.18
+69,tRNA,MT,TH,MERRF MELAS / Encephalopathy,m.12147G>A,SNV,12147,tRNA His,2018.04.18
+70,tRNA,MT,TH,Maternally inherited non syndromic deafness,m.12201T>C,SNV,12201,tRNA His,2020.09.17
+71,tRNA,MT,TS2,DMDF / RP+SNHL,m.12258C>A,SNV,12258,tRNA Ser (AGY),2018.04.18
+72,tRNA,MT,TL2,CPEO,m.12276G>A,SNV,12276,tRNA Leu (CUN),2018.04.18
+73,tRNA,MT,TL2,CPEO / EXIT+Ophthalmoplegia,m.12294G>A,SNV,12294,tRNA Leu (CUN),2018.10.12
+74,tRNA,MT,TL2,"CPEO / KSS / possible carotid atherosclerosis risk, trend toward myocardial infarction risk",m.12315G>A,SNV,12315,tRNA Leu (CUN),2018.04.18
+75,tRNA,MT,TL2,CPEO,m.12316G>A,SNV,12316,tRNA Leu (CUN),2018.04.18
+76,Coding,MT,ND5,Leigh Disease,m.12706T>C,SNV,12706,F124L,2018.04.18
+77,Coding,MT,ND5,Optic neuropathy/ retinopathy/ LD,m.13042G>A,SNV,13042,A236T,2018.04.18
+78,Coding,MT,ND5,LHON,m.13051G>A,SNV,13051,G239S,2018.04.18
+79,Coding,MT,ND5,"Ataxia+PEO / MELAS, LD, LHON, myoclonus, fatigue",m.13094T>C,SNV,13094,V253A,2018.04.18
+80,Coding,MT,ND5,LHON,m.13379A>C,SNV,13379,H348P,2020.04.10
+81,Coding,MT,ND5,Leigh Disease / MELAS / LHON MELAS Overlap Syndrome / negative association w Carotid Atherosclerosis,m.13513G>A,SNV,13513,D393N,2018.04.18
+82,Coding,MT,ND5,Leigh Disease / MELAS / Ca2+ downregulation,m.13514A>G,SNV,13514,D393G,2018.04.18
+83,Coding,MT,ND6,MELAS / Leigh Disease,m.14453G>A,SNV,14453,A74V,2021.12.23
+84,Coding,MT,ND6,LDYT / Leigh Disease / dystonia / carotid atherosclerosis risk,m.14459G>A,SNV,14459,A72V,2018.04.18
+85,Coding,MT,ND6,LHON,m.14482C>A,SNV,14482,M64I,2018.04.18
+86,Coding,MT,ND6,LHON,m.14482C>G,SNV,14482,M64I,2018.04.18
+87,Coding,MT,ND6,LHON,m.14484T>C,SNV,14484,M64V,2018.04.18
+88,Coding,MT,ND6,Dystonia / Leigh Disease / ataxia / ptosis / epilepsy,m.14487T>C,SNV,14487,M63V,2018.04.18
+89,Coding,MT,ND6,LHON,m.14495A>G,SNV,14495,L60S,2018.04.18
+90,Coding,MT,ND6,LHON,m.14568C>T,SNV,14568,G36S,2018.04.18
+91,tRNA,MT,TE,Reversible COX deficiency myopathy,m.14674T>C,SNV,14674,tRNA Glu,2018.04.18
+92,tRNA,MT,TE,MM+DMDF / Encephalomyopathy / Dementia+diabetes+ophthalmoplegia,m.14709T>C,SNV,14709,tRNA Glu,2018.04.18
+93,tRNA,MT,TE,Encephalomyopathy + Retinopathy,m.14710G>A,SNV,14710,tRNA Glu,2018.04.18
+94,Coding,MT,CYB,EXIT / Septo Optic Dysplasia,m.14849T>C,SNV,14849,S35P,2018.04.18
+95,Coding,MT,CYB,"Multisystem Disorder, EXIT",m.15579A>G,SNV,15579,Y278C,2018.04.18
+96,tRNA,MT,TP,MM / PEO,m.15990C>T,SNV,15990,tRNA Pro,2020.10.23
