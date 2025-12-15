@@ -1,0 +1,11 @@
+chr,pos,ref,mut,gene,aachange,impact
+MT,6180,G,A,MT-CO1,A93T,Missense
+MT,11790,T,C,MT-ND4,L344P,Missense
+MT,9151,A,G,MT-ATP6,I209V,Missense
+MT,12396,T,C,MT-ND5,L20L,Synonymous
+MT,14035,T,C,MT-ND5,S567P,Missense
+MT,4232,T,C,MT-ND1,I309T,Missense
+MT,4487,A,G,MT-ND2,Q6Q,Synonymous
+MT,4965,A,G,MT-ND2,S166G,Missense
+MT,6379,T,C,MT-CO1,L159S,Missense
+MT,13552,G,A,MT-ND5,A406T,Missense
