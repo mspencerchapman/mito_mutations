@@ -1,0 +1,15 @@
+Sample,PDID,Canapps project,Source,Age,Sex,Other,Dataset
+CB001,PD40315,2084,CB,0,Female,Normal,Adult_Cord
+CB002,PD45517,2180,CB,0,Female,Normal,Adult_Cord
+KX001,PD40521,1882,BM / PB,29,Male,Normal,Adult_Cord
+KX002,PD40667,2022,BM,38,Male,Inflammatory bowel disease,Adult_Cord
+KX003,PD43974,2129,BM / PB,81,Male,Neurological disorder,Adult_Cord
+KX004,PD45534,2181,BM / SPL / PB,77,Female,Normal,Adult_Cord
+KX007,PD47738,2335,BM,75,Male,Normal,Adult_Cord
+KX008,PD48402,2358,BM,76,Female,Normal,Adult_Cord
+SX001,PD41048,1957,PB,48,Male,Selenoprotein deficiency,Adult_Cord
+AX001,PD43976,2133,PB,63,Male,Normal,Adult_Cord
+8pcw,PD43947,2169,Liver,-0.6,Male,Normal,Foetal
+18pcw,PD41768,2043,Liver/ BM,-0.4125,Male,Normal,Foetal
+TX001,PD42473,,Tonsil,,,Normal,Lymphocyte
+TX002,PD42775,,Tonsil,,,Normal,Lymphocyte
