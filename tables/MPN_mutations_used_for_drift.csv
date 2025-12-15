@@ -1,0 +1,6 @@
+chr,pos,ref,mut,gene,aachange,impact
+MT,5136,T,C,MT-ND2,S223P,Missense
+MT,12565,T,C,MT-ND5,S77P,Missense
+MT,9804,G,A,MT-CO3,A200T,Missense
+MT,14111,T,C,MT-ND5,F592S,Missense
+MT,2270,A,G,NA,NA,Non-Coding
