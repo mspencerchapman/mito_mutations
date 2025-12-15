@@ -1,0 +1,57 @@
+﻿PD_number,ID,Dataset,Plate ID,Cell type
+PD61042b,F148 11 PCW,Foetal,A01,HSC pool
+PD61043b,F162 16 PCW,Foetal,F01,HSC pool
+PD61043c,F162 16 PCW,Foetal,F02,HSC pool
+PD61043d,F162 16 PCW,Foetal,F03,HSC pool
+PD61043e,F162 16 PCW,Foetal,F04,HSC pool
+PD61043f,F162 16 PCW,Foetal,F05,HSC pool
+PD61043g,F162 16 PCW,Foetal,F06,HSC pool
+PD61043h,F162 16 PCW,Foetal,G01,CD34plusCD38plus haematopoietic progenitors
+PD61043i,F162 16 PCW,Foetal,G02,CD34plusCD38plus haematopoietic progenitors
+PD61043j,F162 16 PCW,Foetal,G03,CD34plusCD38plus haematopoietic progenitors
+PD61043k,F162 16 PCW,Foetal,G04,CD34plusCD38plus haematopoietic progenitors
+PD61043l,F162 16 PCW,Foetal,G05,CD34plusCD38plus haematopoietic progenitors
+PD61043m,F162 16 PCW,Foetal,G06,CD34plusCD38plus haematopoietic progenitors
+PD61040b,XN3590,Cord blood,A01,HSC pool
+PD61040c,XN3590,Cord blood,A02,CD34plusCD38plus haematopoietic progenitors
+PD61041b,WB46 ,Adult,A03,HSC pool
+PD61041c,WB46 ,Adult,A04,HSC pool
+PD61041d,WB46 ,Adult,B01,CD34plusCD38plus haematopoietic progenitors
+PD61041e,WB46 ,Adult,B02,CD34plusCD38plus haematopoietic progenitors
+PD61041f,WB46,Adult,B03,CD34plusCD38plus haematopoietic progenitors
+PD61041g,WB46,Adult,B04,CD34plusCD38plus haematopoietic progenitors
+PD61041h,WB46,Adult,B05,CD34plusCD38plus haematopoietic progenitors
+PD61041i,WB46,Adult,B06,CD34plusCD38plus haematopoietic progenitors
+PD61041j,WB46,Adult,B07,CD34plusCD38plus haematopoietic progenitors
+PD61041k,WB46,Adult,B08,CD34plusCD38plus haematopoietic progenitors
+PD60312b,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312c,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312d,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312e,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312f,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312g,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312h,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312i,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312j,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312k,StemcellTech_LOT2102517002,Cord blood,,HSC pool
+PD60312l,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312m,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312n,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312o,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312p,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312q,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312r,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312s,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312t,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60312u,StemcellTech_LOT2102517002,Cord blood,,CD34plusCD38plus haematopoietic progenitors
+PD60313b,WB19,Adult,,HSC pool
+PD60313c,WB19,Adult,,HSC pool
+PD60313d,WB19,Adult,,HSC pool
+PD60313e,WB19,Adult,,HSC pool
+PD60313f,WB19,Adult,,CD34plusCD38plus haematopoietic progenitors
+PD60313g,WB19,Adult,,CD34plusCD38plus haematopoietic progenitors
+PD60313h,WB19,Adult,,CD34plusCD38plus haematopoietic progenitors
+PD60313i,WB19,Adult,,CD34plusCD38plus haematopoietic progenitors
+PD60313j,WB19,Adult,,CD34plusCD38plus haematopoietic progenitors
+PD60313k,WB19,Adult,,CD34plusCD38plus haematopoietic progenitors
+PD60313l,WB19,Adult,,CD34plusCD38plus haematopoietic progenitors
