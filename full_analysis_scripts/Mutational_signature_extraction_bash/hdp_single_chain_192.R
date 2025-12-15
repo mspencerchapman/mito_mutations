@@ -1,0 +1,44 @@
+# HDP Flow II: run single chains
+# Tim Coorens, Feb 2020
+
+options(stringsAsFactors = F)
+library(hdp)
+lower_threshold=40
+
+n=as.numeric(commandArgs(T)[1])
+mutations=read.table("trinuc_mut_mat.txt")
+key_table=read.table("key_table.txt")
+
+#If requiring a minimum number of mutations:
+sample_remove=rownames(mutations)[rowSums(mutations)<lower_threshold]
+print(paste("Removing samples",paste(sample_remove,collapse=" "),"due to insufficient numbers of mutations"))
+mutations=mutations[!rownames(mutations)%in%sample_remove,]
+key_table=key_table[!key_table$Sample%in%sample_remove,]
+
+#Hierarchy is set per patient, can change if wanted
+freq=nrow(mutations)
+
+ppindex = c(0, rep(1,length(freq)),rep(2:(length(freq)+1), times=freq))
+cpindex = c(1, rep(2,length(freq)),rep(3:(length(freq)+2), times=freq))
+print(ppindex)
+print(cpindex)
+
+hdp_mut <- hdp_init(ppindex = c(0, rep(1,length(freq)),rep(2:(length(freq)+1), times=freq)), # index of parental node
+                    cpindex = c(1, rep(2,length(freq)),rep(3:(length(freq)+2), times=freq)), # index of the CP to use
+                    hh = rep(1, 192), # prior is uniform over 96 categories
+                    alphaa = rep(1,length(freq)+2), # shape hyperparameters for 2 CPs
+                    alphab = rep(1,length(freq)+2))  # rate hyperparameters for 2 CPs
+
+hdp_mut <- hdp_setdata(hdp_mut, 
+                       dpindex = (length(freq)+2):numdp(hdp_mut), # index of nodes to add data to
+                       mutations)
+
+hdp_activated <- dp_activate(hdp_mut, 1:numdp(hdp_mut), initcc=10,seed=n*300)
+
+chain=hdp_posterior(hdp_activated,
+                    burnin=20000,
+                    n=100,
+                    seed=n*1000,
+                    space=200,
+                    cpiter=3)
+saveRDS(chain,paste0("hdp_chain_",n,".Rdata"))
