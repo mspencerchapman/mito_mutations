@@ -9,7 +9,7 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 genomeFile="~/R_work/reference_files/genome.fa"
-root_dir="~/R_work/mito_mutations_blood/"
+root_dir="~/R_work/mito_mutations/"
 source(paste0(root_dir,"data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -125,7 +125,7 @@ expanded.clades.marking.plot<-expanded_clades_df%>%
   mutate(Pos_or_neg=factor(Pos_or_neg,levels=c("Present","Absent")))%>%
   mutate(levels=str_c(exp_ID,nodes,sep = "_"))%>%
   ggplot(aes(x=factor(levels,levels=node_factor_levels),y=n_samples,fill=Pos_or_neg))+
-  geom_bar(position="stack",stat="identity",col="black",size=0.15)+
+  geom_bar(position="stack",stat="identity",col="black",linewidth=0.15)+
   scale_fill_brewer(palette="Set2")+
   facet_grid(~exp_ID,scales="free",space = "free")+
   theme_bw()+
@@ -135,19 +135,56 @@ expanded.clades.marking.plot<-expanded_clades_df%>%
 ggsave(filename=paste0(figures_dir,"Figure_05/expanded_clades_marking_plot.pdf"),expanded.clades.marking.plot,width=7,height=2.3)
 
 #Show correlation of lineage marker with the time of the most recent common ancestor of the clone (MRCA)
+#Do a quasibinomial glm, accounting for overdispersion of the data
+m<-glm(max_pos_prop~MRCA_time,
+       family=quasibinomial(link="logit"),
+       weights = n_samples,
+       data=expanded_clades_df)
+
+summary(m)
+m$deviance/m$df.residual
+plot(m)
+
+#Calculate the null model, to compare how much additional deviance is explained by the MRCA time
+m_null <- glm(max_pos_prop ~ 1,
+              family = quasibinomial(link = "logit"),
+              weights = n_samples,
+              data = expanded_clades_df)
+
+# McFadden's using deviances rather than log-likelihoods
+# avoids the likelihood problem with quasibinomial
+1 - (m$deviance / m_null$deviance)
+
+# Generate prediction dataframe for visualization
+pred_df <- data.frame(
+  MRCA_time = seq(min(expanded_clades_df$MRCA_time),
+                  max(expanded_clades_df$MRCA_time),
+                  length.out = 200)
+)
+
+# Get predictions with confidence intervals
+pred_link <- predict(m, newdata = pred_df, type = "link", se.fit = TRUE)
+pred_df$fit   <- plogis(pred_link$fit)
+pred_df$lower <- plogis(pred_link$fit - 1.96 * pred_link$se.fit)
+pred_df$upper <- plogis(pred_link$fit + 1.96 * pred_link$se.fit)
+
 MRCA.prop.correlation<-expanded_clades_df%>%
   ggplot(aes(x=MRCA_time,y=max_pos_prop,col=mean_heteroplasmy))+
   geom_point(aes(size=clonal_fraction),alpha=0.75)+
   scale_x_continuous(limits=c(0,NA))+
   scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(11,"Spectral")))+
+  geom_ribbon(data = pred_df,
+              aes(x = MRCA_time, ymin = lower, ymax = upper),
+              alpha = 0.2,inherit.aes = F) +
+  geom_line(data = pred_df,
+            aes(x = MRCA_time, y = fit),inherit.aes = F) +
   labs(x="Molecular time of clade's MRCA",
        y="Proportion of clade\nwith best lineage marker ",
        col="Mean\nheteroplasmy",
        size="Clade size\n(clonal fraction)")+
   theme_bw()+
-  geom_smooth(col="black",size=0.6,method="lm")+
   my_theme
-summary(lm(max_pos_prop~MRCA_time,data=expanded_clades_df))
+
 ggsave(filename=paste0(figures_dir,"Supp_Figure_06/MRCA_prop_correlation_plot.pdf"),MRCA.prop.correlation,width=4,height=2.5)
 
 #-----------------------------------------------------------------------------------#

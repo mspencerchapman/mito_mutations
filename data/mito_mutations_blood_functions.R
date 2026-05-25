@@ -3691,10 +3691,10 @@ add_var_col=function(tree, ##<< enhanced phylo returned from plot_tree
 
 
 
-highlight_nodes=function(tree,details,matrices,node,nodes,...) {
+highlight_nodes=function(tree,details,matrices,node,nodes,col="red",...) {
   info=get_edge_info(tree,details,node=node)
   if(node %in% nodes){
-    arrows(y0=info$yb,y1=info$yt,x0=info$x,x1=info$x,length=0,col="red",lend=1,...)
+    arrows(y0=info$yb,y1=info$yt,x0=info$x,x1=info$x,length=0,col=col,lend=1,...)
   }
 }
 

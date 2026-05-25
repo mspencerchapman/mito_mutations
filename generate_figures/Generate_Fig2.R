@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------------#
 # --------Load packages (and install if they are not installed yet)-------------------
 #-----------------------------------------------------------------------------------#
-cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal")
+cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal","ggpmisc")
 bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene")
 
 for(package in cran_packages){
@@ -238,8 +238,10 @@ globaldnds_res<-Map(dndsout=dndscv_by_tissue,tissue=c("Foetal blood","Cord blood
   dndsout$globaldnds%>%
     filter(!is.na(name) & complete.cases(.))%>%
     mutate(name=rename_vec[name])%>%
-    mutate(tissue=tissue)
+    mutate(tissue=tissue,.before=1)
 })%>%dplyr::bind_rows()
+
+readr::write_csv(globaldnds_res,file = paste0(root_dir,"/tables/global_dnds_estimates.csv"))
 
 tissue_order=c("Foetal blood","Cord blood","Adult blood")
 nb.cols <- length(tissue_order)
@@ -428,3 +430,136 @@ dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
   labs(x="Variant allele fraction",y="")
 
 ggsave(filename = paste0(plots_dir,"Figure_02/Fig2e.dnds_heatmap_by_vaf_by_gene.pdf"),dnds_heatmap_by_vaf_by_gene,width=4,height=2.5)
+
+#-----------------------------------------------------------------------------------#
+### CROSS TISSUE ANALYSIS----
+#-----------------------------------------------------------------------------------#
+
+nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
+colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
+
+#Read in the mitochondrial copy number data
+mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)%>%
+  dplyr::rename("pileup_median_mtDNA_coverage"=pilup_median_mtDNA_coverage) #This column has a typo
+
+#Import individual level metadata for the adult and foetal blood samples
+ref_df<-readxl::read_excel(nonblood_ref_file) #Import metadata relating to all individuals studied
+colony_info<-read.delim(colony_info_file) #Import colony-level data for the lymphoid dataset as there are multiple different cell types
+
+#Define the dataframe for converting IDs between my IDs, and Andrew's for the different datasets
+translate=data.frame(dataset=c("KY","HL","SO","PR","LM","NW","lymph","EM"),
+                     al_ref=c("lung_organoid","colon","colon_ibd","muty_mutant","endometrium","blood_MPN","immune","blood_emily"))
+
+muty_samples=c("PD44887","PD44888","PD44889","PD44890","PD44891")
+
+#Define a set of 'black-listed' mutations - these are sets of artefacts that recurrently slip through the filters
+#This is often due to haplotype-specific artefacts that map as SNVs
+exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_456_C_T","MT_567_A_C","MT_574_A_C","MT_8270_C_T","MT_16170_A_C","MT_16181_A_C","MT_16182_A_C","MT_16183_A_C","MT_16189_T_C")
+
+#-----------------------------------------------------------------------------------#
+# IMPORT ALL CROSS TISSUE DATASETS ----------------------------------------
+#-----------------------------------------------------------------------------------#
+
+all_cohorts_plus_CML<-c("KY","HL","SO","PR","LM","NW","CML","lymph","blood")
+all_cohorts<-c("KY","HL","SO","PR","LM","NW","lymph","blood")
+
+name_conversion_vec=c("Normal blood","Lymphoid","MPN","Colon","IBD-affected\nColon","MUTYH-mutant\nColon","Endometrium","Bronchial\nepithelium")
+names(name_conversion_vec)=c("blood","lymph","NW","HL","SO","PR","LM","KY")
+tissue_cols<-c("#96e97c","#fd81c8","#145a6a","#65e6f9","#781486","#5f70cc","#aea2eb","#1d6d1f")
+names(tissue_cols)<-name_conversion_vec
+
+
+all_mito_datasets<-lapply(all_cohorts_plus_CML,function(dataset) {
+  dataset_mito_data<-readRDS(paste0(root_dir,"/data/nonblood/mito_mutation_data_",dataset,".RDS"))
+  CN_correlating_muts<-readRDS(paste0(root_dir,"/data/nonblood/CN_correlation_",dataset,".RDS"))
+  
+  rho_cut_off=0
+  
+  #Deal with the germline mutations (if not done already)
+  dataset_mito_data<-Map(list=dataset_mito_data,exp_ID=names(dataset_mito_data),function(list,exp_ID) {
+    if(is.null(list$germline_muts)) {
+      list$germline_muts<-identify_germline(matrices=list$matrices,threshold=0.9)
+      cat(list$germline_muts,sep="\n")
+      list$matrices<-reverse_germline(matrices=list$matrices,threshold=0.9)
+    }
+    return(list)
+  })
+  
+  #Sort out the names of the mutCN column
+  dataset_mito_data<-lapply(dataset_mito_data,function(list) {
+    colnames(list$matrices$implied_mutCN)<-stringr::str_split(colnames(list$matrices$implied_mutCN),pattern = '\\.\\.\\.',simplify=T)[,1]
+    return(list)
+  })
+  
+  #Add the CN correlating muts vector to each patient (slightly inefficient but programatically more straight-forward)
+  dataset_mito_data<-lapply(dataset_mito_data,function(list) {
+    list$CN_correlating_muts<-CN_correlating_muts
+    return(list)
+  })
+  
+  
+  cat("Adding the filtered VAF matrix.",sep="\n")
+  #Annotate specific mutations with their most likely signature using the 'sig_ref' dataframe
+  dataset_mito_data<-Map(list=dataset_mito_data,this_exp_ID=names(dataset_mito_data),function(list,this_exp_ID) {
+    cat(this_exp_ID,sep="\n")
+    
+    if(dataset=="lymph") {list$tree$tip.label<-unique(list$sample_shearwater_calls$sampleID)}
+    
+    mutCN_cutoff=25 #If the mitochondrial copy number is over 25, retain mutation even if is in the "CN correlating muts" list
+    CN_correlating_mut_removal_mat=list$matrices$implied_mutCN>mutCN_cutoff|(matrix((!rownames(list$matrices$vaf)%in%CN_correlating_muts),ncol=1)%*%matrix(rep(1,ncol(list$matrices$vaf)),nrow=1))
+    vaf.filt<-(list$matrices$vaf[,list$tree$tip.label]*list$matrices$SW[,list$tree$tip.label][,list$tree$tip.label]*CN_correlating_mut_removal_mat[,list$tree$tip.label])[!grepl("DEL|INS",rownames(list$matrices$vaf))&
+                                                                                                                                                                            list$rho_vals>rho_cut_off&
+                                                                                                                                                                            !rownames(list$matrices$vaf)%in%exclude_muts,]
+    
+    list$matrices$CN_correlating_mut_removal_mat<-CN_correlating_mut_removal_mat
+    list$matrices$vaf.filt<-vaf.filt
+    return(list)
+  })
+  
+  if(dataset=="lymph") {
+    dataset_mito_data<-Map(list=dataset_mito_data,exp_ID=names(dataset_mito_data),function(list,exp_ID) {
+      if(!exp_ID=="TX001") {list$het_oocyte_muts<-c()}
+      return(list)
+    })
+  }
+  return(dataset_mito_data)
+})
+names(all_mito_datasets)<-all_cohorts_plus_CML
+
+all_df_tidy<-Map(dataset=all_cohorts_plus_CML,dataset_mito_data=all_mito_datasets,function(dataset,dataset_mito_data) {
+  cat(dataset,sep="\n")
+  
+  #Generate tidy data frame of samples, mutations and vafs
+  mutCN_cutoff=25 #If the mitochondrial copy number is over 25, retain mutation even if is in the "CN correlating muts" list
+  vaf_cut_off<-0.03
+  rho_cut_off<-0
+  CN_correlating_muts<-dataset_mito_data$CN_correlating_muts
+  df_tidy<-dplyr::bind_rows(Map(list=dataset_mito_data,exp_ID=names(dataset_mito_data),function(list,exp_ID) {
+    if(is.null(list)){stop(return(NULL))}
+    CN_correlating_mut_removal_mat=list$matrices$CN_correlating_mut_removal_mat
+    implied_mut_CN_tidy<-list$matrices$implied_mutCN%>%
+      as.data.frame()%>%
+      tibble::rownames_to_column(var="mut_ref")%>%
+      tidyr::gather(key="Sample",value="implied_mut_CN",-mut_ref)
+    df_tidy<-(list$matrices$vaf*list$matrices$SW*CN_correlating_mut_removal_mat)%>%
+      as.data.frame()%>%
+      tibble::rownames_to_column(var="mut_ref")%>%
+      mutate(rho_val=list$rho_vals)%>%
+      tidyr::gather(key="Sample",value="vaf",-mut_ref,-rho_val)
+    
+    comb_tidy<-left_join(df_tidy,implied_mut_CN_tidy,by=c("Sample","mut_ref"))%>%
+      dplyr::filter(!grepl("DEL|INS",mut_ref) & !mut_ref%in%exclude_muts & !mut_ref%in%list$het_oocyte_muts)%>%
+      dplyr::filter(vaf>=vaf_cut_off)%>%
+      mutate(exp_ID=exp_ID)
+    return(comb_tidy)
+  }))
+  
+  #Filter the CN-correlating mutations - due to mis-mapping of nuclear reads.
+  #There may be some genuine mutations at these sites, in which case the implied mutation copy number will be much higher than ~2 (here an arbitrary threshold of 8 is applied)
+  df_tidy<-df_tidy%>%
+    left_join(mito_cn,by="Sample")%>%
+    mutate(implied_mut_CN=vaf*bedtools_mtDNA_genomes)%>%
+    dplyr::filter(!(mut_ref%in%dataset_mito_data$CN_correlating_muts & implied_mut_CN<=mutCN_cutoff))
+  
+  return(df_tidy)
+})

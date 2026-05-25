@@ -83,6 +83,9 @@ CN_correlating_muts<-readRDS(paste0(root_dir,"/data/CN_correlation.RDS"))
 #Define the 'black listed' mutation set - those with recurent artefacts despite the Shearwater filtering
 exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_567_A_C","MT_574_A_C","MT_16181_A_C","MT_16182_A_C","MT_16183_A_C","MT_16189_T_C")
 
+#Vector to convert the foetal cell type codes into basic 'HSC'/ 'Progenitor' types
+convert_vec=c("HSC","HSC","HPC","HPC","HPC","HPC")
+names(convert_vec)=c("H","HSC","C","M","HSPC","Progenitor")
 
 #-----------------------------------------------------------------------------------#
 ## ----------------------ANALYSIS OF MITOCHONDRIAL MUTATION BURDENS----------------------
