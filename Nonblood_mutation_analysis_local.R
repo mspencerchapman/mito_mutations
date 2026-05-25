@@ -10,7 +10,7 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations_blood"
+root_dir="~/R_work/mito_mutations/"
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -735,7 +735,7 @@ mito_cn_lmer_df<-mito_cn%>%
   left_join(ref_df%>%dplyr::select(ID,Age,Smoking_years)%>%filter(!duplicated(.)),by=c("exp_ID"="ID"))
 
 #LMER MODEL 1: LMER of logCN against Age and Tissue
-mito_cn.lmer_with_age<-lme4::lmer(log_mitoCN~Age+Tissue+(1|exp_ID),data=mito_cn_lmer_df)
+mito_cn.lmer_with_age<-lmerTest::lmer(log_mitoCN~Age+Tissue+(1|exp_ID),data=mito_cn_lmer_df)
 summary(mito_cn.lmer_with_age)
 confint(mito_cn.lmer_with_age)
 
@@ -743,6 +743,14 @@ confint(mito_cn.lmer_with_age)
 mito_cn.lmer<-lme4::lmer(log_mitoCN~Tissue+(1|exp_ID),data=mito_cn_lmer_df)
 summary(mito_cn.lmer)
 lmer.CIs<-confint(mito_cn.lmer)
+
+#Do AIC on model 1 and 2 to give 
+m1<-lme4::lmer(log_mitoCN~Age+Tissue+(1|exp_ID),data=mito_cn_lmer_df,REML = F)
+m2<-lme4::lmer(log_mitoCN~Tissue+(1|exp_ID),data=mito_cn_lmer_df,REML = F)
+
+#What is the improvement in the AIC?
+diff(AIC(m1,m2)$AIC)
+
 
 #LER MODEL 3: See if bronchial CN correlates with smoking status
 mito_cn.lmer_lung_smoking<-lme4::lmer(log_mitoCN~Smoking_years+(1|exp_ID),data=mito_cn_lmer_df%>%filter(dataset=="KY")%>%mutate(Smoking_years=as.numeric(Smoking_years))%>%replace_na(replace = list(Smoking_years=0)))
@@ -1193,12 +1201,15 @@ lmer1<-lmerTest::lmer(mean~Age:dataset+(1|exp_ID),data=all_sum_of_vaf_summary_df
 #MODEL 2: lmer with full set of Age*dataset terms
 lmer2<-lmerTest::lmer(mean~Age*dataset+(1|exp_ID),data=all_sum_of_vaf_summary_df)
 
+#Compare models using the AIC
+AIC(lmer1,lmer2)
+#Shows that the simpler model with interaction term only is much preferred
+
 #Plot results of the lmer with both fixed and Age interaction term
 name_conversion_vec=c("Normal blood","Lymphoid","MPN","Colon","IBD-affected\nColon","MUTYH-mutant\nColon","Endometrium","Bronchial\nepithelium")
 names(name_conversion_vec)=c("blood","lymph","NW","HL","SO","PR","LM","KY")
 tissue_cols<-c("#96e97c","#fd81c8","#145a6a","#65e6f9","#781486","#5f70cc","#aea2eb","#1d6d1f")
 names(tissue_cols)<-name_conversion_vec
-
 
 CI_table<-confint(lmer1)
 lmer_info_for_plotting<-as.data.frame(summary(lmer1)$coefficients)%>%
@@ -1279,8 +1290,12 @@ df_tidy_annotated<-Map(df_tidy=all_df_tidy,this_tissue=names(all_df_tidy),functi
     arrange(sampleID,pos)
   
   # run dnds with the mtDNA variants to annotate them (the selection analysis isn't actually used here)
-  mtdna.dndsout <- dndscv(mtdna.variant.data, gene_list=all_mtDNA_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+  mtdna.dndsout <- dndscv(mtdna.variant.data,
+                          gene_list=all_mtDNA_genes, 
+                          refdb = mtref_rda_path,
+                          numcode = 2,
+                          max_coding_muts_per_sample = Inf,
+                          max_muts_per_gene_per_sample = Inf)
   
   # get the results with the annotated variants
   annotated.mtdna.variants <- left_join(mtdna.variant.data,mtdna.dndsout$annotmuts,by=c("sampleID","chr","pos","ref","mut"))%>%
@@ -1297,10 +1312,196 @@ complete.annotated.mutation.table<-df_tidy_annotated%>%
   mutate(impact=ifelse(impact%in%c("Stop_loss","Nonsense"),"Truncating",impact))%>% #rename stop loss and nonsense mutations
   tidyr::unite(col="mut_ref",chr,pos,ref,mut,sep="_",remove=F)
 
+#Compare results with those from when annotated with the nuclear genetic code
+df_tidy_annotated_NUC<-Map(df_tidy=all_df_tidy,this_tissue=names(all_df_tidy),function(df_tidy,this_tissue) {
+  cat(this_tissue,sep="\n")
+  
+  # read in the mtdna variant file and remove patient id
+  mtdna.variant.data <- df_tidy%>%
+    separate("mut_ref", c("chr", "pos", "ref", "mut"), "_")%>%
+    mutate(pos=as.numeric(pos))%>%
+    dplyr::select("sampleID"=Sample,chr,pos,ref,mut,vaf)%>% # next, rename/reorder the columns to make them compatible with dnds input format
+    dplyr::filter(!duplicated(.))%>% # remove duplicated variants
+    arrange(sampleID,pos)
+  
+  # run dnds with the mtDNA variants to annotate them (the selection analysis isn't actually used here)
+  mtdna.dndsout <- dndscv(mtdna.variant.data,
+                          gene_list=all_mtDNA_genes, 
+                          refdb = mtref_rda_path,
+                          numcode = 1,
+                          max_coding_muts_per_sample = Inf,
+                          max_muts_per_gene_per_sample = Inf)
+  
+  # get the results with the annotated variants
+  annotated.mtdna.variants <- left_join(mtdna.variant.data,mtdna.dndsout$annotmuts,by=c("sampleID","chr","pos","ref","mut"))%>%
+    tidyr::replace_na(replace=list(impact="Non-Coding"))%>%
+    mutate(tissue=this_tissue,.before=1)
+  return(annotated.mtdna.variants)
+})%>%dplyr::bind_rows()
+
+complete.annotated.mutation.table.NUC<-df_tidy_annotated_NUC%>%
+  left_join(all_df_tidy%>%dplyr::bind_rows()%>%dplyr::select(Sample,exp_ID),by=c("sampleID"="Sample"),relationship="many-to-many")%>%
+  dplyr::rename("patientID"=exp_ID)%>%
+  filter(!duplicated(.))%>%
+  arrange(patientID,pos)%>% # order the dataframe
+  mutate(impact=ifelse(impact%in%c("Stop_loss","Nonsense"),"Truncating",impact))%>% #rename stop loss and nonsense mutations
+  tidyr::unite(col="mut_ref",chr,pos,ref,mut,sep="_",remove=F)
+
+
 my_comparisons <- list(c("Missense", "Synonymous"), c("Synonymous", "Truncating"))
 
+impact_comparison_df<-left_join(complete.annotated.mutation.table,
+          complete.annotated.mutation.table.NUC%>%dplyr::select(tissue,sampleID,mut_ref,codonsub,"impact_NUC"=impact))%>%
+  dplyr::select(tissue,sampleID,mut_ref,codonsub,impact,impact_NUC)
 
-### Generate global dnds ---------
+consequence_change_plot<-impact_comparison_df%>%
+  mutate(change=paste(impact_NUC,impact,sep=">"))%>%
+  mutate(altered=ifelse(impact_NUC==impact,"unchanged","changed"))%>%
+  filter(impact!="Non-Coding")%>%
+  ggplot(aes(y=change,fill=altered))+
+  geom_bar()+
+  facet_grid(rows=vars(altered),scales="free",space="free_y")+
+  theme_classic()+
+  scale_fill_manual(values=c("#e06010","#2d6e3e"),guide="none")+
+  my_theme+
+  labs(y="Consequence of updating to\nmitochondrial genetic code")
+
+impact_comparison_df%>%
+  filter(impact!="Non-Coding")%>%
+  mutate(change=paste(impact_NUC,impact,sep=">"))%>%
+  mutate(altered=ifelse(impact_NUC==impact,"unchanged","changed"))%>%
+  pull(altered)%>%table()
+
+total_numbers_old_vs_new_plot<-impact_comparison_df%>%
+  dplyr::select(mut_ref,"new_annotation"=impact,"original_annotation"=impact_NUC)%>%
+  tidyr::gather(-mut_ref,key="annotation",value="impact")%>%
+  filter(impact!="Non-Coding")%>%
+  ggplot(aes(y = impact,fill=annotation))+
+  geom_bar(position="dodge",width=0.6,col="black",linewidth=0.1)+
+  scale_fill_brewer(palette="Set2")+
+  theme_classic()+
+  my_theme+
+  labs(fill="",y="")
+
+impact_comparison_df%>%
+  dplyr::select(mut_ref,"new_annotation"=impact,"original_annotation"=impact_NUC)%>%
+  tidyr::gather(-mut_ref,key="annotation",value="impact")%>%
+  filter(impact!="Non-Coding")%>%
+  dplyr::group_by(annotation,impact)%>%
+  dplyr::summarise(n=n())
+
+simple_impact_comparison_df<-impact_comparison_df%>%
+  mutate(change=paste(impact_NUC,impact,sep=">"))%>%
+  mutate(altered=ifelse(impact_NUC==impact,"unchanged","changed"))
+
+new_muts<-simple_impact_comparison_df%>%
+  filter(altered=="changed")%>%
+  group_by(impact)%>%
+  dplyr::summarise(new=n())
+
+lost_muts<-simple_impact_comparison_df%>%
+  filter(altered=="changed")%>%
+  group_by(impact_NUC)%>%
+  dplyr::summarise(lost=n())%>%dplyr::rename("impact"=impact_NUC)
+
+simple_impact_comparison_df%>%
+  filter(altered=="unchanged" & impact!="Non-Coding")%>%
+  group_by(impact)%>%
+  dplyr::summarise(unchanged=n())%>%
+  left_join(new_muts)%>%left_join(lost_muts)%>%
+  tidyr::gather(-impact,key="result",value="n")%>%
+  ggplot(aes(y=impact,x=n,fill=result,alpha = result!="lost"))+
+  geom_bar(stat="identity")+
+  scale_alpha(range=c(0.4,1),guide="none")+
+  theme_classic()+
+  my_theme+
+  theme(axis.title.y=element_blank(),legend.title = element_blank())
+
+### Generate global dnds on all EPITHELIAL TISSUES---------
+
+epithelial_datasets=c("HL","KY","LM","PR","SO")
+#epithelial_datasets=c("blood")
+combined_epithelial_for_dnds<-complete.annotated.mutation.table%>%
+  dplyr::filter(tissue%in%epithelial_datasets)%>%
+  separate("mut_ref", c("chr", "pos", "ref", "mut"), "_")%>%
+  mutate(pos=as.numeric(pos))%>%
+  #dplyr::select(sampleID,chr,pos,ref,mut)%>%
+  dplyr::distinct(sampleID,chr,pos,ref,mut,.keep_all = T)%>%
+  arrange(sampleID,pos)
+
+
+mtdna.dndsout.combined.epithelial <- dndscv(combined_epithelial_for_dnds,
+                        gene_list=target_genes,
+                        refdb = mtref_rda_path,
+                        numcode=2,
+                        max_coding_muts_per_sample = Inf,
+                        max_muts_per_gene_per_sample = Inf)
+
+mut_type_cols<-c("#00468B","#925E9F","#810F7C","black","#E10C04")
+names(mut_type_cols)<-c("Missense","Nonsense","Stop_loss","Non-Coding","Synonymous")
+
+mtdna.dndsout.combined.epithelial$globaldnds%>%
+  filter(!is.na(name) & complete.cases(.))%>%
+  mutate(name=rename_vec[name])%>%
+  filter(name%in%c("Overall","Nonsense","Missense"))%>%
+  ggplot(aes(x=name,y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
+  geom_point(position=position_dodge2(width=0.75), size = 1.5) +
+  labs(y = "Genome-wide dN/dS", x = "Tissue") +
+  theme_classic() + 
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
+  scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
+  my_theme+
+  theme(axis.title.x=element_blank(),
+        axis.text.x = element_text(angle=90),
+        legend.position="none")
+
+## SPLIT THE EPITHELIAL TISSUE analysis at the vaf threshold from blood
+cutoffs=list(low_vaf=c(0.03,0.2),high_vaf=c(0.2,1.1))
+dndsout.epithelial<-lapply(cutoffs,function(cutoffs) {
+  combined_nonblood_for_dnds<-complete.annotated.mutation.table%>%
+    dplyr::filter(tissue%in%non_blood_datasets & vaf>=cutoffs[1] & vaf<cutoffs[2])%>%
+    separate("mut_ref", c("chr", "pos", "ref", "mut"), "_")%>%
+    mutate(pos=as.numeric(pos))%>%
+    dplyr::select(sampleID,chr,pos,ref,mut)%>%
+    dplyr::filter(!duplicated(.))%>%
+    arrange(sampleID,pos)
+  
+  mtdna.dndsout.combined.nonblood <- dndscv(combined_nonblood_for_dnds,
+                                            gene_list=target_genes,
+                                            refdb = mtref_rda_path,
+                                            numcode=2,
+                                            max_coding_muts_per_sample = Inf,
+                                            max_muts_per_gene_per_sample = Inf)
+  return(mtdna.dndsout.combined.nonblood)
+})
+
+globaldnds_by_vaf_epithelial<-Map(dndsout=dndsout.epithelial,vaf_group=c("<20%",">20%"),function(dndsout,vaf_group) {
+  dndsout$globaldnds%>%
+    filter(!is.na(name) & complete.cases(.))%>%
+    mutate(name=rename_vec[name])%>%
+    mutate(VAF=vaf_group)
+})%>%dplyr::bind_rows()
+
+globaldnds_by_vaf_epithelial%>%
+  filter(!is.na(name) & complete.cases(.))%>%
+  filter(name%in%c("Overall","Nonsense","Missense"))%>%
+  ggplot(aes(x=VAF,y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
+  geom_point(position=position_dodge2(width=0.75), size = 1.5) +
+  labs(y = "Genome-wide dN/dS", x = "") +
+  theme_classic() + 
+  facet_grid(~name)+
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
+  scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
+  my_theme+
+  theme(axis.title.x=element_blank(),
+        axis.text.x = element_text(angle=0),
+        legend.position="none")
+
+### Generate global dnds by tissue---------
 dndscv_by_tissue<-Map(df_tidy=all_df_tidy[all_cohorts],this_tissue=all_cohorts,function(df_tidy,this_tissue) {
   
   cat(this_tissue,sep="\n")
@@ -1311,8 +1512,12 @@ dndscv_by_tissue<-Map(df_tidy=all_df_tidy[all_cohorts],this_tissue=all_cohorts,f
     dplyr::filter(!duplicated(.))%>%
     arrange(sampleID,pos)
   
-  mtdna.dndsout <- dndscv(tissue_info, gene_list=target_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+  mtdna.dndsout <- dndscv(tissue_info,
+                          gene_list=target_genes,
+                          refdb = mtref_rda_path,
+                          numcode=2,
+                          max_coding_muts_per_sample = Inf,
+                          max_muts_per_gene_per_sample = Inf)
   return(mtdna.dndsout)
 })
 
@@ -1328,8 +1533,7 @@ globaldnds_res<-Map(dndsout=dndscv_by_tissue,this_tissue=all_cohorts,function(dn
 })%>%dplyr::bind_rows()
 
 nb.cols <- length(name_conversion_vec)
-mycolors <- ggsci::pal_lancet(palette = "lanonc")(9)
-#mycolors <- RColorBrewer::brewer.pal(n=3,name="Set1")
+mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(nb.cols)
 
 max_dnds_value<-2
 stats_to_include=c("Missense","Truncating")
@@ -1344,7 +1548,7 @@ global_dnds_nonblood<-globaldnds_res%>%
   theme_classic() + 
   scale_x_discrete(labels = function(x) str_wrap(x, width = 6))+
   scale_y_continuous(limits=c(0,max_dnds_value))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   my_theme+
@@ -1357,6 +1561,7 @@ ggsave(filename = paste0(plots_dir,"global_dnds_nonblood.pdf"),global_dnds_nonbl
 #-----------------------------------------------------------------------------------#
 ##----------------------Get gene-level dNdS info by tissue---------------
 #-----------------------------------------------------------------------------------#
+qval_cutoff=0.05
 selcv_res_by_tissue<-Map(dndsout=dndscv_by_tissue,this_tissue=all_cohorts,function(dndsout,this_tissue) {
   temp<-dndsout$sel_cv%>%
     dplyr::select(gene_name,wmis_cv,wnon_cv,qmis_cv,qtrunc_cv)
@@ -1370,7 +1575,7 @@ gene_order=c(paste0("MT-ND",1:6),"MT-ND4L","MT-CYB",paste0("MT-CO",1:3),"MT-ATP6
 gene_order<-gene_order[gene_order%in%target_genes]
 
 dnds_heatmap_by_gene_by_tissue<-selcv_res_by_tissue%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),ifelse(dNdS>2,sprintf(dNdS, fmt = '%#.1f'),"")),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
          dNdS=ifelse(dNdS>2,2,dNdS),
          gene_name=factor(gene_name,levels=rev(gene_order)),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
@@ -1391,10 +1596,11 @@ ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_gene_by_tissue.pdf"),dnds_he
 ##----------------------Enhance the tidy dataframe with 'VAF bin' info---------------
 #-----------------------------------------------------------------------------------#
 #Define the VAF 'bins' that will be used for comparing VAF distributions
-#Can set this on a log scale, or as decile bins
+#Can set this on a log scale, or as decile bins, or dichotomous (>/< 20%)
 #Only mutations >3% are actually included
 boundaries<-c(0,0.03,0.1,0.2,0.5,1)
-new_VAF_groups=paste0(100*head(boundaries,-1),"-",100*tail(boundaries,-1),"%")
+boundaries<-c(0,0.03,0.2,1.000001)
+new_VAF_groups=paste0(round(100*head(boundaries,-1)),"-",round(100*tail(boundaries,-1)),"%")
 VAF_groups=data.frame(labels=new_VAF_groups,LL=head(boundaries,-1),UL=tail(boundaries,-1))
 
 #Assign each observed VAF into its 'VAF group' bin
@@ -1414,7 +1620,7 @@ all_df_tidy<-lapply(all_df_tidy,function(df_tidy) {
 #-----------------------------------------------------------------------------------#
 dndscv_by_tissue_and_vaf<-Map(df_tidy=all_df_tidy[all_cohorts],this_tissue=all_cohorts,function(df_tidy,this_tissue) {
   cat(this_tissue,sep = "\n")
-  dndscv_by_vaf_tissue<-lapply(new_VAF_groups[2:5],function(VAF_bin) {
+  dndscv_by_vaf_tissue<-lapply(new_VAF_groups[2:length(new_VAF_groups)],function(VAF_bin) {
     cat(VAF_bin,sep="\n")
     tissue_vaf_info<-df_tidy%>%
       dplyr::filter(VAF_group==VAF_bin)%>%
@@ -1424,15 +1630,19 @@ dndscv_by_tissue_and_vaf<-Map(df_tidy=all_df_tidy[all_cohorts],this_tissue=all_c
       dplyr::filter(!duplicated(.))%>% #only count each mutation once per individual in each VAF group
       arrange(sampleID,pos)
     
-    mtdna.dndsout <- dndscv(tissue_vaf_info, gene_list=target_genes, 
-                            refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+    mtdna.dndsout <- dndscv(tissue_vaf_info,
+                            gene_list=target_genes, 
+                            refdb = mtref_rda_path,
+                            numcode = 2,
+                            max_coding_muts_per_sample = Inf,
+                            max_muts_per_gene_per_sample = Inf)
     return(mtdna.dndsout)
   })
   return(dndscv_by_vaf_tissue)
 })
 
 globaldnds_res_by_tissue_and_vaf<-Map(list1=dndscv_by_tissue_and_vaf,this_tissue=all_cohorts,function(list1,this_tissue) {
-  globaldnds_res_by_vaf<-Map(dndsout=list1,VAF_bin=new_VAF_groups[2:5],function(dndsout,VAF_bin) {
+  globaldnds_res_by_vaf<-Map(dndsout=list1,VAF_bin=new_VAF_groups[2:length(new_VAF_groups)],function(dndsout,VAF_bin) {
     dndsout$globaldnds%>%
       filter(!is.na(name) & complete.cases(.))%>%
       mutate(name=rename_vec[name])%>%
@@ -1448,9 +1658,9 @@ mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(3)
 max_dnds_value<-5
 stats_to_include=c("Missense","Truncating")
 global_dnds_by_tissue_and_vaf_plot<-globaldnds_res_by_tissue_and_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:5] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:5]),
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_hline(yintercept=1, linetype='dashed', col = 'black', linewidth = 0.5) +
@@ -1459,7 +1669,7 @@ global_dnds_by_tissue_and_vaf_plot<-globaldnds_res_by_tissue_and_vaf%>%
   labs(y = "Genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   theme_classic()+
   my_theme+
@@ -1473,9 +1683,9 @@ ggsave(filename = paste0(plots_dir,"global_dnds_by_tissue_and_vaf_plot.pdf"),glo
 
 max_dnds_value<-5
 global_dnds_by_vaf_MPN_and_lymph_onlyplot<-globaldnds_res_by_tissue_and_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:5] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:5]),
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
   filter(tissue%in%c("Lymphoid","MPN"))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
@@ -1499,9 +1709,9 @@ ggsave(filename = paste0(plots_dir,"global_dnds_by_vaf_MPN_and_lymph_onlyplot.pd
 
 max_dnds_value<-2.5
 global_dnds_by_vaf_normal_nonblood_onlyplot<-globaldnds_res_by_tissue_and_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:5] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:5]),
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
   filter(tissue%in%c("Colon","Endometrium","Bronchial\nepithelium"))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
@@ -1529,7 +1739,7 @@ gene_order<-gene_order[gene_order%in%target_genes]
 
 selcv_res_by_tissue_and_vaf<-Map(list1=dndscv_by_tissue_and_vaf,this_tissue=names(dndscv_by_tissue_and_vaf),function(list1,this_tissue) {
   
-  Map(dndsout=list1,VAF_bin=new_VAF_groups[2:5],function(dndsout,VAF_bin) {
+  Map(dndsout=list1,VAF_bin=new_VAF_groups[2:length(boundaries)],function(dndsout,VAF_bin) {
     temp<-dndsout$sel_cv%>%
       dplyr::select(gene_name,wmis_cv,wnon_cv,qmis_cv,qtrunc_cv)
     
@@ -1537,16 +1747,16 @@ selcv_res_by_tissue_and_vaf<-Map(list1=dndscv_by_tissue_and_vaf,this_tissue=name
                      temp%>%dplyr::select(gene_name,"dNdS"=wnon_cv,"qval"=qtrunc_cv)%>%mutate(type="Nonsense"))%>%
       mutate(VAF_group=VAF_bin)
   })%>%dplyr::bind_rows()%>%
-    mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:5]),tissue=this_tissue)
+    mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),tissue=this_tissue)
   
 })%>%dplyr::bind_rows()
 
 dnds_heatmap_by_tissue_and_vaf_by_gene<-selcv_res_by_tissue_and_vaf%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),ifelse(dNdS>2,sprintf(dNdS, fmt = '%#.1f'),"")),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
          dNdS=ifelse(dNdS>2,2,dNdS),
          gene_name=factor(gene_name,levels=rev(gene_order)),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
-  filter(VAF_group%in%VAF_groups$labels[2:5] & tissue!="Blood")%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & tissue!="Blood")%>%
   ggplot(aes(y=gene_name,x=VAF_group,fill=dNdS,label=dnds_if_signif))+
   geom_tile()+
   facet_grid(tissue~type)+
@@ -1563,11 +1773,11 @@ ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene.pdf")
 ## GROUP 1
 group1_tissues<-name_conversion_vec[c(1,4,5,7)]
 dnds_heatmap_by_tissue_and_vaf_by_gene_group1<-selcv_res_by_tissue_and_vaf%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),ifelse(dNdS>2,sprintf(dNdS, fmt = '%#.1f'),"")),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
          dNdS=ifelse(dNdS>2,2,dNdS),
          gene_name=factor(gene_name,levels=rev(gene_order)),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
-  filter(VAF_group%in%VAF_groups$labels[2:5] & tissue%in%group1_tissues)%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & tissue%in%group1_tissues)%>%
   ggplot(aes(y=gene_name,x=VAF_group,fill=dNdS,label=dnds_if_signif))+
   geom_tile()+
   facet_grid(tissue~type)+
@@ -1581,11 +1791,11 @@ dnds_heatmap_by_tissue_and_vaf_by_gene_group1<-selcv_res_by_tissue_and_vaf%>%
 ## GROUP 2
 group2_tissues<-name_conversion_vec[c(2,3,5)]
 dnds_heatmap_by_tissue_and_vaf_by_gene_group2<-selcv_res_by_tissue_and_vaf%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),ifelse(dNdS>2,sprintf(dNdS, fmt = '%#.1f'),"")),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
          dNdS=ifelse(dNdS>2,2,dNdS),
          gene_name=factor(gene_name,levels=rev(gene_order)),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
-  filter(VAF_group%in%VAF_groups$labels[2:5] & tissue%in%group2_tissues)%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & tissue%in%group2_tissues)%>%
   ggplot(aes(y=gene_name,x=VAF_group,fill=dNdS,label=dnds_if_signif))+
   geom_tile()+
   facet_grid(tissue~type)+
@@ -1603,11 +1813,11 @@ ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_group
 
 #Now including lymphoid and blood only
 dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only<-selcv_res_by_tissue_and_vaf%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),ifelse(dNdS>2,sprintf(dNdS, fmt = '%#.1f'),"")),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
          dNdS=ifelse(dNdS>2,2,dNdS),
          gene_name=factor(gene_name,levels=rev(gene_order)),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
-  filter(VAF_group%in%VAF_groups$labels[2:5] & tissue%in%c("Lymphoid","Blood"))%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & tissue%in%c("Lymphoid","Normal blood"))%>%
   ggplot(aes(y=gene_name,x=VAF_group,fill=dNdS,label=dnds_if_signif))+
   geom_tile()+
   facet_grid(tissue~type)+
@@ -1687,7 +1897,7 @@ all_mut<-unlist(lapply(mut_vs_wt_list,function(x) x$mut))
 all_wt<-unlist(lapply(mut_vs_wt_list,function(x) x$wt))
 
 dndscv_by_vaf_and_mut_status<-lapply(list(mut=all_mut,wt=all_wt),function(sample_set) {
-  dndscv_by_vaf<-lapply(new_VAF_groups[2:5],function(VAF_bin) {
+  dndscv_by_vaf<-lapply(new_VAF_groups[2:length(boundaries)],function(VAF_bin) {
     cat(VAF_bin,sep="\n")
     tissue_vaf_info<-all_df_tidy$NW%>%
       dplyr::filter(Sample%in%sample_set & VAF_group==VAF_bin)%>%
@@ -1697,11 +1907,15 @@ dndscv_by_vaf_and_mut_status<-lapply(list(mut=all_mut,wt=all_wt),function(sample
       dplyr::filter(!duplicated(.))%>% #only count each mutation once per individual in each VAF group
       arrange(sampleID,pos)
     
-    mtdna.dndsout <- dndscv(tissue_vaf_info, gene_list=target_genes, 
-                            refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+    mtdna.dndsout <- dndscv(tissue_vaf_info,
+                            gene_list=target_genes, 
+                            refdb = mtref_rda_path,
+                            numcode=2,
+                            max_coding_muts_per_sample = Inf,
+                            max_muts_per_gene_per_sample = Inf)
     return(mtdna.dndsout)
   })
-  names(dndscv_by_vaf)<-new_VAF_groups[2:5]
+  names(dndscv_by_vaf)<-new_VAF_groups[2:nrow(VAF_groups)]
   return(dndscv_by_vaf)
 })
 
@@ -1726,9 +1940,9 @@ nb.cols <- 2
 mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(nb.cols)
 
 MPN_global_dnds_by_mut_status_plot<-global_dnds_by_mut_status%>%
-  filter(VAF_group%in%VAF_groups$labels[2:6] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:6]),
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
          mut_status=rename_mut_status_vec[mut_status])%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
@@ -1758,7 +1972,7 @@ selcv_res_by_mut_status<-Map(list1=dndscv_by_vaf_and_mut_status,status=c("mut","
                      temp%>%dplyr::select(gene_name,"dNdS"=wnon_cv,"qval"=qtrunc_cv)%>%mutate(type="Nonsense"))%>%
       mutate(VAF_group=VAF_bin)
   })%>%dplyr::bind_rows()%>%
-    mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:5]),mut_status=status)
+    mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:nrow(VAF_groups)]),mut_status=status)
   
 })%>%dplyr::bind_rows()
 
@@ -1891,8 +2105,12 @@ mtdna.variant.data <- all_het_oocyte_mut_df%>%
   dplyr::filter(!duplicated(.))%>% # remove duplicated variants
   arrange(sampleID,pos)
 
-mtdna.dndsout <- dndscv(mtdna.variant.data, gene_list=all_mtDNA_genes, 
-                        refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+mtdna.dndsout <- dndscv(mtdna.variant.data,
+                        gene_list=all_mtDNA_genes, 
+                        refdb = mtref_rda_path,
+                        numcode=2,
+                        max_coding_muts_per_sample = Inf,
+                        max_muts_per_gene_per_sample = Inf)
 
 all_het_oocyte_mut_df_annotated<-all_het_oocyte_mut_df%>%
   tidyr::separate(mut_ref,into=c("chr","pos","ref","mut"),sep = "_")%>%

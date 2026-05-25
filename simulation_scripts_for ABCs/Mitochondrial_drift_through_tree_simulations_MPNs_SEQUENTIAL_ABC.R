@@ -1,4 +1,4 @@
-#Mitochondrial simulation
+#Mitochondrial simulation through phylogeny
 #This script is quite slow, therefore it is run as a program for each mutation at a time
 #To run script do e.g.
 #./Mitochondrial_drift_simulation.R -j 1

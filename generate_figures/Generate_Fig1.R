@@ -153,6 +153,8 @@ mtDNA_by_pheno_summary<-mito_cn%>%
             mean_mtDNA_genomes=mean(bedtools_mtDNA_genomes),
             median_mtDNA_genomes=median(bedtools_mtDNA_genomes))
 
+readr::write_csv(x=mtDNA_by_pheno_summary,file=paste0(root_dir,"/tables/Supplementary_table3.csv"))
+
 #Review the average copy number of colonies with different phenotypes relative to the average copy number of erythroid colonies
 pheno_levels=c("Ery","EryMy","Gran","MyGran","MyMono","Mono","NKMy")
 mtDNA_by_pheno_and_ID_summary%>%

@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------------#
 # --------Load packages (and install if they are not installed yet)-------------------
 #-----------------------------------------------------------------------------------#
-cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal")
+cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal","ggpubr")
 bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene")
 
 for(package in cran_packages){
@@ -32,7 +32,7 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations_blood"
+root_dir="~/R_work/mito_mutations"
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -566,7 +566,7 @@ sum_of_vaf_by_celltype<-sum_of_vaf_df%>%
   geom_violin(aes(fill=Cell_type),alpha=0.2)+
   scale_color_manual(values=c("#1a80bb", "#ea801c"))+
   scale_fill_manual(values=c("#1a80bb", "#ea801c"))+
-  stat_compare_means(method = "wilcox.test",label = "p.format",fontface="italic",vjust = +1,size=2.6)+
+  ggpubr::stat_compare_means(method = "wilcox.test",label = "p.format",fontface="italic",vjust = +1,size=2.6)+
   geom_jitter(aes(col=Cell_type),width=0.2,alpha=0.5)+
   facet_grid(cols=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales = "free",space="free")+
   theme_classic()+
@@ -658,7 +658,7 @@ exp_vs_singleton_sov%>%
   facet_grid(~exp_ID)+
   theme_classic()+
   theme(legend.position="none")+
-  stat_compare_means(method = "wilcox.test",label = "p.format",fontface="italic")+
+  ggpubr::stat_compare_means(method = "wilcox.test",label = "p.format",fontface="italic")+
   labs(x="",y="Mean mtDNA mutation burden\n (sum of VAF)")
 
 all.ks.tests<-lapply(unique(exp_vs_singleton_sov$exp_ID),function(this_exp_ID) {
@@ -807,6 +807,7 @@ confint(exp_vs_singleton.lmer)
 
 library(dndscv)
 mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
+mtref_rda_path="~/Downloads/mtref.rda"
 input.dir <- paste0(root_dir,"dnds_tables/")
 
 dnds_theme<-theme(panel.border = element_rect(color = "black",
@@ -842,8 +843,12 @@ df_tidy_annotated<-lapply(valid.tissues,function(tissue.id) {
     arrange(sampleID,pos)
   
   # run dnds with the mtDNA variants to annotate them (the selection analysis isn't actually used here)
-  mtdna.dndsout <- dndscv(mtdna.variant.data, gene_list=all_mtDNA_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+  mtdna.dndsout <- dndscv(mtdna.variant.data,
+                          gene_list=all_mtDNA_genes, 
+                          refdb = mtref_rda_path,
+                          numcode = 2,
+                          max_coding_muts_per_sample = Inf,
+                          max_muts_per_gene_per_sample = Inf)
   
   # get the results with the annotated variants
   annotated.mtdna.variants <- left_join(mtdna.variant.data,mtdna.dndsout$annotmuts,by=c("sampleID","chr","pos","ref","mut"))%>%
@@ -860,7 +865,8 @@ complete.annotated.mutation.table<-df_tidy_annotated%>%
   mutate(impact=ifelse(impact%in%c("Stop_loss","Nonsense"),"Truncating",impact))%>% #rename stop loss and nonsense mutations
   tidyr::unite(col="mut_ref",chr,pos,ref,mut,sep="_",remove=F)
 
-my_comparisons <- list(c("Missense", "Synonymous"), c("Synonymous", "Truncating"))
+my_comparisons <- list(c("Missense", "Synonymous"),
+                       c("Synonymous", "Truncating"))
 
 ### GENERATE FIG. 2B
 mutation_category_by_vaf_violin_plot<-complete.annotated.mutation.table%>%
@@ -895,8 +901,12 @@ dndscv_by_tissue<-lapply(c("Foetal blood","Cord blood","Adult blood"),function(t
     dplyr::filter(!duplicated(.))%>%
     arrange(sampleID,pos)
   
-  mtdna.dndsout <- dndscv(tissue_info, gene_list=target_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+  mtdna.dndsout <- dndscv(tissue_info,
+                          gene_list=target_genes, 
+                          refdb = mtref_rda_path,
+                          numcode = 2,
+                          max_coding_muts_per_sample = Inf,
+                          max_muts_per_gene_per_sample = Inf)
   return(mtdna.dndsout)
 })
 
@@ -914,6 +924,7 @@ globaldnds_res<-Map(dndsout=dndscv_by_tissue,tissue=c("Foetal blood","Cord blood
 tissue_order=c("Foetal blood","Cord blood","Adult blood")
 nb.cols <- length(tissue_order)
 mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(nb.cols)
+mut_type_cols<-c("#00468B","#925E9F")
 
 max_dnds_value<-2
 stats_to_include=c("Missense","Truncating")
@@ -928,7 +939,7 @@ global_dnds_blood<-globaldnds_res%>%
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
   scale_x_discrete(labels = function(x) str_wrap(x, width = 6))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   my_theme+
@@ -1001,7 +1012,10 @@ dndscv_by_vaf_adultblood<-lapply(new_VAF_groups,function(VAF_bin) {
     arrange(sampleID,pos)
   
   mtdna.dndsout <- dndscv(tissue_vaf_info, gene_list=target_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+                          refdb = mtref_rda_path,
+                          max_coding_muts_per_sample = Inf,
+                          numcode = 2,
+                          max_muts_per_gene_per_sample = Inf)
   return(mtdna.dndsout)
 })
 
@@ -1016,7 +1030,7 @@ tissue_order=c("Foetal blood","Cord blood","Adult blood")
 nb.cols <- length(tissue_order)
 mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(nb.cols)
 
-max_dnds_value<-1.7
+max_dnds_value<-2
 
 stats_to_include=c("Missense","Truncating")
 global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
@@ -1029,7 +1043,7 @@ global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
   labs(y = "Genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
   theme_classic()+
@@ -1042,6 +1056,7 @@ ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_by_vaf_adult_blood.pdf")
 #-----------------------------------------------------------------------------------#
 ##----------------------Get gene-level dNdS info by VAF group---------------
 #-----------------------------------------------------------------------------------#
+qval_cutoff=0.05
 selcv_res_by_vaf<-Map(dndsout=dndscv_by_vaf_adultblood,VAF_bin=new_VAF_groups,function(dndsout,VAF_bin) {
   temp<-dndsout$sel_cv%>%
     dplyr::select(gene_name,wmis_cv,wnon_cv,qmis_cv,qtrunc_cv)
@@ -1053,10 +1068,10 @@ selcv_res_by_vaf<-Map(dndsout=dndscv_by_vaf_adultblood,VAF_bin=new_VAF_groups,fu
   mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels))
 
 dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(round(dNdS,2),"*"),""),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(round(dNdS,2),"*"),""),
          gene_name=factor(gene_name,levels=rev(gene_order)))%>%
   filter(VAF_group%in%VAF_groups$labels[2:6])%>%
-  ggplot(aes(y=gene_name,x=VAF_group,fill=dNdS,label=dnds_if_signif))+
+  ggplot(aes(y=gene_name,x=VAF_group,fill=pmin(dNdS,2),label=dnds_if_signif))+
   geom_tile()+
   facet_grid(~type)+
   geom_text(aes(col=type),size=1.6)+
@@ -1065,7 +1080,7 @@ dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
   my_theme+
   theme(axis.text.x=element_text(angle=90))+
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
-  labs(x="Variant allele fraction",y="")
+  labs(x="Variant allele fraction",y="",fill="dN/dS")
 
 ggsave(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_vaf_by_gene.pdf"),dnds_heatmap_by_vaf_by_gene,width=4,height=2.5)
 #-----------------------------------------------------------------------------------#
@@ -1090,7 +1105,10 @@ dndscv_by_young_or_old<-lapply(c("Young adult","Older adult"),function(tissue.id
     arrange(sampleID,pos)
   
   mtdna.dndsout <- dndscv(tissue_info, gene_list=target_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+                          refdb = mtref_rda_path,
+                          max_coding_muts_per_sample = Inf,
+                          numcode = 2,
+                          max_muts_per_gene_per_sample = Inf)
   return(mtdna.dndsout)
 })
 
@@ -1103,7 +1121,7 @@ global_dnds_by_young_or_old_status<-Map(dndsout=dndscv_by_young_or_old,status=c(
   
 })%>%dplyr::bind_rows()
 
-max_dnds_value<-2
+max_dnds_value<-1.5
 stats_to_include=c("Missense","Truncating")
 global_dnds_young_or_old_plot<-global_dnds_by_young_or_old_status%>%
   filter(name%in%stats_to_include)%>%
@@ -1115,7 +1133,7 @@ global_dnds_young_or_old_plot<-global_dnds_by_young_or_old_status%>%
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
   scale_x_discrete(labels = function(x) str_wrap(x, width = 6))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   my_theme+
@@ -1125,7 +1143,7 @@ global_dnds_young_or_old_plot<-global_dnds_by_young_or_old_status%>%
         legend.title=element_blank(),
         legend.position="none")
 
-ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_blood.pdf"),global_dnds_blood,width=1.5,height=2.5)
+ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_young_or_old_plot.pdf"),global_dnds_young_or_old_plot,width=1.5,height=2.5)
 
 dndscv_by_vaf_and_young_or_old_status<-lapply(c("Young adult","Older adult"),function(tissue.id) {
   
@@ -1146,7 +1164,11 @@ dndscv_by_vaf_and_young_or_old_status<-lapply(c("Young adult","Older adult"),fun
       arrange(sampleID,pos)
     
     mtdna.dndsout <- dndscv(tissue_vaf_info, gene_list=target_genes, 
-                            refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+                            refdb = mtref_rda_path,
+                            numcode = 2,
+                            max_coding_muts_per_sample = Inf,
+                            max_muts_per_gene_per_sample = Inf)
+    
     return(mtdna.dndsout)
   })
   names(dndscv_by_vaf)<-new_VAF_groups
@@ -1165,6 +1187,7 @@ global_dnds_by_vaf_and_young_or_old_status<-Map(list1=dndscv_by_vaf_and_young_or
   
 })%>%dplyr::bind_rows()
 
+max_dnds_value=2
 global_dnds_by_vaf_and_young_or_old_status_plot<-global_dnds_by_vaf_and_young_or_old_status%>%
   filter(VAF_group%in%VAF_groups$labels[2:6] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
@@ -1176,7 +1199,7 @@ global_dnds_by_vaf_and_young_or_old_status_plot<-global_dnds_by_vaf_and_young_or
   labs(y = "Genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
   theme_classic()+
@@ -1227,8 +1250,12 @@ dndscv_by_vaf_and_mut_status<-lapply(list(mut=all_mut,wt=all_wt),function(sample
       dplyr::filter(!duplicated(.))%>% #only count each mutation once per individual in each VAF group
       arrange(sampleID,pos)
     
-    mtdna.dndsout <- dndscv(tissue_vaf_info, gene_list=target_genes, 
-                            refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+    mtdna.dndsout <- dndscv(tissue_vaf_info,
+                            gene_list=target_genes, 
+                            refdb = mtref_rda_path,
+                            numcode = 2,
+                            max_coding_muts_per_sample = Inf,
+                            max_muts_per_gene_per_sample = Inf)
     return(mtdna.dndsout)
   })
   names(dndscv_by_vaf)<-new_VAF_groups
@@ -1263,7 +1290,7 @@ global_dnds_by_mut_status_plot<-global_dnds_by_mut_status%>%
   labs(y = "Genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
   theme_classic()+
@@ -1289,7 +1316,7 @@ selcv_res_by_mut_status<-Map(list1=dndscv_by_vaf_and_mut_status,status=c("mut","
 })%>%dplyr::bind_rows()
 
 dnds_heatmap_by_mut_status_by_gene<-selcv_res_by_mut_status%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),ifelse(dNdS>2,sprintf(dNdS, fmt = '%#.1f'),"")),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
          dNdS=ifelse(dNdS>2,2,dNdS),
          gene_name=factor(gene_name,levels=rev(gene_order)),
          mut_status=rename_mut_status_vec[mut_status])%>%
@@ -1343,8 +1370,12 @@ dndscv_by_vaf_and_expansion_status<-lapply(list(mut=all_mut,wt=all_wt),function(
       dplyr::filter(!duplicated(.))%>% #only count each mutation once per individual in each VAF group
       arrange(sampleID,pos)
     
-    mtdna.dndsout <- dndscv(tissue_vaf_info, gene_list=target_genes, 
-                            refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+    mtdna.dndsout <- dndscv(tissue_vaf_info,
+                            gene_list=target_genes, 
+                            refdb = mtref_rda_path,
+                            numcode = 2,
+                            max_coding_muts_per_sample = Inf,
+                            max_muts_per_gene_per_sample = Inf)
     return(mtdna.dndsout)
   })
   names(dndscv_by_vaf)<-new_VAF_groups
@@ -1363,7 +1394,7 @@ global_dnds_by_expansion_status<-Map(list1=dndscv_by_vaf_and_expansion_status,st
   
 })%>%dplyr::bind_rows()
 
-max_dnds_value<-4
+max_dnds_value<-10
 stats_to_include=c("Missense","Truncating")
 rename_mut_status_vec=c("Clonal expansion","Singleton")
 names(rename_mut_status_vec)<-c("mut","wt")
@@ -1379,7 +1410,7 @@ global_dnds_by_expansion_status_plot<-global_dnds_by_expansion_status%>%
   labs(y = "Genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
-  scale_color_manual(values = mycolors[1:2], name="Mutation type") +
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
   geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
   theme_classic()+
@@ -1405,7 +1436,7 @@ selcv_res_by_expansion_status<-Map(list1=dndscv_by_vaf_and_expansion_status,stat
 })%>%dplyr::bind_rows()
 
 dnds_heatmap_by_expansion_status_by_gene<-selcv_res_by_expansion_status%>%
-  mutate(dnds_if_signif=ifelse(qval<0.1,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),ifelse(dNdS>2,sprintf(dNdS, fmt = '%#.1f'),"")),
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
          dNdS=ifelse(dNdS>2,2,dNdS),
          gene_name=factor(gene_name,levels=rev(gene_order)),
          mut_status=rename_mut_status_vec[mut_status])%>%
