@@ -8,8 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # Load packages (and install if they are not installed 
-cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal","ggpubr")
-bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene")
+cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal","ggpubr","VGAM","usethis","RColorBrewer","MCMCglmm","phangorn","spam","dichromat","ggridges","forcats","lmerTest","tidyverse","readr")
+bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene","Rsamtools","ggtree")
 
 for(package in cran_packages){
   if(!require(package, character.only=T,quietly = T, warn.conflicts = F)){
@@ -31,10 +31,15 @@ if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
   library("dndscv",character.only=T,quietly = T, warn.conflicts = F)
 }
 
+if(!require("treemut", character.only=T,quietly = T, warn.conflicts = F)){
+  devtools::install_github("nangalialab/treemut")
+  library("treemut",character.only=T,quietly = T, warn.conflicts = F)
+}
+
 ```
 
 Set file paths.
-```{r}
+```{r set_file_paths}
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
@@ -46,6 +51,7 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 figures_dir=paste0(root_dir,"/figures/")
+plots_dir=paste0(root_dir,"/plots/")
 rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
 
 #Set the basic plotting theme for ggplot2
@@ -86,7 +92,7 @@ mito_cn<-left_join(mito_cn,phenotype_data_EM)
 mito_data_file=paste0(root_dir,"/data/mito_data.Rds")
 mito_data<-readRDS(mito_data_file)
 CN_correlating_muts<-readRDS(paste0(root_dir,"/data/CN_correlation.RDS"))
-exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_567_A_C","MT_574_A_C","MT_16181_A_C","MT_16182_A_C","MT_16183_A_C","MT_16189_T_C") #These are the ones to exclude for the endometrial analysis
+exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_567_A_C","MT_574_A_C","MT_16181_A_C","MT_16182_A_C","MT_16183_A_C","MT_16189_T_C") #These are the ones to exclude that particularly affect the endometrial analysis
 
 mut_type_cols<-c("#00468B","#925E9F","#925E9F","#810F7C","black","#E10C04","black")
 names(mut_type_cols)<-c("Missense","Nonsense","Truncating","Stop_loss","Non-Coding","Synonymous","Overall")
@@ -100,12 +106,12 @@ This is a function of:
 (1) the mtDNA copy number within the colony/ sample
 (2) the overall WGS coverage of the sample
 
-```{r}
+```{r coverage_plot,fig.height=5,fig.width=7}
 #Generate the coverage histograms
 coverage.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   ggplot(aes(x=bedtools_mtDNA_coverage))+
-  geom_histogram(fill="lightblue",col="black",linewidth=0.2)+
+  geom_histogram(fill="lightblue",col="black",linewidth=0.2,bins=30)+
   scale_x_log10(labels=scales::label_comma())+
   facet_wrap(~exp_ID,scales = "free_y")+
   theme_bw()+
@@ -117,11 +123,11 @@ ggsave(filename=paste0(figures_dir,"Supp_Figure_01/Coverage_plot.pdf"),coverage.
 ```
 
 
-```{r}
+```{r median_coverage_plot,fig.height=3,fig.width=7}
 median.coverage.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   ggplot(aes(x=pilup_median_mtDNA_coverage))+
-  geom_histogram(fill="lightblue",col="black",linewidth=0.2)+
+  geom_histogram(fill="lightblue",col="black",linewidth=0.2,bins=30)+
   scale_x_log10(labels=scales::label_comma())+
   facet_wrap(~exp_ID,scales = "free_y",nrow=2)+
   theme_bw()+
@@ -150,7 +156,7 @@ ggsave(filename=paste0(figures_dir,"Supp_Figure_01/median.coverage.ridges.plot.p
 Uniformity across the mtDNA genome is also a key marker of coverage quality.
 We use a very stringent marker of uniformity - the proportion of genome with >80% of the mean.
 
-```{r uniformity_ridges,fig.height=3,fig.width=4}
+```{r uniformity_ridges,fig.height=3.5,fig.width=4}
 uniformity_ridges.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   ggplot(aes(x=perc_over0.8,y=exp_ID))+
@@ -165,7 +171,7 @@ ggsave(filename=paste0(figures_dir,"Supp_Figure_01/Uniformity_perc80_ridges_plot
 ```
 
 Print coverage summary statistics
-```{r}
+```{r coverage_summary_stats}
 mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   group_by(exp_ID)%>%
@@ -179,7 +185,7 @@ mito_cn%>%
 
 ## Mitochondrial DNA copy number
 Get some basic MITOCHONDRIAL COPY NUMBER STATISTICS
-```{r}
+```{r mito_cn_pheno_summary}
 #Vector to convert the foetal cell type codes into basic 'HSC'/ 'Progenitor' types
 convert_vec=c("HSC","HSC","HPC","HPC","HPC","HPC")
 names(convert_vec)=c("H","HSC","C","M","HSPC","Progenitor")
@@ -201,7 +207,7 @@ mtDNA_by_pheno_summary<-mito_cn%>%
 
 Review the average copy number of colonies with different phenotypes relative to the average copy number of erythroid colonies
 
-```{r fig.height=2.5,fig.width=3.5}
+```{r mito_cn_pheno_summary_plot,fig.height=2.5,fig.width=3.5}
 pheno_levels=c("Ery","EryMy","Gran","MyGran","MyMono","Mono","NKMy")
 mtDNA_by_pheno_and_ID_summary%>%
   dplyr::select(-n)%>%
@@ -262,7 +268,7 @@ mito_cn%>%
 
 Generate a plot of mtDNA copy number across samples, grouped by individual.
 
-```{r fig.height=2,fig.width=7}
+```{r mito_cn_by_sample_dot_plot,fig.height=2,fig.width=7}
 Individual_means_df<-mito_cn%>%
   mutate(Cell_type=convert_vec[Cell_type])%>%
   filter(Sample%in%unlist(lapply(mito_data,function(list) list$tree$tip.label))&
@@ -287,7 +293,7 @@ mtDNA.copy.number.logscale<-mito_cn%>%
   facet_grid(cols=vars(factor(exp_ID,levels = ref_df$Sample[order(ref_df$Age)])),scales="free",space = "free")+
   geom_hline(aes(yintercept=median),linetype=2,data=Individual_means_df,col="red",linewidth=0.5)+
   geom_text(aes(x=100,y=mean,label=paste0("tilde(x) == ",round(median))),nudge_y=+0.1,size=2,data=Individual_means_df,parse=T,inherit.aes = F)+
-  labs(x="Individual",y="Mitochondrial copy number",col="Colony\nphenotype")+
+  labs(x="Individual",y="Mitochondrial copy number")+
   my_theme+
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
@@ -304,7 +310,7 @@ ggsave(filename = paste0(figures_dir,"Figure_01/mtDNA.copy.number.logscale.pdf")
 
 Generate the same plot, but now colour points by the colony phenotype. This is slightly difficult to interpret due to the multitude of colours!
 
-```{r fig.height=2,fig.width=7}
+```{r mito_cn_by_sample_dot_plot,fig.height=2,fig.width=7}
 phenotype_cols=c("red",RColorBrewer::brewer.pal(n=length(pheno_levels)-1,name = "Set2"),"darkgray") #Make the erythroid red, and 'unknown' dark grey
 names(phenotype_cols)<-c(pheno_levels,"Unknown")
 mtDNA.copy.number.logscale.by.phenotype<-mito_cn%>%
@@ -378,7 +384,7 @@ median_mtDNA_CN_by_age<-mito_cn%>%
   summarise(mean=mean(bedtools_mtDNA_genomes,na.rm=T),median=median(bedtools_mtDNA_genomes,na.rm=T),sd=sd(bedtools_mtDNA_genomes,na.rm=T))%>%
   left_join(ref_df,by=c("exp_ID"="Sample"))%>%
   ggplot(aes(x=Age,y=median,col=factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])))+
-  geom_smooth(aes(x=Age,y=median),method="lm",inherit.aes = F,col="black",size=0.5)+
+  geom_smooth(aes(x=Age,y=median),method="lm",inherit.aes = F,col="black",linewidth=0.5)+
   geom_point(alpha=0.8)+
   scale_color_manual(values = Individual_cols)+
   theme_bw()+
@@ -435,7 +441,7 @@ Map(list=mito_data,mito_cn_phy=mito_cn_phylo,exp_ID=names(mito_data),function(li
 
 Plot a histogram of the p-values to show that, while there are a couple <0.5, overall there is not a convincing signal.
 
-```{r mtDNA_CN_phylogenetic_signal,fig.height=2,fig.width=2.5}
+```{r mtDNA_CN_phylogenetic_signal_pvals,fig.height=2,fig.width=2.5}
 #Histogram of p-values
 sapply(mito_cn_phylo,function(dat) dat[[3]]$pvalue["dt","Cmean"])%>%
   as.data.frame()%>%
@@ -467,6 +473,7 @@ df_tidy<-dplyr::bind_rows(Map(list=mito_data,exp_ID=names(mito_data),function(li
     dplyr::select(-global)%>%
     tidyr::gather(key="Sample",value="implied_mut_CN",-mut_ref)
   
+  #This now only includes cells where the ML_sig is N1
   df_tidy<-(list$matrices$vaf*list$matrices$SW*(list$matrices$ML_Sig=="N1")*CN_correlating_mut_removal_mat)%>%
     as.data.frame()%>%
     tibble::rownames_to_column(var="mut_ref")%>%
@@ -534,7 +541,7 @@ sum(unlist(lapply(mito_data,function(list) {
 })))
 ```
 
-Generate a dataframe of mean mutations VAFs of mutations. Though not particularly interesting.
+Generate a dataframe of mean number of unique mutations per cell. Though not particularly interesting.
 
 ```{r}
 Individual_burden_means_df<-df_tidy%>%
@@ -599,7 +606,7 @@ ggsave(filename=paste0(figures_dir,"Figure_01/Sample_proportions_with_mut.pdf"),
 A good measure of the overall mutation burden is the "sum of VAF".
 For example, if this is 1, it means that - on average - each mitochondrial genome has one mutation.
 
-```{r}
+```{r create_sum_of_vaf_df}
 
 sum_of_vaf_df<-Map(list=mito_data,Exp_ID=names(mito_data),function(list,Exp_ID){
   #sum the vaf of mutations that:
@@ -627,22 +634,10 @@ sum_of_vaf_summary<-sum_of_vaf_df%>%
 head(sum_of_vaf_summary)
 ```
 
+Look at the relationship between mean sum of vaf per cell, and the age of the individual.
+This has a clear linear relationship.
 
-```{r}
-sum_of_vaf_df%>%
-  left_join(mito_cn,by=c("Sample","exp_ID"))%>%
-  dplyr::mutate(exp_ID=gsub("8 pcw","8pcw",exp_ID))%>%
-  ggplot(aes(x=factor(Cell_type,levels = c("HSC","Progenitor")),col=Cell_type,y=sum_of_vaf))+
-  ggpubr::stat_compare_means(aes(label = paste0("p=", ..p.format..)), label.x=1.0,label.y=3.7,method="wilcox.test",size=1.8,fontface="italic")+
-  geom_point(alpha=0.1)+
-  facet_grid(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),drop=T)+
-  geom_boxplot()+
-  theme_bw()+
-  my_theme
-```
-
-
-```{r}
+```{r,fig.height=2,fig.width=3}
 mean_sum_of_vaf_by_age<-sum_of_vaf_summary%>%
   left_join(ref_df,by=c("exp_ID"="Sample"))%>%
   ggplot(aes(x=Age,y=mean,col=factor(exp_ID,levels = ref_df$Sample[order(ref_df$Age)])))+
@@ -660,7 +655,7 @@ ggsave(filename=paste0(figures_dir,"Figure_01/mean_sum_of_vaf_by_age.pdf"),plot=
 ```
 
 
-```{r}
+```{r fig.height=2,fig.width=7}
 lm.mean_mutburden_by_age=lm(mean~Age,data=sum_of_vaf_summary%>%
                               left_join(ref_df,by=c("exp_ID"="Sample")))
 summary(lm.mean_mutburden_by_age)$coefficients
@@ -687,8 +682,9 @@ sum_of_vaf_plot_log
 ggsave(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
 ```
 
-Now coloured by cell type
-```{r}
+Now coloured by cell type, as requested by the reviewer.
+
+```{r fig.height=2.2,fig.width=7}
 sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
   mutate(exp_ID=gsub("8 pcw","8pcw",exp_ID))%>%
   mutate(sum_of_vaf=ifelse(sum_of_vaf==0,0.001,sum_of_vaf))%>%
@@ -711,8 +707,10 @@ sum_of_vaf_plot_log_by_celltype
 ggsave(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log_by_celltype.pdf"),plot=sum_of_vaf_plot_log_by_celltype,height=2.2,width=7)
 ```
 
-Comparison of mutation burden by cell type - violin plot, with overlaid comparisons using the non-parametric Wilcoxon test.
-```{r}
+Comparison of mutation burden by cell type (HSCs and progenitor cell types) - violin plot, with overlaid comparisons using the non-parametric Wilcoxon test.
+This does not show any significant difference.
+
+```{r fig.height=2.2,fig.width=7}
 individuals_with_both=c("18pcw","CB002","SX001","AX001","KX004")
 sum_of_vaf_by_celltype<-sum_of_vaf_df%>%
   filter(exp_ID%in%individuals_with_both)%>%
@@ -740,7 +738,7 @@ ggsave(filename = paste0(rebuttal_figs_dir,"sum_of_vaf_by_celltype_comparison.pd
 Look at the 96-profile of the mutations, divied by mutation type
 In fact - double this to a 192-profile, incorporating - in addition - the replication strand (heavy vs light).
 
-```{r}
+```{r import_trinuc_freq}
 # read in the trinucleotide context reference object
 mtdna_trinuc_freq <- readRDS(paste0(root_dir,"/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds"))
 
@@ -753,10 +751,9 @@ head(mtdna_trinuc_freq)
 ```
 
 Plot all the mutations across samples.
-```{r}
+```{r trinuc_plot_all,fig.height=4,fig.width=7}
 trinucleotide_plot(mutations = df_tidy%>%
                      filter(Sample!="global"&
-                              #ML_Sig=="N1"&
                               !mut_ref%in%exclude_muts)%>%
                      separate(mut_ref,into=c("chr","pos","ref","mut"))%>%
                      dplyr::rename("donor"=exp_ID)%>%
@@ -767,10 +764,9 @@ trinucleotide_plot(mutations = df_tidy%>%
 ```
 
 Now limit to check the 0.5 - 1% VAF mutations.
-```{r}
+```{r trinuc_plot_0.5-1,fig.height=4,fig.width=7}
 trinucleotide_plot(mutations = df_tidy%>%
                      filter(Sample!="global"&
-                              #ML_Sig=="N1"&
                               !mut_ref%in%exclude_muts&
                               vaf<0.01 & vaf>0.005)%>%
                      separate(mut_ref,into=c("chr","pos","ref","mut"))%>%
@@ -782,10 +778,9 @@ trinucleotide_plot(mutations = df_tidy%>%
 ```
 
 Now check the <0.5 VAF mutations.
-```{r}
+```{r trinuc_plot_sub0.5,fig.height=4,fig.width=7}
 trinucleotide_plot(mutations = df_tidy%>%
                      filter(Sample!="global"&
-                              ML_Sig=="N1"&
                               !mut_ref%in%exclude_muts&
                               vaf<0.005)%>%
                      separate(mut_ref,into=c("chr","pos","ref","mut"))%>%
@@ -804,7 +799,7 @@ Need to take into account that different cells within a clade are not independen
 This may slightly alter the distribution of mutation burdens as some of the variation is smoothed out (might effect the k-s test statistic)
 Therefore, could alternatively randomly pick a single sample.
 
-```{r}
+```{r mutburden_by_expansion_status}
 exp_vs_singleton_sov<-Map(list=mito_data[3:10],exp_ID=names(mito_data)[3:10],function(list,exp_ID) {
   
   #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
@@ -848,7 +843,7 @@ p.adjust(sapply(all.ks.tests,function(res) res$p.value),method = "BH")
 ## Mutation burden by driver status: mut/ wt
 
 Step 1. Add basic nDNA driver mutation info to the object
-```{r}
+```{r add_driver_info}
 mito_data<-Map(list=mito_data,exp_ID=names(mito_data),function(list,exp_ID) {
   annot_muts_file<-paste0(root_dir,"/data/blood_adult/annot_files_filtered/annotated_muts_filt_",exp_ID,".Rds")
   if(file.exists(annot_muts_file)) {
@@ -930,7 +925,7 @@ ggsave(filename = paste0(rebuttal_figs_dir,"sov_mut_vs_wt.pdf"),sov_mut_vs_wt,wi
 
 Do a formal regression using a linear mixed effects model: does the mutation burden differ by driver status?  Individual is included here as a random effect.
 
-```{r}
+```{r mutburden_by_driver_status_regression}
 mut_vs_wt.lmer<-lmerTest::lmer(mean_sov~type+(1|exp_ID),data=sov_mut_vs_wt_df)
 summary(mut_vs_wt.lmer)
 confint(mut_vs_wt.lmer)
@@ -1115,7 +1110,9 @@ complete.annotated.mutation.table.NUC<-df_tidy_annotated_NUC%>%
 
 ```
 
-```{r consequence_change_plot}
+Here we show how the incorrect annotation changes  the numbers of mutations with different consequences (i.e. truncating vs missense vs synonymous)
+
+```{r consequence_change_plot,fig.height=3,fig.width=4}
 ## Plots of nuclear vs mitochondrial annotation----
 impact_comparison_df<-left_join(complete.annotated.mutation.table,
                                 complete.annotated.mutation.table.NUC%>%dplyr::select(tissue,sampleID,mut_ref,codonsub,"impact_NUC"=impact))%>%
@@ -1140,7 +1137,7 @@ ggsave(filename = paste0(plots_dir,"consequence_change_plot.pdf"),consequence_ch
 ```
 
 
-```{r}
+```{r compare_misannotated_to_corrected1,fig.height=3,fig.width=3}
 impact_comparison_df%>%
   filter(impact!="Non-Coding")%>%
   mutate(change=paste(impact_NUC,impact,sep=">"))%>%
@@ -1149,7 +1146,7 @@ impact_comparison_df%>%
 ```
 
 
-```{r}
+```{r compare_misannotated_to_corrected2,fig.height=3,fig.width=3}
 total_numbers_old_vs_new_plot<-impact_comparison_df%>%
   dplyr::select(mut_ref,"corrected_annotation"=impact,"original_annotation"=impact_NUC)%>%
   tidyr::gather(-mut_ref,key="annotation",value="impact")%>%
@@ -1169,7 +1166,7 @@ ggsave(filename = paste0(plots_dir,"total_numbers_old_vs_new_plot.pdf"),total_nu
 ```
 
 
-```{r}
+```{r compare_misannotated_to_corrected3,fig.height=3,fig.width=3}
 impact_comparison_df%>%
   dplyr::select(mut_ref,"new_annotation"=impact,"original_annotation"=impact_NUC)%>%
   tidyr::gather(-mut_ref,key="annotation",value="impact")%>%
@@ -1179,7 +1176,7 @@ impact_comparison_df%>%
 ```
 
 
-```{r}
+```{r compare_misannotated_to_corrected4,,fig.height=3,fig.width=3}
 simple_impact_comparison_df<-impact_comparison_df%>%
   mutate(change=paste(impact_NUC,impact,sep=">"))%>%
   mutate(altered=ifelse(impact_NUC==impact,"unchanged","changed"))
@@ -1211,7 +1208,7 @@ simple_impact_comparison_df%>%
 
 ### Look at the numbers of synonymous/ non-synonymous mutations
 
-```{r}
+```{r mutations_by_type_violin,fig.height=3,fig.width=5}
 my_comparisons <- list(c("Missense", "Synonymous"),
                        c("Synonymous", "Nonsense"))
 
@@ -1233,7 +1230,7 @@ mutation_category_by_vaf_violin_plot<-complete.annotated.mutation.table%>%
 ```
 
 
-```{r}
+```{r heteroplasmy_cum_distribution,fig.height=3,fig.width=3}
 #Gives some sense of differing heteroplasmy distributions
 #But bear in mind there are multiple non-independent measures for some variants
 #Would need to account for this e.g. by taking single measure of e.g. max VAF of variant per individual
@@ -1344,7 +1341,7 @@ Combine across all the blood individuals and assess the dN/dS ratios of all vari
 Only count each variant once per individual.
 As before, using the argument "numcode=2" ensures that the mitochondrial genetic code is used for annotation.
 
-```{r}
+```{r run_dnds_across_tissues}
 dndscv_by_tissue<-lapply("x",function(tissue.id) {
   
   cat(tissue.id,sep="\n")
@@ -1381,7 +1378,7 @@ mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(nb.cols)
 ```
 
 Visualize these results
-```{r}
+```{r global_dnds}
 max_dnds_value<-1.3
 stats_to_include=c("Missense","Truncating","Overall")
 global_dnds_blood<-globaldnds_res%>%
@@ -1410,7 +1407,7 @@ ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_blood.pdf"),global_dnds_
 ```
 
 
-```{r}
+```{r dnds_by_gene_heatmap}
 ### Generate Extended Data FIG. 2C ---------
 gene_order=c(paste0("MT-ND",1:6),"MT-ND4L","MT-CYB",paste0("MT-CO",1:3),"MT-ATP6","MT-ATP8")
 gene_order<-gene_order[gene_order%in%target_genes]
@@ -1444,7 +1441,7 @@ ggsave(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_gene.pdf"),dnds_heat
 
 ### dndscv - split by heteroplasmy
 
-```{r}
+```{r dnds_by_heteroplasmy}
 #Define the VAF 'bins' that will be used for comparing VAF distributions
 #Can set this on a log scale, or as decile bins
 boundaries<-c(0,0.01,0.1,0.2,0.5,1)
@@ -1591,8 +1588,9 @@ ggsave(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_vaf_by_gene.pdf"),dn
 ```
 
 ### dndscv - dichotomous heteroplasmy split
-Broadly speaking, the threshold between positive and negative selection is ~20%.  Therefore, to maximise power to detect gene-level effects, run analysis with single cut-off at this threshold.
-```{r}
+Broadly speaking, the threshold between positive and negative selection is ~20%.  Therefore, to maximise power to detect gene-level effects, run analysis with single cut-off at this threshold. This maximises the power to detect differences in other tissues (such as the non-blood tissues), but also to find any gene-specific differences.
+
+```{r dnds_dichot_heteroplasmy_heatmap}
 
 boundaries<-c(0,0.01,0.2,1)
 new_VAF_groups=paste0(100*head(boundaries,-1),"-",100*tail(boundaries,-1),"%")
@@ -1652,7 +1650,215 @@ dnds_heatmap_by_dichotomous_vaf_by_gene<-selcv_res_by_dichotomous_vaf%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
   labs(x="Variant allele fraction",y="",fill="dN/dS")
 
+dnds_heatmap_by_dichotomous_vaf_by_gene
+
 ggsave(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_dichotomous_vaf_by_gene.pdf"),dnds_heatmap_by_dichotomous_vaf_by_gene,width=2.2,height=2.5)
+
+```
+
+## Re-analysis of Ju et al, cancer data
+
+```{r ju_VAF_distribution,fig.height=2.5,fig.width=2.5}
+ju_dat<-readxl::read_excel(paste0(root_dir,"/data/elife-02935-supp2-v2.xlsx"))
+
+ju_dat_reduced<-ju_dat%>%dplyr::select("sampleID"=Tumour_sampleID,
+                                 "pos"=mtDNA_pos,
+                                 "ref"=wt_allele,
+                                 "alt"=var_allele,
+                                 "vaf"=`VAF(T)`)%>%
+  mutate("chr"="MT",.before="pos")
+
+#Look at the heteroplasmy distribution
+ju_vaf_distribution<-ju_dat_reduced%>%
+  ggplot(aes(x=vaf))+
+  geom_histogram(col="black",linewidth=0.2,fill="lightblue")+
+  theme_classic()+
+  my_theme+
+  labs(x="Variant allele fraction")
+ju_vaf_distribution
+ggsave(filename = paste0(rebuttal_figs_dir,"ju_vaf_distribution.pdf"),ju_vaf_distribution,width=2,height=2.5)
+```
+
+
+```{r ju_global_dnds,fig.height=2.5,fig.width=2}
+dndsout<-dndscv(ju_dat_reduced,
+       gene_list=all_mtDNA_genes, 
+       refdb = mtref_rda_path,
+       numcode = 2,
+       max_coding_muts_per_sample = Inf,
+       max_muts_per_gene_per_sample = Inf)
+
+get_dnds_pvalue <- function(globaldnds, term = "wmis") {
+  mle    <- globaldnds[term, "mle"]
+  cilow  <- globaldnds[term, "cilow"]
+  cihigh <- globaldnds[term, "cihigh"]
+  
+  log_se <- (log(cihigh) - log(cilow)) / (2 * 1.96)
+  z      <- log(mle) / log_se
+  p      <- 2 * pnorm(-abs(z))
+  
+  return(data.frame(term = term, mle = mle, 
+                    cilow = cilow, cihigh = cihigh,
+                    p_value = p))
+}
+
+# Apply to all terms
+results <- do.call(rbind, lapply(
+  c("wmis", "wnon", "wspl", "wtru", "wall"),
+  function(t) get_dnds_pvalue(dndsout$globaldnds, t)
+))
+
+#Visualize results
+max_dnds_value=1.6
+stats_to_include=c("Missense","Truncating","Overall")
+ju_global_dnds_plot<-dndsout$globaldnds%>%
+  filter(!is.na(name) & complete.cases(.))%>%
+  mutate(name=factor(rename_vec[name],levels=stats_to_include))%>%
+  filter(name%in%stats_to_include)%>%
+  ggplot(aes(x=name,y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
+  geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
+  geom_point(position=position_dodge2(width=0.75), size = 1.5)+
+  labs(y = "Mitochondrial genome-wide dN/dS") +
+  theme_classic() + 
+  ylim(c(0.5,max_dnds_value))+
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
+  scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
+  my_theme+
+  #facet_wrap(~tissue,nrow=1)+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_text(angle=45,vjust = +0.5),
+        legend.title=element_blank(),
+        legend.position="none")
+ju_global_dnds_plot
+ggsave(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_plot.pdf"),ju_global_dnds_plot,width=2,height=2.5)
+```
+
+
+```{r ju_dnds_by_gene_heatmap,fig.height=2.5,fig.width=2}
+temp<-dndsout$sel_cv%>%
+  dplyr::select(gene_name,wmis_cv,wnon_cv,qmis_cv,qtrunc_cv)
+
+qval_cutoff=0.05
+ju_dnds_by_gene_heatmap<-dplyr::bind_rows(temp%>%dplyr::select(gene_name,"dNdS"=wmis_cv,"qval"=qmis_cv)%>%mutate(type="Missense"),
+                 temp%>%dplyr::select(gene_name,"dNdS"=wnon_cv,"qval"=qtrunc_cv)%>%mutate(type="Nonsense"))%>%
+  dplyr::filter(gene_name%in%target_genes)%>%
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(round(dNdS,2),"*"),""),
+         gene_name=factor(gene_name,levels=rev(gene_order)))%>%
+  ggplot(aes(y=gene_name,x=type,fill=pmin(dNdS,2),label=dnds_if_signif))+
+  geom_tile()+
+  geom_text(aes(col=type),size=2)+
+  scale_color_manual(values=c("black","white"),guide="none")+
+  theme_classic()+
+  my_theme+
+  theme(axis.text.x=element_text(angle=45,vjust=0.7))+
+  scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
+  labs(x="",y="",fill="dN/dS")
+ju_dnds_by_gene_heatmap
+ggsave(filename = paste0(rebuttal_figs_dir,"ju_dnds_by_gene_heatmap.pdf"),ju_dnds_by_gene_heatmap,width=2,height=2.5)
+```
+
+Analyse by heteroplasmy, as for the normal blood data
+
+```{r ju_group_by_VAF,fig.height=2.5,fig.width=4}
+boundaries<-c(0,0.03,0.1,0.2,0.5,1)
+new_VAF_groups=paste0(100*head(boundaries,-1),"-",100*tail(boundaries,-1),"%")
+VAF_groups=data.frame(labels=new_VAF_groups,LL=head(boundaries,-1),UL=tail(boundaries,-1))
+
+
+VAF_groups=data.frame(labels=new_VAF_groups,LL=head(boundaries,-1),UL=tail(boundaries,-1))
+
+#Assign each observed VAF into its 'VAF group' bin
+ju_dat_reduced$VAF_group=sapply(ju_dat_reduced$vaf,function(vaf) {
+  if(vaf==0) {
+    return("Absent")
+  } else {
+    return(VAF_groups$labels[VAF_groups$LL<vaf & VAF_groups$UL>=vaf])
+  }
+})
+
+dndscv_by_dichotomous_vaf_blood<-lapply(new_VAF_groups[2:length(new_VAF_groups)],function(VAF_bin) {
+  cat(VAF_bin,sep="\n")
+  tissue_vaf_info<-ju_dat_reduced%>%
+    dplyr::filter(VAF_group==VAF_bin)%>%
+    dplyr::filter(!duplicated(.))%>% #only count each mutation once per individual in each VAF group
+    arrange(sampleID,pos)
+  
+  mtdna.dndsout <- dndscv(tissue_vaf_info, gene_list=target_genes, 
+                          refdb = mtref_rda_path,
+                          max_coding_muts_per_sample = Inf,
+                          numcode = 2,
+                          max_muts_per_gene_per_sample = Inf)
+  return(mtdna.dndsout)
+})
+
+globaldnds_res_by_vaf<-Map(dndsout=dndscv_by_dichotomous_vaf_blood,VAF_bin=new_VAF_groups[2:length(new_VAF_groups)],function(dndsout,VAF_bin) {
+  dndsout$globaldnds%>%
+    filter(!is.na(name) & complete.cases(.))%>%
+    mutate(name=rename_vec[name])%>%
+    mutate(VAF_group=VAF_bin)
+})%>%dplyr::bind_rows()
+
+stats_to_include="Overall"
+stats_to_include=c("Missense","Truncating","Overall")
+max_dnds_value=3
+ju_global_dnds_missense_by_vaf_plot<-globaldnds_res_by_vaf%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
+  mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
+         name=factor(name,levels=stats_to_include))%>%
+  ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
+  geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
+  geom_point(position=position_dodge2(width=0.75), size = 1.5) +
+  labs(y = "Mitochondrial genome-wide dN/dS", x = "Variant allele fraction") +
+  theme_classic() + 
+  ylim(c(0,max_dnds_value))+
+  scale_color_manual(values = mut_type_cols, name="Mutation type") +
+  scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
+  theme_classic()+
+  my_theme+
+  #facet_wrap(~tissue,nrow=1)+
+  theme(legend.position="right",axis.text.x=element_text(angle=90))
+
+ju_global_dnds_missense_by_vaf_plot
+
+ggsave(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_missense_by_vaf_plot.pdf"),ju_global_dnds_missense_by_vaf_plot,width=4,height=2.5)
+```
+
+
+```{r ju_dnds_by_vaf_by_gene,fig.height=2.5,fig.width=2.5}
+### Now at a per gene level
+selcv_res_by_vaf<-Map(dndsout=dndscv_by_dichotomous_vaf_blood,VAF_bin=new_VAF_groups[2:length(new_VAF_groups)],function(dndsout,VAF_bin) {
+  temp<-dndsout$sel_cv%>%
+    dplyr::select(gene_name,wmis_cv,wnon_cv,qmis_cv,qtrunc_cv)
+  
+  dplyr::bind_rows(temp%>%dplyr::select(gene_name,"dNdS"=wmis_cv,"qval"=qmis_cv)%>%mutate(type="Missense"),
+                   temp%>%dplyr::select(gene_name,"dNdS"=wnon_cv,"qval"=qtrunc_cv)%>%mutate(type="Nonsense"))%>%
+    mutate(VAF_group=VAF_bin)
+})%>%dplyr::bind_rows()%>%
+  mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels))
+
+
+ju_dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
+  mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(round(dNdS,2),"*"),""),
+         gene_name=factor(gene_name,levels=rev(gene_order)))%>%
+  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)])%>%
+  dplyr::filter(type=="Missense")%>%
+  ggplot(aes(y=gene_name,x=VAF_group,fill=pmin(dNdS,2),label=dnds_if_signif))+
+  geom_tile()+
+  facet_grid(~type)+
+  geom_text(aes(col=type),size=2)+
+  scale_color_manual(values=c("black","white"),guide="none")+
+  theme_classic()+
+  my_theme+
+  theme(axis.text.x=element_text(angle=90))+
+  scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
+  labs(x="Variant allele fraction",y="",fill="dN/dS")
+
+ju_dnds_heatmap_by_vaf_by_gene
+
+ggsave(filename = paste0(rebuttal_figs_dir,"ju_dnds_heatmap_by_vaf_by_gene.pdf"),ju_dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
 
 ```
 

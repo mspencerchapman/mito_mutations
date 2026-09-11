@@ -4,7 +4,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-root_dir="~/R_work/mito_mutations_blood/"
+root_dir="~/R_work/mito_mutations/"
 figures_dir=paste0(root_dir,"figures/")
 source(paste0(root_dir,"data/mito_mutations_blood_functions.R"))
 mito_data_file=paste0(root_dir,"data/mito_data.Rds")
@@ -296,7 +296,7 @@ abc_res_plot_mut_rate<-abc_res_df%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
              ymin=`muts_per_mitochondria_per_generation_2.5%`,
              ymax=`muts_per_mitochondria_per_generation_97.5%`))+
-  geom_smooth(method="lm",col="black",size=0.5)+
+  geom_smooth(method="lm",col="black",linewidth=0.5)+
   geom_point(alpha=0.75,size=0.5)+
   geom_errorbar(width=0.3,alpha=0.5)+
   theme_classic()+
@@ -394,8 +394,12 @@ target_genes <- c("MT-CYB", "MT-ND5", "MT-ND2", "MT-ND4", "MT-ND1", "MT-CO3", "M
 dndscv_input<-df_tidy%>%tidyr::separate(col=mut_ref,into = c("chr","pos","ref","alt"),sep = "_")%>%
   dplyr::select("sampleID"=Sample,chr,pos,ref,alt)
 
-dndscv_output <- dndscv(dndscv_input, gene_list=target_genes, 
-                        refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
+dndscv_output <- dndscv(dndscv_input,
+                        gene_list=target_genes, 
+                        refdb = mtref_rda_path,
+                        numcode=2,
+                        max_coding_muts_per_sample = Inf,
+                        max_muts_per_gene_per_sample = Inf)
 
 mtDNA.annotated<-dndscv_output$annotmuts%>%
   tidyr::unite(col = "mut_ref",chr,pos,ref,mut,sep = "_")%>%

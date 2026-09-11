@@ -4071,7 +4071,7 @@ set_tree_coords=function(atree){
   atree
 }
 
-plot_tree=function(tree,direction="down",cex.label=5,offset=0,plot_axis=T,title=NULL,b_do_not_plot=FALSE,lwd=1,bars=NULL,default_edge_color="darkgrey",ymax=NULL,cex.terminal.dots=0,vspace.reserve=0,cex.axis=1){
+plot_tree=function(tree,direction="down",cex.label=0,offset=0,plot_axis=T,title=NULL,b_do_not_plot=FALSE,lwd=1,bars=NULL,default_edge_color="darkgrey",ymax=NULL,cex.terminal.dots=0,vspace.reserve=0,cex.axis=1){
   par(mar=c(1, 1, 1, 3) + 0.1)
   #browser()
   if(!(direction %in% c("down","across"))){
@@ -4122,9 +4122,9 @@ plot_tree=function(tree,direction="down",cex.label=5,offset=0,plot_axis=T,title=
     }else{
       tipcol=tree$tip.color
     }
-    #if(cex.label>0){
-    #text(tree$tip.label,y =top-(coords$a1[idx.tip]+offset) ,x=coords$b1[idx.tip],cex = cex.label,pos = 1,col=tipcol)
-    # }
+    if(cex.label>0){
+    text(tree$tip.label,y =top-(coords$a1[idx.tip]+offset) ,x=coords$b1[idx.tip],cex = cex.label,pos = 1,col=tipcol,srt=270)
+    }
     if(cex.terminal.dots>0){
       points(y =top-(coords$a1[idx.tip]) ,x=coords$b1[idx.tip],col=c("darkgrey", "blueviolet","deeppink")[Y_loss], cex=cex.terminal.dots,pch=15)
     }
@@ -4299,7 +4299,7 @@ library(ape)
 #library(phytools)
 library(MCMCglmm)
 library(phangorn)
-library(spam)
+#library(spam)
 #library(INLA)
 #library(phylodyn)
 #library(ggtree)

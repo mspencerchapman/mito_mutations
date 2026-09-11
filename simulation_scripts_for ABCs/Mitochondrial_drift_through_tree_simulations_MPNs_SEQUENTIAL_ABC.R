@@ -19,6 +19,7 @@ option_list = list(
   make_option(c("-m", "--muts_df"), action="store", default='muts.csv', type='character', help="path to csv file with 2 columns: 'exp_ID' and 'mut', with the details of the mutations to include in the ABC"),
   make_option(c("-j", "--j_index"), action="store", default='1', type='numeric', help="mutation index within the dataframe")
   )
+
 opt = parse_args(OptionParser(option_list=option_list, add_help_option=FALSE))
 print(opt)
 
@@ -56,7 +57,7 @@ exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_567_A_C","MT_574_A_C","MT_16181_A_C
 
 MPN_ultra_trees<-readRDS("MPN_ultratrees.RDS")
 
-##This is the key iterative simulation function for this simulation script. It takes:
+##This is the key iterative simulation function for this script. It takes:
 #(1) a tree structure ("sub_tree")
 #(2) the node number of the tree root, from which to start the drift
 #(2) a starting VAF of a theoretical mitochondrial mutation in the root of the tree
@@ -64,6 +65,7 @@ MPN_ultra_trees<-readRDS("MPN_ultratrees.RDS")
 #It then models independent drift down each lineage and outputs a data frame the of the mutation VAF at each node /tip
 #Note that it assumes that the tree is scale to "molecular time" (i.e. SNVs) and that the mutation rate is constant at ~17.5 SNVs per year (Mitchell et al, 2022)
 #However, if the tree is already scaled to actual time, can change the 'units_per_year' metric to 1 (if scaled to years) or 365 (if scaled to days)
+
 get_mito_mut_vaf_df=function(sub_tree,node,starting_vaf=0.5,units_per_year=17.5,mito_cn=1000,generation_time=1,vaf_df=NULL) {
   if(!is.numeric(node)|length(node)!=1) {stop("node must be a numeric of length=1")}
   if(is.null(vaf_df)){vaf_df<-data.frame(node=node,vaf=starting_vaf)}

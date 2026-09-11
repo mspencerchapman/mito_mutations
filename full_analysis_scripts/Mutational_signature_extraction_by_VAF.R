@@ -11,7 +11,7 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 genomeFile="~/R_work/reference_files/genome.fa"
-root_dir="~/R_work/mito_mutations_blood"
+root_dir="~/R_work/mito_mutations"
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the plotting theme for ggplot2
@@ -380,6 +380,9 @@ ggsave(filename = paste0(root_dir,"/rebuttal_plots/HDP_Sigprofiler_correlation.p
 ##----------------PRODUCE THE 'ML_Sig' MATRIX----------------
 #Enhance data with a matched "ML_Sig" matrix matching the VAF/ SW matrixes in the mito_data object
 sig_ref<-readRDS(paste0(root_dir,"/data/mutational_signatures/sig_ref_file.Rds"))
+
+#Define the VAF bins to use for signature extraction
+bins=2^c(-10:0)
 
 #The "MT_16519_T_T" mutation is real, but is at a site where there is a germline SNP (MT_16519_T_C)
 #Therefore actual somatic mutation is a MT_16519_C_T - need to ensure this is marked as the real "N1" signature so that is retained in mutaiton set
