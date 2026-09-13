@@ -5,10 +5,12 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-This markdown goes through all the analysis on the comparator cross-tissue dataset from the manuscript xxx.
+This markdown goes through all the analysis on the comparator cross-tissue dataset from the manuscript "Mitochondrial mutation, drift and selection during human development and ageing".
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = F)
+
 # Load packages (and install if they are not installed 
 cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal","ggpubr","VGAM","usethis","RColorBrewer","MCMCglmm","phangorn","spam","dichromat","ggridges","forcats","lmerTest","tidyverse","readr","patchwork","BuenColors","Seurat")
 bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene","Rsamtools","ggtree","ComplexHeatmap")
@@ -28,7 +30,7 @@ for(package in bioconductor_packages){
   }
 }
 
-#Insstall & load github packages
+#Install & load github packages
 if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
   devtools::install_github("im3sanger/dndscv")
   library("dndscv",character.only=T,quietly = T, warn.conflicts = F)
@@ -49,16 +51,21 @@ if(!require("mitovizR", character.only=T,quietly = T, warn.conflicts = F)){
   library("mitovizR",character.only=T,quietly = T, warn.conflicts = F)
 }
 
-
 ```
 
-Set file paths.
-```{r set_file_paths}
-options(stringsAsFactors = F)
+## Set file paths.
 
-#Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/hs37d5.fa"
+Manually set these file paths before running the script - this needs a local copy of the hg19 genome file
+
+```{r set_file_paths}
+genomeFile="~/R_work/reference_files/genome.fa"
 root_dir="~/R_work/mito_mutations/"
+```
+
+Set the secondary file paths used throughout the script. This data is all included in the github repository.
+
+```{r set_file_paths2}
+#Source the necessary functions - included in the repo
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -71,11 +78,8 @@ rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
 plots_dir=rebuttal_figs_dir
 
 # read in the trinucleotide context data
-mtdna_trinuc_freq_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds"),"/lustre/scratch126/casm/team154pc/ms56/mito_mutations_blood/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds")
+mtdna_trinuc_freq_path=paste0(root_dir,"/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds")
 mtdna_trinuc_freq <- readRDS(mtdna_trinuc_freq_path)
-
-#Set the path of your local genome file (this is hg19)
-genomeFile="~/R_work/reference_files/genome.fa"
 
 # set regions for coding and dloop regions - important for the mutation profiles
 coding_region <- 577:16023
@@ -101,7 +105,14 @@ mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtool
 #Import individual level metadata for the adult and foetal blood samples
 ref_df<-readxl::read_excel(nonblood_ref_file) #Import metadata relating to all individuals studied
 colony_info<-read.delim(colony_info_file) #Import colony-level data for the lymphoid dataset as there are multiple different cell types
+```
 
+Set some other variables and colour schemes used in the script.
+e.g. defining which initials are used as keys for which dataset.
+
+(out of interest, these are generally the initials of the principal scientist who generated that data, e.g. KY = "Kenichi Yoshida")
+
+```{r set_variables}
 #Define the dataframe for converting IDs between my IDs, and Andrew's for the different datasets
 translate=data.frame(dataset=c("KY","HL","SO","PR","LM","NW","lymph","EM"),
                      al_ref=c("lung_organoid","colon","colon_ibd","muty_mutant","endometrium","blood_MPN","immune","blood_emily"))
@@ -120,14 +131,6 @@ name_conversion_vec=c("Normal blood","Lymphoid","MPN","Colon","IBD-affected\nCol
 names(name_conversion_vec)=c("blood","lymph","NW","HL","SO","PR","LM","KY")
 tissue_cols<-c("#96e97c","#fd81c8","#145a6a","#65e6f9","#781486","#5f70cc","#aea2eb","#1d6d1f")
 names(tissue_cols)<-name_conversion_vec
-```
-
-
-```{r set_cols}
-
-mut_type_cols<-c("#00468B","#925E9F","#925E9F","#810F7C","black","#E10C04","black")
-names(mut_type_cols)<-c("Missense","Nonsense","Truncating","Stop_loss","Non-Coding","Synonymous","Overall")
-
 ```
 
 ## IMPORT ALL DATASETS
@@ -204,7 +207,7 @@ all_mito_datasets<-lapply(all_cohorts_plus_CML,function(dataset) {
 names(all_mito_datasets)<-all_cohorts_plus_CML
 ```
 
-### Convert this into tidy dataframe format. One dataframe per dataset.
+Convert this into tidy dataframe format. One dataframe per dataset.
 
 ```{r convert_to_tidy_df}
 all_df_tidy<-Map(dataset=all_cohorts_plus_CML,dataset_mito_data=all_mito_datasets,function(dataset,dataset_mito_data) {
@@ -676,8 +679,10 @@ expanded.clades.plot<-dplyr::bind_rows(Map(list=dataset_mito_data,exp_ID=names(d
 expanded.clades.plot
 ggsave(filename=paste0(plots_dir,dataset,"_expanded_clades_plot.pdf"),expanded.clades.plot,width=4,height=2.5)
 ```
-### Get info on 'marker mutations'
-Slightly complex snippet of code to pull out any mutations that are:
+#### Get info on 'marker mutations'
+For the previously selected dataset, find the best "marker mutations" and visualize this.
+
+First, there is this slightly complex snippet of code to pull out any mutations that are:
  (1) shared by ≥2 clone samples
  (2) are not present in a large fraction of samples outside the clone (must be <20%)
 
@@ -761,7 +766,7 @@ expanded.clades.marking.plot<-expanded_clades_df%>%
   labs(x="Clonal expansion",y=str_wrap("Number of samples within expansion",width=15),fill=str_wrap("Best mitochondrial marker mutation",width=10))
 
 expanded.clades.marking.plot
-ggsave(filename=paste0("expanded_clades_marking_plot_",dataset,".pdf"),expanded.clades.marking.plot,width=7,height=2.3)
+ggsave(filename=paste0(plots_dir,"expanded_clades_marking_plot_",dataset,".pdf"),expanded.clades.marking.plot,width=7,height=2.3)
 ```
 
 
@@ -774,6 +779,10 @@ expanded_clades_df$n_marker<-sapply(1:nrow(expanded_clades_df),function(i) {
 ```
 
 ## COPY NUMBER ANALYSIS 
+
+Analyse the mitochondrial DNA copy number, by individual.
+
+Here we have a boxplot of the mtDNA copy number for each individual as a boxplot. The boxplots are grouped by their tissue of origin. Note that the y-axis is logarithmic as there is huge between sample variability (both within and between tissues).
 
 ```{r copy_number_analysis_boxplot,fig.width=10,fig.height=4}
 #Box plots of copy number by tissue type
@@ -796,6 +805,7 @@ cn_by_tissue_plot
 ggsave(filename=paste0(plots_dir,"cn_by_tissue_plot.pdf"),cn_by_tissue_plot,width=10,height=4)
 ```
 
+Given that tissue type is a major driver of mtDNA copy number, summarise this by group all samples from a given tissue (aggregating across individuals) into a single ridge plot.
 
 ```{r copy_number_analysis_ridge_plot,fig.width=3,fig.height=2}
 #Ridges plots of copy number distribution across the tissue
@@ -817,6 +827,7 @@ mitoCN_ridges_plot
 ggsave(filename=paste0(plots_dir,"mitoCN_ridges_plot.pdf"),mitoCN_ridges_plot,width=3,height=2)
 ```
 
+Within each tissue, is there a difference in copy number through life? No - nothing convincing.
 
 ```{r copy_number_by_age,fig.width=3,fig.height=2}
 #Dot plot of median copy number against age, points coloured by tissue plot

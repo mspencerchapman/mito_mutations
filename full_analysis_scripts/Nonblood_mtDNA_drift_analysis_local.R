@@ -11,7 +11,7 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations_blood"
+root_dir="~/R_work/mito_mutations"
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
