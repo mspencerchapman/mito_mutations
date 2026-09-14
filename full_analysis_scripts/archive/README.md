@@ -32,7 +32,7 @@ The same applies to the two `Mitochondrial_mut_analysis` files.
 
 | Archived script | Superseded by |
 |---|---|
-| `Compile_nonblood_mito_data.R` | `../Compile_nonblood_mito_data_v2.R` |
+| `Compile_nonblood_mito_data.R` | `../Compile_nonblood_mito_data.R` (the file formerly named `_v2`) |
 
 ## Never used
 
