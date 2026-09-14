@@ -87,16 +87,7 @@ coding_region <- 577:16023
 d_loop_region <- c(1:576,16024:16569)
 
 #Set the basic plotting theme for ggplot2
-my_markdown_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
+#my_markdown_theme is defined in config.R
 
 
 #Read in the mitochondrial copy number data
@@ -281,7 +272,7 @@ coverage.plot<-mito_cn%>%
   facet_wrap(~Tissue,scales = "free_y",nrow=2)+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Mean mitochondrial DNA coverage",y="Count")
 coverage.plot
 save_plot(filename=paste0(plots_dir,"coverage_by_tissue_plot.pdf"),coverage.plot,width=7,height=2.5)
@@ -304,7 +295,7 @@ median.coverage.plot<-mito_cn%>%
   #facet_wrap(~Tissue,scales = "free_y",nrow=2)+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="")
 median.coverage.plot
 save_plot(filename=paste0(plots_dir,"median.coverage.plot.pdf"),median.coverage.plot,width=3.3,height=2.5)
@@ -328,7 +319,7 @@ uniformity_plot<-mito_cn%>%
   #facet_wrap(~Tissue,scales = "free_y",nrow=2)+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Coverage uniformity\n(proportion of mtDNA genome with coverage >80% of mean)",y="")
 uniformity_plot
 save_plot(filename=paste0(plots_dir,"uniformity_plot.pdf"),uniformity_plot,width=3.3,height=2.5)
@@ -1117,7 +1108,7 @@ plot_list=Map(dataset_mito_data=all_mito_datasets[all_cohorts],df_tidy=all_df_ti
          y=str_wrap("Proportion of samples with at least 1 mutation with VAF > cut-off",width=40),
          col="Individual",title = name_conversion_vec[this_dataset])+
     my_markdown_theme+
-    theme(legend.key.height = unit(2.8,"mm"),legend.title = element_text(size=7))
+    theme(legend.key.height = unit(2.8,"mm"),legend.title = element_text(size = 14))
   save_plot(filename=paste0(plots_dir,"Sample_proportions_with_mut_",this_dataset,".pdf"),prop.of.samples.with.mut,width=3.5,height=2)
   return(prop.of.samples.with.mut)
 })
@@ -1183,7 +1174,7 @@ plot_list=lapply(all_cohorts,function(this_dataset) {
       geom_point(size=0.1)+
       theme_classic()+
       my_markdown_theme+
-      theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size=6))+
+      theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 12))+
       facet_grid(cols=vars(factor(exp_ID,levels=ref_df%>%arrange(Age)%>%filter(Cohort==this_dataset&ID%in%sum_of_vaf_summary$exp_ID)%>%pull(ID))),scales = "free",space="free",drop = T)+
       scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
       geom_hline(aes(yintercept=mean),linetype=2,data=sum_of_vaf_summary%>%mutate(mean=ifelse(mean==0,0.001,mean)),col="red",linewidth=0.5)+
@@ -1201,7 +1192,7 @@ plot_list=lapply(all_cohorts,function(this_dataset) {
       geom_point(size=0.1)+
       theme_classic()+
       my_markdown_theme+
-      theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size=6))+
+      theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 12))+
       facet_grid(cols=vars(factor(exp_ID,levels=ref_df%>%arrange(Age)%>%filter(Cohort==this_dataset&ID%in%sum_of_vaf_summary$exp_ID)%>%pull(ID))),scales = "free",space="free",drop = T)+
       scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
       geom_hline(aes(yintercept=mean),linetype=2,data=sum_of_vaf_summary%>%mutate(mean=ifelse(mean==0,0.001,mean)),col="red",linewidth=0.5)+

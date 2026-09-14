@@ -38,16 +38,7 @@ coding_region <- 577:16023
 d_loop_region <- c(1:576,16024:16569)
 
 #Set the basic plotting theme for ggplot2
-my_markdown_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
+#my_markdown_theme is defined in config.R
 
 
 #Read in the mitochondrial copy number data

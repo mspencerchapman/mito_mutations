@@ -56,16 +56,7 @@ plots_dir=notebook_plots_dir("mtDNA_mutations_blood")
 rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Set the basic plotting theme for ggplot2
-my_markdown_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
+#my_markdown_theme is defined in config.R
 
 #Read in the mitochondrial copy number data
 mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
@@ -117,7 +108,7 @@ coverage.plot<-mito_cn%>%
   facet_wrap(~exp_ID,scales = "free_y")+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Mean mitochondrial DNA coverage",y="Count")
 coverage.plot
 save_plot(filename=paste0(figures_dir,"Coverage_plot.pdf"),coverage.plot,width=4,height=3)
@@ -133,7 +124,7 @@ median.coverage.plot<-mito_cn%>%
   facet_wrap(~exp_ID,scales = "free_y",nrow=2)+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="Count")
 median.coverage.plot
 save_plot(filename=paste0(figures_dir,"Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
@@ -148,7 +139,7 @@ median.coverage.ridges.plot<-mito_cn%>%
   scale_x_log10(labels=scales::label_comma())+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="")
 median.coverage.ridges.plot
 save_plot(filename=paste0(figures_dir,"median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
@@ -165,7 +156,7 @@ uniformity_ridges.plot<-mito_cn%>%
   scale_x_log10()+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Coverage uniformity\n(proportion of mtDNA genome with coverage >80% of mean)",y="")
 uniformity_ridges.plot
 save_plot(filename=paste0(figures_dir,"Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
@@ -230,7 +221,7 @@ mito_cn_by_pheno<-mito_cn%>%
   geom_text(data=mtDNA_by_pheno_summary,aes(label=paste0("µ = ",round(mean_mtDNA_genomes)),x=Phenotype,y=75),size=1.6,inherit.aes = F)+
   my_markdown_theme+
   theme(#axis.text.x = element_text(angle=90),
-        strip.text.x = element_text(size=7,margin = margin(t=1,r=0,b=1,l=0,unit="mm")),
+        strip.text.x = element_text(size = 14,margin = margin(t=1,r=0,b=1,l=0,unit="mm")),
         legend.key.size = unit(0,"mm"),
         legend.position="right")
 mito_cn_by_pheno
@@ -253,7 +244,7 @@ mito_cn_by_pheno_all_HSCprog<-mito_cn%>%
   theme_bw()+
   labs(x="",col="Founder cell\nphenotype",y="mtDNA copies per cell")+
   my_markdown_theme+
-  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(t=1,r=0,b=1,l=0,unit="mm")),legend.position="none",legend.title = element_text(size=7))
+  theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(t=1,r=0,b=1,l=0,unit="mm")),legend.position="none",legend.title = element_text(size = 14))
 mito_cn_by_pheno_all_HSCprog
 save_plot(filename=paste0(figures_dir,"mito_cn_by_pheno_HSCprog.pdf"),mito_cn_by_pheno_all_HSCprog,width=4,height=2)
 
@@ -298,9 +289,9 @@ mtDNA.copy.number.logscale<-mito_cn%>%
   my_markdown_theme+
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
-        legend.title = element_text(size=8),
+        legend.title = element_text(size = 16),
         legend.key.height = unit(2,"mm"),
-        strip.text.x = element_text(size=6),
+        strip.text.x = element_text(size = 12),
         panel.spacing.x=unit(1, "mm"))+
   guides(colour = guide_legend(override.aes = list(size=2)))
 
@@ -334,9 +325,9 @@ mtDNA.copy.number.logscale.by.phenotype<-mito_cn%>%
   my_markdown_theme+
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
-        legend.title = element_text(size=8),
+        legend.title = element_text(size = 16),
         legend.key.height = unit(2,"mm"),
-        strip.text.x = element_text(size=6),
+        strip.text.x = element_text(size = 12),
         panel.spacing.x=unit(1, "mm"))+
   guides(colour = guide_legend(override.aes = list(size=2)))
 
@@ -364,7 +355,7 @@ foetal_18pcw_by_cell_type_loc<-mito_cn%>%
   theme_bw()+
   my_markdown_theme+
   scale_y_log10(limits=c(8,20000),breaks=c(10,100,1000,10000))+
-  theme(legend.title = element_text(size=7),legend.text = element_text(size=6))+
+  theme(legend.title = element_text(size = 14),legend.text = element_text(size = 12))+
   labs(x="Cell type & location",y="mtDNA copies per cell",col="Founder cell\nphenotype")
 
 foetal_18pcw_by_cell_type_loc
@@ -392,7 +383,7 @@ median_mtDNA_CN_by_age<-mito_cn%>%
   scale_y_continuous(limits=c(0,1000))+
   labs(y="Median mitochondrial genomes per cell",col="Individual")+
   my_markdown_theme+
-  theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size=7),legend.text=element_text(size=6))
+  theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size = 14),legend.text=element_text(size = 12))
 median_mtDNA_CN_by_age
 save_plot(filename = paste0(figures_dir,"median_mtDNA_CN_by_age.pdf"),plot = median_mtDNA_CN_by_age,width=3.5,height=2)
 ```
@@ -594,7 +585,7 @@ prop.of.samples.with.mut<-samples_with_mut_df%>%
        y=str_wrap("Proportion of samples with at least 1 mutation with VAF > cut-off",width=40),
        col="Individual")+
   my_markdown_theme+
-  theme(legend.key.height = unit(3,"mm"),legend.title = element_text(size=7))
+  theme(legend.key.height = unit(3,"mm"),legend.title = element_text(size = 14))
 
 prop.of.samples.with.mut
 
@@ -648,7 +639,7 @@ mean_sum_of_vaf_by_age<-sum_of_vaf_summary%>%
   labs(col="Individual",y="Mean mutation burden (sum of VAF)")+
   geom_smooth(aes(x=Age,y=mean),col="black",linewidth=0.5,method="lm",inherit.aes = F)+
   my_markdown_theme+
-  theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size=7),legend.text=element_text(size=5))
+  theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size = 14),legend.text=element_text(size = 10))
 
 mean_sum_of_vaf_by_age
 
@@ -670,7 +661,7 @@ sum_of_vaf_plot_log<-sum_of_vaf_df%>%
   geom_point(size=0.1)+
   theme_classic()+
   my_markdown_theme+
-  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size=6))+
+  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 12))+
   facet_grid(cols=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales = "free",space="free")+
   scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
   geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",size=0.5)+
@@ -694,7 +685,7 @@ sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
   scale_color_manual(values=c("#1a80bb", "#ea801c"))+
   theme_classic()+
   my_markdown_theme+
-  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size=6))+
+  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 12))+
   facet_grid(cols=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales = "free",space="free")+
   scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
   geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",size=0.5)+
