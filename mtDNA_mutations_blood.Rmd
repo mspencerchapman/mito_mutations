@@ -119,7 +119,7 @@ coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Mean mitochondrial DNA coverage",y="Count")
 coverage.plot
-save_plot(filename=paste0(figures_dir,"Supp_Figure_01/Coverage_plot.pdf"),coverage.plot,width=4,height=3)
+save_plot(filename=paste0(figures_dir,"Coverage_plot.pdf"),coverage.plot,width=4,height=3)
 ```
 
 
@@ -135,7 +135,7 @@ median.coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="Count")
 median.coverage.plot
-save_plot(filename=paste0(figures_dir,"Supp_Figure_01/Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
+save_plot(filename=paste0(figures_dir,"Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
 ```
 
 A ridges plot is perhaps better here to compare.
@@ -150,7 +150,7 @@ median.coverage.ridges.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="")
 median.coverage.ridges.plot
-save_plot(filename=paste0(figures_dir,"Supp_Figure_01/median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
+save_plot(filename=paste0(figures_dir,"median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
 ```
 
 Uniformity across the mtDNA genome is also a key marker of coverage quality.
@@ -167,7 +167,7 @@ uniformity_ridges.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Coverage uniformity\n(proportion of mtDNA genome with coverage >80% of mean)",y="")
 uniformity_ridges.plot
-save_plot(filename=paste0(figures_dir,"Supp_Figure_01/Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
+save_plot(filename=paste0(figures_dir,"Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
 ```
 
 Print coverage summary statistics
@@ -233,7 +233,7 @@ mito_cn_by_pheno<-mito_cn%>%
         legend.key.size = unit(0,"mm"),
         legend.position="right")
 mito_cn_by_pheno
-save_plot(filename=paste0(figures_dir,"additional_plots/mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
+save_plot(filename=paste0(figures_dir,"mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
 ```
 
 
@@ -254,7 +254,7 @@ mito_cn_by_pheno_all_HSCprog<-mito_cn%>%
   my_theme+
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(t=1,r=0,b=1,l=0,unit="mm")),legend.position="none",legend.title = element_text(size=7))
 mito_cn_by_pheno_all_HSCprog
-save_plot(filename=paste0(figures_dir,"Figure_01/mito_cn_by_pheno_HSCprog.pdf"),mito_cn_by_pheno_all_HSCprog,width=4,height=2)
+save_plot(filename=paste0(figures_dir,"mito_cn_by_pheno_HSCprog.pdf"),mito_cn_by_pheno_all_HSCprog,width=4,height=2)
 
 #Generate the table of average CN by cell type - these values are overlaid onto the above plot
 mito_cn%>%
@@ -305,7 +305,7 @@ mtDNA.copy.number.logscale<-mito_cn%>%
 
 mtDNA.copy.number.logscale
 
-save_plot(filename = paste0(figures_dir,"Figure_01/mtDNA.copy.number.logscale.pdf"),plot=mtDNA.copy.number.logscale,height=2,width=7)
+save_plot(filename = paste0(figures_dir,"mtDNA.copy.number.logscale.pdf"),plot=mtDNA.copy.number.logscale,height=2,width=7)
 ```
 
 Generate the same plot, but now colour points by the colony phenotype. This is slightly difficult to interpret due to the multitude of colours!
@@ -341,7 +341,7 @@ mtDNA.copy.number.logscale.by.phenotype<-mito_cn%>%
 
 mtDNA.copy.number.logscale.by.phenotype
 
-save_plot(filename = paste0(figures_dir,"Figure_01/mtDNA.copy.number.logscale.by.phenotype.pdf"),plot=mtDNA.copy.number.logscale.by.phenotype,height=2,width=7)
+save_plot(filename = paste0(figures_dir,"mtDNA.copy.number.logscale.by.phenotype.pdf"),plot=mtDNA.copy.number.logscale.by.phenotype,height=2,width=7)
 ```
 
 
@@ -367,7 +367,7 @@ foetal_18pcw_by_cell_type_loc<-mito_cn%>%
   labs(x="Cell type & location",y="mtDNA copies per cell",col="Founder cell\nphenotype")
 
 foetal_18pcw_by_cell_type_loc
-save_plot(filename=paste0(figures_dir,"Figure_01/foetal_18pcw_by_cell_type_loc.pdf"),foetal_18pcw_by_cell_type_loc,width=3,height=2)
+save_plot(filename=paste0(figures_dir,"foetal_18pcw_by_cell_type_loc.pdf"),foetal_18pcw_by_cell_type_loc,width=3,height=2)
 ```
 
 ### Assess for a relationship between age and mtDNA copy number
@@ -393,7 +393,7 @@ median_mtDNA_CN_by_age<-mito_cn%>%
   my_theme+
   theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size=7),legend.text=element_text(size=6))
 median_mtDNA_CN_by_age
-save_plot(filename = paste0(figures_dir,"Supp_Figure_01/median_mtDNA_CN_by_age.pdf"),plot = median_mtDNA_CN_by_age,width=3.5,height=2)
+save_plot(filename = paste0(figures_dir,"median_mtDNA_CN_by_age.pdf"),plot = median_mtDNA_CN_by_age,width=3.5,height=2)
 ```
 
 Now do a formal regression to confirm if there is any kind of significant relationship (although not evident visually).
@@ -597,7 +597,7 @@ prop.of.samples.with.mut<-samples_with_mut_df%>%
 
 prop.of.samples.with.mut
 
-save_plot(filename=paste0(figures_dir,"Figure_01/Sample_proportions_with_mut.pdf"),prop.of.samples.with.mut,width=3,height=2)
+save_plot(filename=paste0(figures_dir,"Sample_proportions_with_mut.pdf"),prop.of.samples.with.mut,width=3,height=2)
 
 ```
 
@@ -651,7 +651,7 @@ mean_sum_of_vaf_by_age<-sum_of_vaf_summary%>%
 
 mean_sum_of_vaf_by_age
 
-save_plot(filename=paste0(figures_dir,"Figure_01/mean_sum_of_vaf_by_age.pdf"),plot=mean_sum_of_vaf_by_age,height=2,width=3)
+save_plot(filename=paste0(figures_dir,"mean_sum_of_vaf_by_age.pdf"),plot=mean_sum_of_vaf_by_age,height=2,width=3)
 ```
 
 
@@ -679,7 +679,7 @@ sum_of_vaf_plot_log<-sum_of_vaf_df%>%
 
 sum_of_vaf_plot_log
 
-save_plot(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
+save_plot(filename = paste0(figures_dir,"sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
 ```
 
 Now coloured by cell type, as requested by the reviewer.
@@ -704,7 +704,7 @@ sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
 
 sum_of_vaf_plot_log_by_celltype
 
-save_plot(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log_by_celltype.pdf"),plot=sum_of_vaf_plot_log_by_celltype,height=2.2,width=7)
+save_plot(filename = paste0(figures_dir,"sum_of_vaf_log_by_celltype.pdf"),plot=sum_of_vaf_plot_log_by_celltype,height=2.2,width=7)
 ```
 
 Comparison of mutation burden by cell type (HSCs and progenitor cell types) - violin plot, with overlaid comparisons using the non-parametric Wilcoxon test.

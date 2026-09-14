@@ -157,7 +157,7 @@ real_mut_distribution_plot_normalized<-left_join(real_muts_dist_df,nsamp_df)%>%
   labs(x="VAF range",y="Number of N1 mutations detected per sample")
 
 real_mut_distribution_plot_normalized+my_rmd_theme+theme(strip.text.x = element_text(size=9),axis.text.x = element_text(size=6,angle=90))
-save_plot(filename=paste0(figures_dir,"Figure_04/real_mut_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
+save_plot(filename=paste0(figures_dir,"real_mut_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
 ```
 
 
@@ -253,7 +253,7 @@ modelled_VAF_dist<-gens_record%>%
   my_theme
 
 modelled_VAF_dist+my_rmd_theme+theme(strip.text.x = element_text(size=9),axis.text.x = element_text(size=6,angle=90))
-save_plot(filename=paste0(figures_dir,"Figure_04/Modelled_VAF_dist.pdf"),modelled_VAF_dist,width = 6,height=2)
+save_plot(filename=paste0(figures_dir,"Modelled_VAF_dist.pdf"),modelled_VAF_dist,width = 6,height=2)
 ```
 
 How many 'high VAF' (>50%) mutaitons are there depending on the generation?
@@ -287,7 +287,7 @@ acquisition_time_by_VAF<-gens_record%>%
   labs(x="Time of mutation acquisition\n(WF Generations)",y="Density")
 
 acquisition_time_by_VAF+my_rmd_theme
-save_plot(filename = paste0(figures_dir,"Supp_Figure_04/Acquisition_time_by_VAF.pdf"),acquisition_time_by_VAF,width=7,height=2.5)
+save_plot(filename = paste0(figures_dir,"Acquisition_time_by_VAF.pdf"),acquisition_time_by_VAF,width=7,height=2.5)
 ```
 
 Plot same data but as a ridges plot.
@@ -304,7 +304,7 @@ acquisition_time_by_VAF_ridges<-gens_record%>%
   labs(x="Time of mutation acquisition\n(WF Generations)",y="VAF level")
 
 acquisition_time_by_VAF_ridges+my_rmd_theme
-save_plot(filename = paste0(figures_dir,"Supp_Figure_04/acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
+save_plot(filename = paste0(figures_dir,"acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
 ```
 ### Animation of the Wright-Fisher model
 
@@ -395,7 +395,7 @@ abc_res_plot_mut_rate<-abc_res_df%>%
   coord_flip()
 
 abc_res_plot_mut_rate+my_rmd_theme
-save_plot(filename=paste0(figures_dir,"Figure_04/abc_res_plot_mut_rate.pdf"),abc_res_plot_mut_rate,width=1.75,height=2)
+save_plot(filename=paste0(figures_dir,"abc_res_plot_mut_rate.pdf"),abc_res_plot_mut_rate,width=1.75,height=2)
 ```
 
 Now do linear mixed effects modelling using all values of the posterior distribution and using individual as a random effect.
@@ -450,7 +450,7 @@ abc_res_plot_total_generations<-abc_res_df%>%
         legend.text = element_text(margin = margin(t=0)))
 
 abc_res_plot_total_generations+my_rmd_theme
-save_plot(filename=paste0(figures_dir,"Figure_04/abc_res_plot_total_generations.pdf"),abc_res_plot_total_generations,width=2,height=2)
+save_plot(filename=paste0(figures_dir,"abc_res_plot_total_generations.pdf"),abc_res_plot_total_generations,width=2,height=2)
 ```
 
 ## Now a version of the ABC with only synonymous/ non-coding mutation
@@ -556,7 +556,7 @@ real_syn_mut_distribution_plot_normalized<-left_join(syn_muts_distribution_df,ns
 
 real_syn_mut_distribution_plot_normalized+my_rmd_theme+theme(axis.text.x = element_text(size=7,angle=90),strip.text.x = element_text(size=10))
 
-save_plot(filename=paste0(figures_dir,"Figure_04/synonymous_noncoding_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
+save_plot(filename=paste0(figures_dir,"synonymous_noncoding_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
 ```
 
 Create the matrix of summary statistics for the ABC.
@@ -618,7 +618,7 @@ abc_synres_plot_mut_rate<-abc_syn_res_df%>%
 
 abc_synres_plot_mut_rate+my_rmd_theme
 
-save_plot(filename=paste0(figures_dir,"Figure_04/abc_synres_plot_mut_rate.pdf"),abc_synres_plot_mut_rate,width=1.75,height=2)
+save_plot(filename=paste0(figures_dir,"abc_synres_plot_mut_rate.pdf"),abc_synres_plot_mut_rate,width=1.75,height=2)
 ```
 
 Now do linear mixed effects modelling using all values of the posterior distribution and using individual as a random effect.
@@ -676,7 +676,7 @@ abc_synres_plot_total_generations+geom_point(aes(col=exp_ID),alpha=0.1,size=0.5)
         legend.box.margin = margin(c(0,0,0,0)),
         legend.text = element_text(margin = margin(t=0)))
 
-save_plot(filename=paste0(figures_dir,"Figure_04/abc_synres_plot_total_generations.pdf"),abc_synres_plot_total_generations,width=2,height=2)
+save_plot(filename=paste0(figures_dir,"abc_synres_plot_total_generations.pdf"),abc_synres_plot_total_generations,width=2,height=2)
 ```
 
 ### Compare the drift rate estimates between the full mutation set and the synonymous/ non-coding set
