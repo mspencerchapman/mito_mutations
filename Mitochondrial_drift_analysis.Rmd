@@ -111,12 +111,12 @@ real_mut_distribution_plot<-real_muts_dist_df%>%
   geom_line(aes(group=exp_ID))+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(size = 10,angle=90),strip.text.x = element_text(size = 12))+
+  theme(axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))+
   #facet_grid(rows=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales="free")+
   facet_wrap(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),scales="fixed",dir="v",ncol=6)+
   labs(x="VAF range",y="Number of N1 mutations detected")
 
-real_mut_distribution_plot+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 12,angle=90))
+real_mut_distribution_plot+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 6,angle=90))
 ```
 
 Normalize mutation numbers by the number of samples included.
@@ -134,12 +134,12 @@ real_mut_distribution_plot_normalized<-left_join(real_muts_dist_df,nsamp_df)%>%
   geom_line(aes(group=exp_ID))+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(size = 10,angle=90),strip.text.x = element_text(size = 12))+
+  theme(axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))+
   #facet_grid(rows=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales="free")+
   facet_wrap(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),scales="fixed",dir="v",ncol=6)+
   labs(x="VAF range",y="Number of N1 mutations detected per sample")
 
-real_mut_distribution_plot_normalized+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 9,angle=90))
+real_mut_distribution_plot_normalized+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 6,angle=90))
 save_plot(filename=paste0(figures_dir,"real_mut_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
 ```
 
@@ -230,12 +230,12 @@ modelled_VAF_dist<-gens_record%>%
   geom_bar(stat="count")+
   facet_wrap(~total_gens,ncol=5)+
   theme_bw()+
-  theme(legend.position = "none",axis.text.x = element_text(size = 10,angle=90),strip.text.x = element_text(size = 12))+
+  theme(legend.position = "none",axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))+
   scale_fill_manual(values = colorRampPalette(RColorBrewer::brewer.pal(8,"Spectral"))(1200))+
   labs(x="VAF group",y="Count")+
   my_markdown_theme
 
-modelled_VAF_dist+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 9,angle=90))
+modelled_VAF_dist+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 6,angle=90))
 save_plot(filename=paste0(figures_dir,"Modelled_VAF_dist.pdf"),modelled_VAF_dist,width = 6,height=2)
 ```
 
@@ -532,12 +532,12 @@ real_syn_mut_distribution_plot_normalized<-left_join(syn_muts_distribution_df,ns
   geom_line(aes(group=exp_ID))+
   theme_bw()+
   my_markdown_theme+
-  theme(axis.text.x = element_text(size = 10,angle=90),strip.text.x = element_text(size = 12))+
+  theme(axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))+
   #facet_grid(rows=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales="free")+
   facet_wrap(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),scales="fixed",dir="v",ncol=6)+
   labs(x="VAF range",y="Number of mutations not affecting coding sequence detected per sample")
 
-real_syn_mut_distribution_plot_normalized+my_markdown_theme+theme(axis.text.x = element_text(size = 14,angle=90),strip.text.x = element_text(size = 12))
+real_syn_mut_distribution_plot_normalized+my_markdown_theme+theme(axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))
 
 save_plot(filename=paste0(figures_dir,"synonymous_noncoding_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
 ```
