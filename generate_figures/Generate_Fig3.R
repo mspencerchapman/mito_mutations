@@ -1,4 +1,16 @@
 #-----------------------------------------------------------------------------------#
+# Generate_Fig3.R
+#
+# Fig. 3 | Heteroplasmic mutations during early development.
+#
+# This script writes ONE PDF PER DONOR, to
+#   figures/Figure_03/Low_level_hetmut_<exp_ID>_phylos.pdf
+# Each donor's file is one of panels a-d; the panels were then assembled into the
+# final composite figure in Adobe Illustrator. There is therefore no single output
+# file corresponding to "Figure 3", and no panel is missing.
+#-----------------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------------#
 # --------Load packages (and install if they are not installed yet)-------------------
 #-----------------------------------------------------------------------------------#
 cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal")
@@ -31,8 +43,8 @@ if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/genome.fa" #This should be the hg37 genome file
-root_dir="~/R_work/mito_mutations"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -40,6 +52,9 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 plots_dir=paste0(root_dir,"/plots/")
 rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+
+#Create the figure output directories if they do not already exist
+for(d in c("Figure_03")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),

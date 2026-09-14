@@ -8,14 +8,14 @@ library(phylosignal)
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/R_work/reference_files/genome.fa"
-root_dir="~/R_work/mito_mutations/"
-source(paste0(root_dir,"data/mito_mutations_blood_functions.R"))
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
+source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
-tree_file_paths = list.files(paste0(root_dir,"data/tree_files"),pattern=".tree",full.names = T)
-ref_file=paste0(root_dir,"data/Samples_metadata_ref.csv")
-figures_dir=paste0(root_dir,"figures/")
+tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
+ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
+figures_dir=paste0(root_dir,"/figures/")
 
 #Set the plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -30,9 +30,9 @@ my_theme<-theme(text = element_text(family="Helvetica"),
         legend.title = element_text(size=8))
 
 #Now import the mitochondrial mutation data
-mito_data_file=paste0(root_dir,"data/mito_data.Rds")
+mito_data_file=paste0(root_dir,"/data/mito_data.Rds")
 mito_data<-readRDS(mito_data_file)
-CN_correlating_muts<-readRDS(paste0(root_dir,"data/CN_correlation.RDS"))
+CN_correlating_muts<-readRDS(paste0(root_dir,"/data/CN_correlation.RDS"))
 CN_correlating_muts<-CN_correlating_muts[-which(CN_correlating_muts=="MT_16519_T_T")]
 
 #Define the "old individuals" used to assess mitochondrial mutations as lineage tracing markers
@@ -224,7 +224,15 @@ mito_data<-Map(list=mito_data,exp_ID=names(mito_data), function(list,exp_ID) {
 })
 
 #Save the file with the new shared mutations data
-saveRDS(mito_data,file=mito_data_file)
+#Only write back when the cached result is actually new. This keeps the
+#deposited data file byte-stable: without the guard, simply running this
+#script changes mito_data.Rds and so invalidates its published checksum
+#(see data/zenodo_manifest.csv).
+if(!all(sapply(mito_data,function(list) !is.null(list$shared_muts_df)))) {
+  saveRDS(mito_data,file=mito_data_file)
+} else {
+  cat("shared_muts_df already present for every donor - mito_data.Rds left unchanged\n")
+}
 
 #Combine this info into a single data frame
 shared_muts_old_combined<-dplyr::bind_rows(Map(exp_ID=names(mito_data),list=mito_data,function(exp_ID,list) {
@@ -439,7 +447,7 @@ seuratSNN <- function(matSVD, resolution = 1, k.param = 10){
   return(as.character(clusters[,1]))
 }
 
-output.dir <- paste0(root_dir,"data/mito_mut_clones")
+output.dir <- paste0(root_dir,"/data/mito_mut_clones")
 dir.create(output.dir,showWarnings = F)
 
 # store the information for the heatmap here
@@ -614,7 +622,7 @@ cluster_cols<- c("lightgray","#1f77b4","#d62728","#2ca02c","#ff7f0e","#9467bd","
                  "#bcbd22","#17becf","#ad494a","#e7ba52","#8ca252","#756bb1","#636363","#aec7e8", brewer.pal(12, "Paired"))
 length(cluster_cols)
 mito_data=Map(list=mito_data[old_individuals],exp_ID=old_individuals,function(list,exp_ID){
-  exp_clones<-read.delim(paste0(root_dir,"data/mito_mut_clones/",exp_ID,"_mtdna_clone_assignment.txt"))
+  exp_clones<-read.delim(paste0(root_dir,"/data/mito_mut_clones/",exp_ID,"_mtdna_clone_assignment.txt"))
   n_clones<-length(unique(exp_clones$cluster_id))
   exp_cluster_cols<-cluster_cols[1:n_clones]
   names(exp_cluster_cols)<-unique(exp_clones$cluster_id)

@@ -8,17 +8,17 @@ library(phylosignal)
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations_blood/"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 R_scripts_dir = "~/R_work/my_functions/"
 treemut_dir="~/R_work/treemut/"
 R_scripts=list.files(R_scripts_dir,pattern = ".R",full.names = T)
 sapply(R_scripts[-2],source)
 
 #Set the key file paths using the root dir
-tree_file_paths = list.files(paste0(root_dir,"data/tree_files"),pattern=".tree",full.names = T)
-ref_file=paste0(root_dir,"data/Samples_metadata_ref.csv")
-figures_dir=paste0(root_dir,"figures/")
+tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
+ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
+figures_dir=paste0(root_dir,"/figures/")
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -47,9 +47,9 @@ my_theme<-theme(text = element_text(family="Helvetica"),
                 legend.key.size= unit(5,"mm"),
                 strip.text.x = element_text(size=6))
 
-abc_output_files<-list.files(path = paste0(root_dir,"data/Drift_ABC2"),pattern="abc.file.",full.names = F)
+abc_output_files<-list.files(path = paste0(root_dir,"/data/Drift_ABC2"),pattern="abc.file.",full.names = F)
 abc_values<-lapply(abc_output_files,function(file){
-  abc.nn<-readRDS(paste0(root_dir,"data/Drift_ABC2/",file))
+  abc.nn<-readRDS(paste0(root_dir,"/data/Drift_ABC2/",file))
   exp_ID<-stringr::str_split(file,pattern="\\.",simplify = T)[,3]
   mut<-stringr::str_split(file,pattern="\\.",simplify = T)[,4]
   return(data.frame(exp_ID=exp_ID,mut=mut,adj.values=log10(abc.nn$adj.values[,3]),unadj.values=log10(abc.nn$unadj.values[,3])))

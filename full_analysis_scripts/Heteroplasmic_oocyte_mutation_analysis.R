@@ -8,7 +8,7 @@ library(phylosignal)
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-root_dir="~/R_work/mito_mutations_blood"
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir

@@ -4,11 +4,11 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-root_dir="~/R_work/mito_mutations/"
-figures_dir=paste0(root_dir,"figures/")
-source(paste0(root_dir,"data/mito_mutations_blood_functions.R"))
-mito_data_file=paste0(root_dir,"data/mito_data.Rds")
-ref_file=paste0(root_dir,"data/Samples_metadata_ref.csv")
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
+figures_dir=paste0(root_dir,"/figures/")
+source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
+mito_data_file=paste0(root_dir,"/data/mito_data.Rds")
+ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -28,10 +28,10 @@ ref_df=read.csv(ref_file)%>%filter(Dataset!="Lymphocyte")
 Individual_cols=RColorBrewer::brewer.pal(12,"Paired")
 names(Individual_cols)<-ref_df$Sample[order(ref_df$Age)]
 
-exposures<-read.csv(paste0(root_dir,"data/mutational_signatures/exposures.csv"))
-components<-read.csv(paste0(root_dir,"data/mutational_signatures/components.csv"))
-mutation_profiles_mat=read.table(paste0(root_dir,"data/mutational_signatures/trinuc_mut_mat.txt"))
-sig_ref<-readRDS(file=paste0(root_dir,"data/mutational_signatures/sig_ref_file.Rds"))
+exposures<-read.csv(paste0(root_dir,"/data/mutational_signatures/exposures.csv"))
+components<-read.csv(paste0(root_dir,"/data/mutational_signatures/components.csv"))
+mutation_profiles_mat=read.table(paste0(root_dir,"/data/mutational_signatures/trinuc_mut_mat.txt"))
+sig_ref<-readRDS(file=paste0(root_dir,"/data/mutational_signatures/sig_ref_file.Rds"))
 
 #Clean up the row and column names
 sub_vec = c("C>A","C>G","C>T","T>A","T>C","T>G"); ctx_vec = paste(rep(c("A","C","G","T"),each=4),rep(c("A","C","G","T"),times=4),sep="-")
@@ -269,7 +269,7 @@ dev.off()
 #The actual simulations are run in the separate script "Mito_VAF_distribution_simulations.R"
 
 library(abc)
-all_sumstats=readRDS(file=paste0(root_dir,"data/Drift_ABC/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
+all_sumstats=readRDS(file=paste0(root_dir,"/data/Drift_ABC_VAF_distribution/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
 
 new_VAF_groups=c("<0.1%","0.1-0.2%","0.2-0.4%","0.4-0.8%","0.8-1.6%","1.6-3.1%","3.1-6.2%","6.2-12.5%","12.5-25%","25-50%",">50%")
 
@@ -387,7 +387,7 @@ df_tidy<-dplyr::bind_rows(Map(list=mito_data,exp_ID=names(mito_data),function(li
 
 ###Annotate these using dndscv
 library(dndscv)
-mtref_rda_path=paste0(root_dir,"data/mtref.rda")
+mtref_rda_path=paste0(root_dir,"/data/mtref.rda")
 #All mtDNA genes
 target_genes <- c("MT-CYB", "MT-ND5", "MT-ND2", "MT-ND4", "MT-ND1", "MT-CO3", "MT-ATP6","MT-ND3", "MT-ATP8", "MT-ND4L", "MT-CO2", "MT-CO1","MT-ND5")
 
@@ -464,7 +464,7 @@ sumstats.syn.data<-left_join(syn_muts_distribution_df,nsamp_df)%>%
 #The actual simulations are run in the separate script "Mito_VAF_distribution_simulations.R"
 
 library(abc)
-all_sumstats=readRDS(file=paste0(root_dir,"data/Drift_ABC/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
+all_sumstats=readRDS(file=paste0(root_dir,"/data/Drift_ABC_VAF_distribution/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
 
 new_VAF_groups=c("<0.1%","0.1-0.2%","0.2-0.4%","0.4-0.8%","0.8-1.6%","1.6-3.1%","3.1-6.2%","6.2-12.5%","12.5-25%","25-50%",">50%")
 

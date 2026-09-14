@@ -1,0 +1,84 @@
+cff-version: 1.2.0
+title: >-
+  Code and processed data for "Mitochondrial mutation, drift and selection
+  during human development and ageing"
+message: >-
+  If you use this software or the accompanying data, please cite both the
+  repository and the associated publication.
+type: software
+authors:
+  - given-names: Michael
+    family-names: Spencer Chapman
+    affiliation: Wellcome Sanger Institute
+    email: ms56@sanger.ac.uk
+  - given-names: Moritz J.
+    family-names: Przybilla
+    affiliation: Wellcome Sanger Institute
+  - given-names: Andrew R. J.
+    family-names: Lawson
+    affiliation: Wellcome Sanger Institute
+  - given-names: Emily
+    family-names: Mitchell
+    affiliation: Wellcome Sanger Institute
+  - given-names: Kevin
+    family-names: Dawson
+    affiliation: Wellcome Sanger Institute
+  - given-names: Nicholas
+    family-names: Williams
+    affiliation: Wellcome Sanger Institute
+  - given-names: Luke M. R.
+    family-names: Harvey
+    affiliation: Wellcome Sanger Institute
+  - given-names: Emily F.
+    family-names: Calderbank-May
+    affiliation: University of Cambridge
+  - given-names: Anna Maria
+    family-names: Ranzoni
+    affiliation: University of Cambridge
+  - given-names: Ana
+    family-names: Cvejic
+    affiliation: University of Cambridge
+  - given-names: Krishnaa
+    family-names: Mahbubani
+    affiliation: University of Cambridge
+  - given-names: Kourosh
+    family-names: Saeb Parsy
+    affiliation: University of Cambridge
+  - given-names: Anthony R.
+    family-names: Green
+    affiliation: University of Cambridge
+  - given-names: Jyoti
+    family-names: Nangalia
+    affiliation: Wellcome Sanger Institute
+  - given-names: Elisa
+    family-names: Laurenti
+    affiliation: University of Cambridge
+  - given-names: Inigo
+    family-names: Martincorena
+    affiliation: Wellcome Sanger Institute
+  - given-names: Peter J.
+    family-names: Campbell
+    affiliation: Wellcome Sanger Institute
+repository-code: 'https://github.com/mspencerchapman/mito_mutations'
+abstract: >-
+  Analysis code for the study of somatic mitochondrial DNA mutation, genetic
+  drift and selection across human development and ageing. Includes the mtDNA
+  mutation calling pipeline, mutational signature extraction, dN/dS selection
+  analysis, and approximate Bayesian computation inference of mitochondrial
+  drift rates through phylogenies of clonal expansions. The accompanying
+  processed data is deposited at https://doi.org/10.5281/zenodo.22754723.
+keywords:
+  - mitochondrial DNA
+  - heteroplasmy
+  - somatic mutation
+  - genetic drift
+  - clonal haematopoiesis
+  - phylogenetics
+  - approximate Bayesian computation
+license: CC-BY-4.0
+# TODO on acceptance: add the paper under references, and the Zenodo DOI as
+# identifiers, e.g.
+# identifiers:
+#   - type: doi
+#     value: 10.5281/zenodo.22754723
+#     description: Processed data deposit

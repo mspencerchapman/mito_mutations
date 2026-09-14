@@ -1,8 +1,8 @@
 ##Plot schematic of population size against generation time given the drift information
 library(ggplot2)
 library(dplyr)
-root_dir="~/R_work/mito_mutations_blood/"
-figures_dir=paste0(root_dir,"figures/")
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
+figures_dir=paste0(root_dir,"/figures/")
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),

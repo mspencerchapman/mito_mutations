@@ -2790,6 +2790,15 @@ trinucleotide_plot = function (mutations, file_name=NULL, analysis_type, analysi
     ylab = "Mutation count"
   }
   
+  #Open the output device BEFORE drawing, rather than copying the current device
+  #afterwards. dev.copy() replays the source device's display list, which
+  #interactive devices record but file devices (pdf, png) do not - so saving with
+  #dev.copy() worked in RStudio but wrote a blank page under Rscript.
+  if(!is.null(file_name)){
+    pdf(file=file_name,width=12,height=5)
+    on.exit(dev.off(),add=TRUE)
+  }
+
   h_heavy = barplot(y_heavy, las=2, col=colvec, border=NA, ylim=c(-maxy*1.5,maxy*1.5), space=1, cex.names=0.6, names.arg=xstr, ylab=ylab)
   h_light = barplot(-y_light, las=2, col=colvec, border=NA, ylim=c(-maxy*1.5,maxy*1.5), space=1, cex.names=0.6, names.arg=xstr, ylab=ylab, add = T)
   
@@ -2810,11 +2819,7 @@ trinucleotide_plot = function (mutations, file_name=NULL, analysis_type, analysi
     rect(xpos[1]-0.5, maxy*1.25, xpos[2]+0.5, maxy*1.15, border=NA, col=colvec[j*16])
     text(x=mean(xpos), y=maxy*1.15, pos=3, labels=sub_vec[j])
   }
-  if(!is.null(file_name)){
-    dev.copy(pdf,file_name,width=12,height=5)
-    dev.off()
-  }
-  #dev.off()
+  #The device opened at the top of the function is closed by on.exit()
 }
 
 

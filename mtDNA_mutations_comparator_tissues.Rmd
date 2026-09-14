@@ -58,8 +58,8 @@ if(!require("mitovizR", character.only=T,quietly = T, warn.conflicts = F)){
 Manually set these file paths before running the script - this needs a local copy of the hg19 genome file
 
 ```{r set_file_paths}
-genomeFile="~/R_work/reference_files/genome.fa"
-root_dir="~/R_work/mito_mutations/"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 ```
 
 Set the secondary file paths used throughout the script. This data is all included in the github repository.
@@ -1012,11 +1012,13 @@ trinucleotide_plot(mutations = all_df_tidy[all_cohorts]%>%
 
 
 ```{r trinuc_profiles2,fig.width=7,fig.height=4}
+#Low-VAF profile: cut at 0.1, matching the output file name and the published
+#Extended Data Fig. 3d ("<10%"). This filter previously read vaf<0.05.
 trinucleotide_plot(mutations = all_df_tidy[all_cohorts]%>%
                      dplyr::bind_rows()%>%
                      filter(Sample!="global"&
                               !mut_ref%in%exclude_muts&
-                              vaf<0.05)%>%
+                              vaf<0.1)%>%
                      separate(mut_ref,into=c("chr","pos","ref","mut"))%>%
                      dplyr::rename("donor"=exp_ID)%>%
                      mutate(pos=as.numeric(pos)),
@@ -1400,7 +1402,7 @@ ggsave(filename = paste0(plots_dir,"mutburden_by_age_and_tissue_plot.pdf"),mutbu
 ```{r annotate_mutations,message=FALSE,warning=FALSE}
 library(dndscv)
 mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
-input.dir <- paste0(root_dir,"dnds_tables/")
+input.dir <- paste0(root_dir,"/dnds_tables/")
 
 dnds_theme<-theme(panel.border = element_rect(color = "black",
                                               fill = NA,

@@ -56,8 +56,8 @@ if(!require("mitovizR", character.only=T,quietly = T, warn.conflicts = F)){
 Manually set these file paths before running the script - this needs a local copy of the hg19 genome file
 
 ```{r set_file_paths}
-genomeFile="~/R_work/reference_files/genome.fa"
-root_dir="~/R_work/mito_mutations/"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 ```
 
 Set the secondary file paths used throughout the script. This data is all included in the github repository.

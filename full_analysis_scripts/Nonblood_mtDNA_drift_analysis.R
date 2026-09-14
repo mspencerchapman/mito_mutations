@@ -579,7 +579,7 @@ ggsave(filename=paste0(figures_dir,"VAF_dist_plot_",dataset,".pdf"),VAF_dist_plo
 
 library(abc)
 root_dir="/lustre/scratch126/casm/team154pc/ms56/mito_mutations_blood/"
-all_sumstats=readRDS(file=paste0(root_dir,"data/Drift_ABC/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
+all_sumstats=readRDS(file=paste0(root_dir,"/data/Drift_ABC_VAF_distribution/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
 #all_sumstats=readRDS(file = "/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/VAF_distribution_ABC_simulation_sumstats_COMBINED.Rds")
 
 #sim_framework="varying_mtDNA_CN"
@@ -973,7 +973,7 @@ dev.off()
 #The actual simulations are run in the separate script "Mito_VAF_distribution_simulations.R"
 
 library(abc)
-all_sumstats=readRDS(file=paste0(root_dir,"data/Drift_ABC/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
+all_sumstats=readRDS(file=paste0(root_dir,"/data/Drift_ABC_VAF_distribution/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
 
 new_VAF_groups=c("<0.1%","0.1-0.2%","0.2-0.4%","0.4-0.8%","0.8-1.6%","1.6-3.1%","3.1-6.2%","6.2-12.5%","12.5-25%","25-50%",">50%")
 

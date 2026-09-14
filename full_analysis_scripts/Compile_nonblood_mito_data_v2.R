@@ -21,7 +21,7 @@ mito_cn=read.csv("/lustre/scratch125/casm/team268im/al28/mtDNA/whole_genome_cove
 
 # #Set these file paths before running the script
 # genomeFile="~/Documents/Reference_files/hs37d5.fa"
-# root_dir="~/R_work/mito_mutations_blood/"
+# root_dir="~/R_work/mito_mutations"
 # source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 translate=data.frame(dataset=c("KY","HL","SO","PR","LM","NW","lymph","CML"),

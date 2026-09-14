@@ -30,14 +30,17 @@ bioc_packages <- c(
 )
 
 # Not on CRAN/Bioconductor - installed from GitHub.
-# Sources below were read back from the installed packages' DESCRIPTION files,
-# except hdp, which is not installed locally - confirm before relying on it.
+# Sources below were read back from the installed packages' DESCRIPTION files.
+# NB hdp: the original nicolaroberts/hdp no longer compiles under modern R - it
+# uses the legacy Free()/Calloc() macros that R replaced with R_Free()/R_Calloc(),
+# which current clang rejects. Use the Sanger fork, which is patched for this.
 github_packages <- c(
   treemut   = "nangalialab/treemut",          # phylogeny mutation assignment
+  rsimpop   = "nangalialab/rsimpop",          # clonal expansion simulation (Fig 6c)
   dndscv    = "im3sanger/dndscv",             # selection analysis
   BuenColors= "caleblareau/BuenColors",       # palettes
   mitovizR  = "robertopreste/mitovizR",       # mtDNA visualisation
-  hdp       = "nicolaroberts/hdp"             # mutational signature extraction (source UNVERIFIED)
+  hdp       = "NickWilliamsSanger/hdp"        # mutational signature extraction (fork that builds on modern R)
 )
 
 install_if_missing <- function(pkgs, installer) {

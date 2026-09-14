@@ -31,8 +31,8 @@ if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -601,7 +601,7 @@ mtdna_trinuc_freq <- readRDS(paste0(root_dir,"/data/mtDNA_trinuc_freqs_coding_dl
 # set regions for coding and dloop regions
 coding_region <- 577:16023
 d_loop_region <- c(1:576,16024:16569)
-genomeFile="~/R_work/reference_files/genome.fa"
+#genomeFile is set in config.R
 
 trinucleotide_plot(mutations = df_tidy%>%
                      filter(Sample!="global"&
@@ -825,7 +825,7 @@ confint(exp_vs_singleton.lmer)
 library(dndscv)
 mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
 mtref_rda_path="~/Downloads/mtref.rda"
-input.dir <- paste0(root_dir,"dnds_tables/")
+input.dir <- paste0(root_dir,"/dnds_tables/")
 
 dnds_theme<-theme(panel.border = element_rect(color = "black",
                                               fill = NA,

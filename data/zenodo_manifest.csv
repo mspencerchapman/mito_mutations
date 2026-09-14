@@ -1,5 +1,5 @@
 "filename","path","bytes","md5","description"
-"mito_data.Rds","data/mito_data.Rds",77203264,"76fbc91188c91a49fc9f046ae40a2276","Processed blood/normal haematopoiesis cohort: VAF matrices, phylogenies (tree, tree.ultra), shearwater calls, germline assignments"
+"mito_data.Rds","data/mito_data.Rds",77255829,"e7bc4b1d5ecc99a290c6bf00465b320d","Processed blood/normal haematopoiesis cohort: VAF matrices, phylogenies (tree, tree.ultra), shearwater calls, germline assignments"
 "mito_mutation_data_blood.RDS","data/nonblood/mito_mutation_data_blood.RDS",75701887,"39bb6b2ef2f60d2e90fb54134f6d140d","Processed mtDNA mutation data, blood cohort"
 "mito_mutation_data_SO.RDS","data/nonblood/mito_mutation_data_SO.RDS",32220769,"e3391f5511bc5d4d8805e4a04595e852","Processed mtDNA mutation data, SO (colon IBD) cohort"
 "whole_genome_coverage_pileup_and_bedtools_annotated.csv","data/whole_genome_coverage_pileup_and_bedtools_annotated.csv",11147818,"6eb17acf72a338d6740e0713c08fb067","Per-sample mtDNA copy number from whole-genome coverage"

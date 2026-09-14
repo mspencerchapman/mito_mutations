@@ -31,15 +31,20 @@ if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/genome.fa" #This should be the hg37 genome file
-root_dir="~/R_work/mito_mutations"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 plots_dir=paste0(root_dir,"/plots/")
+
 rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+
+#Create the figure output directories if they do not already exist
+for(d in c("Extended_Data_Figure_07")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
+for(d in c("Figure_04")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -249,7 +254,7 @@ modelled_VAF_dist<-gens_record%>%
 ggsave(filename=paste0(plots_dir,"Figure_04/Fig4b.Modelled_VAF_dist.pdf"),width = 6,height=2)
 
 #-----------------------------------------------------------------------------------#
-### Generate SUPPLEMENTARY FIG. 7A ---------
+### Generate EXTENDED DATA FIG. 7A ---------
 #-----------------------------------------------------------------------------------#
 
 #One notable feature is that these simulations suggest that high VAF mutations were acquired early in life
@@ -265,7 +270,7 @@ acquisition_time_by_VAF_ridges<-gens_record%>%
   my_theme+
   labs(x="Time of mutation acquisition\n(WF Generations)",y="VAF level")
 
-ggsave(filename = paste0(figures_dir,"Supp_Figure_07/SuppFig7a.acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
+ggsave(filename = paste0(plots_dir,"Extended_Data_Figure_07/ExtDataFig7a.acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
 
 #-----------------------------------------------------------------------------------#
 ### Generate animation of evolving VAF distribution ---------
@@ -320,7 +325,7 @@ sumstats.data<-left_join(real_muts_dist_df,nsamp_df)%>%
 
 #The actual simulations are run in the separate script "Mito_VAF_distribution_simulations.R"
 library(abc)
-all_sumstats=readRDS(file=paste0(root_dir,"/data/Drift_ABC/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
+all_sumstats=readRDS(file=paste0(root_dir,"/data/Drift_ABC_VAF_distribution/VAF_distribution_ABC_simulation_sumstats_combined.Rds"))
 
 new_VAF_groups=c("<0.1%","0.1-0.2%","0.2-0.4%","0.4-0.8%","0.8-1.6%","1.6-3.1%","3.1-6.2%","6.2-12.5%","12.5-25%","25-50%",">50%")
 

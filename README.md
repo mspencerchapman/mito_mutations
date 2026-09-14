@@ -17,12 +17,17 @@ Rscript install_dependencies.R     # one-off; see SESSIONINFO.md for versions
 Rscript download_data.R            # fetch the processed data objects from Zenodo (~270 MB)
 ```
 
-Every analysis script resolves its inputs from a single `root_dir` variable set
-at the top of the script. Set it to your clone of this repository:
+**Configuration.** Every script begins with `source(here::here("config.R"))`,
+which sets the project paths, the shared plotting theme and a package helper.
+`config.R` locates the repository root automatically, so there are no paths to
+edit - with one exception. If you want to regenerate the mutational signature
+profiles, set your reference genome in `config.R`:
 
 ```r
-root_dir <- "~/R_work/mito_mutations"
+genomeFile <- "~/path/to/your/GRCh37/genome.fa"   # the only setting you may need to change
 ```
+
+Everything else runs without it.
 
 Figures can then be regenerated individually, e.g.:
 
@@ -39,7 +44,7 @@ Rscript generate_figures/Generate_Fig4.R
 | `data/` | Processed mutation calls, phylogenies, metadata and ABC posteriors (see **Data**) |
 | `generate_figures/` | One script per manuscript figure - the entry point for reproducing results |
 | `full_analysis_scripts/` | Full analyses behind each figure: compilation, drift, selection, signatures |
-| `simulation_scripts_for ABCs/` | Forward simulations and approximate Bayesian computation for drift inference |
+| `simulation_scripts_for_ABCs/` | Forward simulations and approximate Bayesian computation for drift inference |
 | `mtDNA_mutation_calling_pipeline/` | Upstream variant calling (shearwater, coverage, haplotype assignment) |
 | `*.Rmd` | Narrative analysis notebooks with rendered `.html` output |
 | `figures/`, `plots/`, `tables/` | Generated outputs |
@@ -63,7 +68,18 @@ compute cluster; stages 3-4 run from the processed data in `data/`.
 3. **Analysis** - `full_analysis_scripts/`
    Mutation burden and signatures, drift, selection (dN/dS), lineage tracing.
 
-4. **Figures** - `generate_figures/Generate_Fig*.R`
+4. **Figures** - `generate_figures/`
+   One script per manuscript figure: `Generate_Fig1.R` - `Generate_Fig6.R` for the
+   main figures, `Generate_ExtData_Fig*.R` for Extended Data figures. Outputs are
+   written to `figures/Figure_NN/` and `figures/Extended_Data_Figure_NN/`, named by
+   panel (e.g. `Fig4a.`, `ExtDataFig9c.`).
+
+   Note that these scripts produce the individual **panels**, not the assembled
+   figures: final composition, lettering and layout were done in Adobe Illustrator.
+   Some figures are therefore one file per donor rather than per panel - Fig. 3, for
+   example, writes one phylogeny PDF per donor, each of which is one of panels a-d.
+   A few scripts also generate panels belonging to an Extended Data figure alongside
+   their main figure (e.g. `Generate_Fig5.R` writes Extended Data Fig. 9).
 
 ### Drift inference by ABC
 
@@ -73,7 +89,7 @@ Wright-Fisher model, and simulations are accepted by distance to the observed
 summary statistics.
 
 ```bash
-cd "simulation_scripts_for ABCs"
+cd simulation_scripts_for_ABCs
 
 # sequential ABC - each mutation's posterior becomes the next mutation's prior
 Rscript Mitochondrial_drift_through_tree_ABC_SEQ_local.R -t normal
@@ -105,7 +121,7 @@ Data for this project lives in three places:
 | What | Where | How to get it |
 |---|---|---|
 | Raw sequencing data | European Genome-phenome Archive (EGA) | Managed access - see the manuscript's Data Availability statement |
-| Processed data objects (~270 MB) | Zenodo | `Rscript download_data.R` |
+| Processed data objects (~270 MB) | Zenodo [10.5281/zenodo.22754723](https://doi.org/10.5281/zenodo.22754723) | `Rscript download_data.R` |
 | Metadata, phylogenies, references, analysis products | This repository | included in the clone |
 
 ### Fetching the processed data
@@ -158,5 +174,10 @@ Please cite the manuscript. <!-- TODO: add full citation and DOI on acceptance -
 
 ## License
 
-<!-- TODO: add a LICENSE file; without one, default copyright applies and others
-     cannot legally reuse this code. -->
+This work is licensed under the
+[Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+You are free to share and adapt the material for any purpose, including
+commercially, provided you give appropriate credit. See [LICENSE](LICENSE).
+
+The R packages this code depends on (see `install_dependencies.R`) retain their
+own licences.

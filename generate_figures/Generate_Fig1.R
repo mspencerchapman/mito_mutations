@@ -31,8 +31,8 @@ if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/genome.fa" #This should be the hg37 genome file
-root_dir="~/R_work/mito_mutations"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -40,6 +40,9 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 plots_dir=paste0(root_dir,"/plots/")
 rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+
+#Create the figure output directories if they do not already exist
+for(d in c("Figure_01")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -268,7 +271,10 @@ sum_of_vaf_plot_log<-sum_of_vaf_df%>%
   geom_text(aes(x=0,y=median_pos,label=paste0("tilde(x) == ",round(median,3))),size=2,nudge_x=+115,nudge_y=+0.5,data=sum_of_vaf_summary%>%mutate(median_pos=ifelse(median==0,0.001,median)),parse=T)+
   labs(x="Sample",y="Mutation burden\n(sum of VAF)")+
   theme(panel.spacing.x=unit(1, "mm"))
-ggsave(filename = paste0(plots_dir,"Figure_01/sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
+#Not saved: this all-cell-types version of the plot does not appear in the final
+#figure (Fig 1c uses the by-cell-type version below). The plot object is kept for
+#interactive inspection.
+#ggsave(filename = paste0(plots_dir,"Figure_01/sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
 
 #-----------------------------------------------------------------------------------#
 ## Generate FIG. 1C ---------

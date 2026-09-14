@@ -1198,8 +1198,8 @@ ggsave(filename=paste0(plots_dir,"regression_comb_plot.pdf"),regression_comb_plo
 #-----------------------------------------------------------------------------------#
 
 library(dndscv)
-mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
-input.dir <- paste0(root_dir,"dnds_tables/")
+mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
+input.dir <- paste0(root_dir,"/dnds_tables/")
 
 dnds_theme<-theme(panel.border = element_rect(color = "black",
                                               fill = NA,
@@ -1788,7 +1788,7 @@ library(dndscv)
 library(mitovizR)
 
 all_mtDNA_genes <- c("MT-CYB", "MT-ND5", "MT-ND2", "MT-ND4", "MT-ND1", "MT-CO3", "MT-ATP6","MT-ND3", "MT-ATP8", "MT-ND4L", "MT-CO2", "MT-CO1","MT-ND5","MT-ND6")
-mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
+mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
 
 # read in the mtdna variant file and remove patient id
 mtdna.variant.data <- all_het_oocyte_mut_df%>%

@@ -19,10 +19,9 @@
 # EGA. See the Data Availability statement in the manuscript.
 #-------------------------------------------------------------------------------
 
-# Zenodo record for the processed data.
-# TODO: set this to the record id once the deposition is published, e.g. 12345678.
-# The DOI badge on the Zenodo page shows 10.5281/zenodo.<RECORD_ID>.
-ZENODO_RECORD_ID <- Sys.getenv("ZENODO_RECORD_ID", unset = "")
+# Zenodo record for the processed data: DOI 10.5281/zenodo.22754723
+# Override at runtime with ZENODO_RECORD_ID=<id> if pointing at a new version.
+ZENODO_RECORD_ID <- Sys.getenv("ZENODO_RECORD_ID", unset = "22754723")
 
 args <- commandArgs(trailingOnly = TRUE)
 opt_list  <- "--list"  %in% args

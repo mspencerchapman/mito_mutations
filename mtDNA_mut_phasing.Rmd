@@ -12,8 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations/"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -30,7 +30,7 @@ mtdna_trinuc_freq_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/
 mtdna_trinuc_freq <- readRDS(mtdna_trinuc_freq_path)
 
 #Set the path of your local genome file (this is hg19)
-genomeFile="~/R_work/reference_files/genome.fa"
+#genomeFile is set in config.R
 
 # set regions for coding and dloop regions - important for the mutation profiles
 coding_region <- 577:16023

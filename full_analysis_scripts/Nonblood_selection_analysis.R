@@ -44,15 +44,15 @@ R_function_files = list.files("~/Mounts/Lustre2/my_functions",pattern=".R",full.
 treemut_dir="~/Mounts/Lustre2/fetal_HSC/treemut"
 sapply(R_function_files[-2],source)
 setwd(treemut_dir); source("treemut.R"); setwd(my_working_directory)
-root_dir="~/R_work/mito_mutations_blood/"
-plots_dir=paste0(root_dir,"rebuttal_plots/")
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
+plots_dir=paste0(root_dir,"/rebuttal_plots/")
 
 #Import the mitochondrial copy number data
-mito_cn=read.csv(paste0(root_dir,"data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
-mtref_rda_path=paste0(root_dir,"data/mtref.rda")
+mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
+mtref_rda_path=paste0(root_dir,"/data/mtref.rda")
 
 #Import sample metadata
-ref_df<-readxl::read_excel(paste0(root_dir,"data/non_blood_metadata.xlsx"))
+ref_df<-readxl::read_excel(paste0(root_dir,"/data/non_blood_metadata.xlsx"))
 
 translate=data.frame(dataset=c("KY","HL","SO","PR","LM","NW","lymph"),
                      al_ref=c("lung_organoid","colon","colon_ibd","muty_mutant","endometrium","blood_MPN","immune"))
@@ -184,7 +184,7 @@ all.data.list[all.data.list$exp_ID %in% adultblood_IDs & all.data.list$Tissue=="
 # READ IN & PROCESS THE DATA
 #####################################################################################
 
-input.dir <- paste0(root_dir,"dnds_tables/")
+input.dir <- paste0(root_dir,"/dnds_tables/")
 
 #exclude ND6 from analysis since its on the other strand
 target_genes <- c("MT-CYB", "MT-ND5", "MT-ND2", "MT-ND4", "MT-ND1", "MT-CO3", "MT-ATP6","MT-ND3", "MT-ATP8", "MT-ND4L", "MT-CO2", "MT-CO1")
@@ -258,21 +258,21 @@ complete.annotated.mutation.table%>%
   filter(mutation%in%c(Blood_drift_muts))%>%
   filter(!duplicated(.))%>%
   dplyr::select(chr,pos,ref,mut,gene,aachange,impact)%>%
-  readr::write_csv(file=paste0(root_dir,"tables/blood_mutations_used_for_drift.csv"))
+  readr::write_csv(file=paste0(root_dir,"/tables/blood_mutations_used_for_drift.csv"))
 
 complete.annotated.mutation.table%>%
   dplyr::select(-sampleID,-vaf,-tissue,-patientID)%>%
   filter(mutation%in%c(MPN_drift_muts))%>%
   filter(!duplicated(.))%>%
   dplyr::select(chr,pos,ref,mut,gene,aachange,impact)%>%
-  readr::write_csv(file=paste0(root_dir,"tables/MPN_mutations_used_for_drift.csv"))
+  readr::write_csv(file=paste0(root_dir,"/tables/MPN_mutations_used_for_drift.csv"))
 
 complete.annotated.mutation.table%>%
   dplyr::select(-sampleID,-vaf,-tissue,-patientID)%>%
   filter(mutation%in%c(no_coding_change_MPN_muts$mut))%>%
   filter(!duplicated(.))%>%
   dplyr::select(chr,pos,ref,mut,gene,aachange,impact)%>%
-  readr::write_csv(file=paste0(root_dir,"tables/MPN_nocoding_mutations_used_for_drift.csv"))
+  readr::write_csv(file=paste0(root_dir,"/tables/MPN_nocoding_mutations_used_for_drift.csv"))
 
 complete.annotated.mutation.table%>%
   #dplyr::select(-sampleID,-vaf,-tissue,-patientID)%>%

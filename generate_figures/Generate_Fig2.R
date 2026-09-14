@@ -31,8 +31,8 @@ if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/genome.fa" #This should be the hg37 genome file
-root_dir="~/R_work/mito_mutations"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -40,6 +40,9 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 plots_dir=paste0(root_dir,"/plots/")
 rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+
+#Create the figure output directories if they do not already exist
+for(d in c("Figure_02")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -154,7 +157,7 @@ sum_of_vaf_summary<-sum_of_vaf_df%>%
 #-----------------------------------------------------------------------------------#
 
 mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
-input.dir <- paste0(root_dir,"dnds_tables/")
+input.dir <- paste0(root_dir,"/dnds_tables/")
 
 dnds_theme<-theme(panel.border = element_rect(color = "black",
                                               fill = NA,
@@ -293,7 +296,7 @@ mutation_category_by_vaf_violin_plot<-complete.annotated.mutation.table%>%
   my_theme+
   theme(legend.position="none")
 
-ggsave(filename = paste0(plots_dir,"Figure_01/Fig2b.mutation_category_by_vaf_violin_plot.pdf"),mutation_category_by_vaf_violin_plot,width=3,height=2.5)
+ggsave(filename = paste0(plots_dir,"Figure_02/Fig2b.mutation_category_by_vaf_violin_plot.pdf"),mutation_category_by_vaf_violin_plot,width=3,height=2.5)
 
 
 #-----------------------------------------------------------------------------------#

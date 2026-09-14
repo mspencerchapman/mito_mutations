@@ -31,8 +31,8 @@ if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/genome.fa" #This should be the hg37 genome file
-root_dir="~/R_work/mito_mutations"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -40,6 +40,10 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 plots_dir=paste0(root_dir,"/plots/")
 rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+
+#Create the figure output directories if they do not already exist
+#Extended_Data_Figure_08 is selected via ifelse() further down, so it is listed explicitly here
+for(d in c("Extended_Data_Figure_08","Extended_Data_Figure_09","Figure_05")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -104,7 +108,7 @@ get_expanded_clade_nodes=function(tree,height_cut_off=100,min_clonal_fraction=0.
 }
 
 #-----------------------------------------------------------------------------------#
-### Generate SUPPLEMENTARY FIG. 9A ---------
+### Generate EXTENDED DATA FIG. 9A ---------
 #-----------------------------------------------------------------------------------#
 
 expanded.clades.plot<-dplyr::bind_rows(Map(list=mito_data[old_individuals],exp_ID=old_individuals,function(list,exp_ID){
@@ -119,7 +123,7 @@ expanded.clades.plot<-dplyr::bind_rows(Map(list=mito_data[old_individuals],exp_I
   labs(x="Individual",y="Clonal fraction",fill="Number of\n samples\n in clone")+
   theme_bw()+
   my_theme
-ggsave(filename=paste0(plots_dir,"Supp_Figure_09/SuppFig9a.expanded_clades_plot.pdf"),expanded.clades.plot,width=3,height=2.5)
+ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_09/ExtDataFig9a.expanded_clades_plot.pdf"),expanded.clades.plot,width=3,height=2.5)
 
 expanded_clades_df<-Map(list=mito_data[old_individuals],exp_ID=old_individuals,function(list,exp_ID){
   cat(paste0(exp_ID,"\n"))
@@ -191,7 +195,7 @@ expanded.clades.marking.plot<-expanded_clades_df%>%
 ggsave(filename=paste0(plots_dir,"Figure_05/Fig5b.expanded_clades_marking_plot.pdf"),expanded.clades.marking.plot,width=7,height=2.3)
 
 #-----------------------------------------------------------------------------------#
-### Generate SUPPLEMENTARY FIG. 9B ---------
+### Generate EXTENDED DATA FIG. 9B ---------
 #-----------------------------------------------------------------------------------#
 
 #Show correlation of lineage marker with the time of the most recent common ancestor of the clone (MRCA)
@@ -208,7 +212,7 @@ MRCA.prop.correlation<-expanded_clades_df%>%
   geom_smooth(col="black",size=0.6,method="lm")+
   my_theme
 summary(lm(max_pos_prop~MRCA_time,data=expanded_clades_df))
-ggsave(filename=paste0(plots_dir,"Supp_Figure_09/SuppFig9b.MRCA_prop_correlation_plot.pdf"),MRCA.prop.correlation,width=4,height=2.5)
+ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_09/ExtDataFig9b.MRCA_prop_correlation_plot.pdf"),MRCA.prop.correlation,width=4,height=2.5)
 
 #-----------------------------------------------------------------------------------#
 #----PULL OUT THE SHARED MUTATIONS - embed as an additional object within the mito_data list-----
@@ -248,7 +252,15 @@ mito_data<-Map(list=mito_data,exp_ID=names(mito_data), function(list,exp_ID) {
 })
 
 #Save the file with the new shared mutations data
-saveRDS(mito_data,file=mito_data_file)
+#Only write back when the cached result is actually new. This keeps the
+#deposited data file byte-stable: without the guard, simply running this
+#script changes mito_data.Rds and so invalidates its published checksum
+#(see data/zenodo_manifest.csv).
+if(!all(sapply(mito_data,function(list) !is.null(list$shared_muts_df)))) {
+  saveRDS(mito_data,file=mito_data_file)
+} else {
+  cat("shared_muts_df already present for every donor - mito_data.Rds left unchanged\n")
+}
 
 #Combine this info into a single data frame
 shared_muts_old_combined<-dplyr::bind_rows(Map(exp_ID=names(mito_data),list=mito_data,function(exp_ID,list) {
@@ -260,7 +272,7 @@ shared_muts_old_combined<-dplyr::bind_rows(Map(exp_ID=names(mito_data),list=mito
   dplyr::filter(exp_ID%in%old_individuals & !mut%in%CN_correlating_muts)
 
 #-----------------------------------------------------------------------------------#
-### Generate SUPPLEMENTARY FIG. 9C ---------
+### Generate EXTENDED DATA FIG. 9C ---------
 #-----------------------------------------------------------------------------------#
 
 phylosignal.by.nsamples<-shared_muts_old_combined%>%
@@ -276,10 +288,10 @@ phylosignal.by.nsamples<-shared_muts_old_combined%>%
        fill="Significant \nphylogenetic \nsignal")+
   my_theme+theme(legend.margin = margin(t=0.1,unit="mm"))
 
-ggsave(filename=paste0(plots_dir,"Supp_Figure_09/SuppFig9c.Phylosignal_by_nsamples.pdf"),phylosignal.by.nsamples,width=2,height=2)
+ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_09/ExtDataFig9c.Phylosignal_by_nsamples.pdf"),phylosignal.by.nsamples,width=2,height=2)
 
 #-----------------------------------------------------------------------------------#
-### Generate SUPPLEMENTARY FIG. 9D ---------
+### Generate EXTENDED DATA FIG. 9D ---------
 #-----------------------------------------------------------------------------------#
 
 phylosignal.by.globalvaf<-shared_muts_old_combined%>%
@@ -294,7 +306,7 @@ phylosignal.by.globalvaf<-shared_muts_old_combined%>%
        size="No of positive\nsamples",
        col="Significant\nphylogenetic\nsignal")+
   my_theme+theme(legend.margin = margin(t=0.1,unit="mm"))
-ggsave(filename=paste0(plots_dir,"Supp_Figure_09/SuppFig9d.Phylosignal_by_globalvaf.pdf"),phylosignal.by.globalvaf,width=3.5,height=2)
+ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_09/ExtDataFig9d.Phylosignal_by_globalvaf.pdf"),phylosignal.by.globalvaf,width=3.5,height=2)
 
 phylosignal.by.globalvaf.binned<-shared_muts_old_combined%>%
   mutate(bin=ifelse(global_VAF<0.005,"<0.5%",ifelse(global_VAF>0.01,">1%","0.5-1%")))%>%
@@ -305,10 +317,10 @@ phylosignal.by.globalvaf.binned<-shared_muts_old_combined%>%
   theme_bw()+
   labs(x="Global VAF group",y="Count",fill="Significant\nphylogenetic\nsignal")+
   my_theme+theme(legend.margin = margin(t=0.1,unit="mm"),axis.text.x = element_text(angle = 90))
-ggsave(filename=paste0(plots_dir,"Supp_Figure_09/SuppFig9e.Phylosignal_by_globalvaf_binned.pdf"),phylosignal.by.globalvaf.binned,width=1.5,height=2)
+ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_09/ExtDataFig9e.Phylosignal_by_globalvaf_binned.pdf"),phylosignal.by.globalvaf.binned,width=1.5,height=2)
 
 #-----------------------------------------------------------------------------------#
-### Generate FIG. 5A/ Supplementary FIG 8 ---------
+### Generate FIG. 5A/ Extended Data FIG 8 ---------
 #-----------------------------------------------------------------------------------#
 
 #Generate the mutations with/ without phylosignal separately
@@ -335,9 +347,9 @@ temp=Map(list=mito_data[old_individuals],exp_ID=old_individuals,f=function(list,
   }
   plot_muts.clustered<-hclust(dist(vaf.mtx[plot_muts,]))
   par(mfrow=c(1,1))
-  fig<-ifelse(exp_ID=="KX004","Figure_05/","Supp_Figure_08/")
+  fig<-ifelse(exp_ID=="KX004","Figure_05/","Extended_Data_Figure_08/")
   pdf(file = paste0(plots_dir,fig,exp_ID,"_phylosignal.pdf"),width = 7,height=4)
-  plot_tree(tree = list$tree.ultra,cex.label = 0,plot_axis=F,vspace.reserve = 3.1)
+  list$tree.ultra=plot_tree(tree = list$tree.ultra,cex.label = 0,plot_axis=F,vspace.reserve = 3.1)
   add_mito_mut_heatmap(tree=list$tree.ultra,heatmap=hm[plot_muts.clustered$order,],border="gray",heatmap_bar_height=0.05,cex.label = 0.25)
   dev.off()
 })
@@ -362,9 +374,9 @@ temp=Map(list=mito_data[old_individuals],exp_ID=old_individuals,f=function(list,
   }
   plot_muts.clustered<-hclust(dist(vaf.mtx[plot_muts,]))
   par(mfrow=c(1,1))
-  fig<-ifelse(exp_ID=="KX004","Figure_05/","Supp_Figure_08/")
+  fig<-ifelse(exp_ID=="KX004","Figure_05/","Extended_Data_Figure_08/")
   pdf(file = paste0(plots_dir,fig,exp_ID,"_no_phylosignal.pdf"),width = 7,height=4)
-  plot_tree(tree = list$tree.ultra,cex.label = 0,plot_axis=F,vspace.reserve = 3)
+  list$tree.ultra=plot_tree(tree = list$tree.ultra,cex.label = 0,plot_axis=F,vspace.reserve = 3)
   add_mito_mut_heatmap(tree=list$tree.ultra,heatmap=hm[plot_muts.clustered$order,],border="gray",heatmap_bar_height=0.05,cex.label = 0.25)
   dev.off()
 })

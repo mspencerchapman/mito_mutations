@@ -9,8 +9,8 @@ library(phylosignal)
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations/"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -1235,7 +1235,7 @@ ggsave(filename=paste0(plots_dir,"lmer_terms.pdf"),p1.1,width=2.5,height=2)
 
 library(dndscv)
 mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
-input.dir <- paste0(root_dir,"dnds_tables/")
+input.dir <- paste0(root_dir,"/dnds_tables/")
 
 dnds_theme<-theme(panel.border = element_rect(color = "black",
                                               fill = NA,

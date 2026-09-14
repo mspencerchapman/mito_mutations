@@ -3,9 +3,9 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
-root_dir="~/R_work/mito_mutations_blood/"
-figures_dir=paste0(root_dir,"figures/")
-source(paste0(root_dir,"data/mito_mutations_blood_functions.R"))
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
+figures_dir=paste0(root_dir,"/figures/")
+source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 
 ###-----------------------------DRIFT SIMULATIONS OF HETEROPLASMIC OOCYTE MUTATIONS-------------------------------
@@ -44,7 +44,7 @@ ggsave(paste0(figures_dir,"Figure_06/VAF_distribution_histogram.pdf"),VAF.distri
 
 #Now simulate the final distribution of mutation VAFs through the phylogeny using one of the adult phylogenies (KX004) as an example
 #Here we just use a single drift rate (the adult rate) for simplicity
-mito_data<-readRDS(paste0(root_dir,"data/mito_data.Rds"))
+mito_data<-readRDS(paste0(root_dir,"/data/mito_data.Rds"))
 exp_ID="KX004"
 vaf_df_het_oocyte=get_mito_mut_vaf_df(mito_data[[exp_ID]]$tree.ultra,node=mito_data[[exp_ID]]$tree.ultra$edge[1,1],starting_vaf = 0.036,mito_cn = 675,generation_time = 18)
 sample_vafs=vaf_df_het_oocyte$vaf[order(vaf_df_het_oocyte$node)][1:length(mito_data[[exp_ID]]$tree.ultra$tip.label)]

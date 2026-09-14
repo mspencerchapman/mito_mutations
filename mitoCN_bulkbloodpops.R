@@ -14,12 +14,12 @@ my_theme<-theme(text = element_text(family="Helvetica"),
         legend.title = element_text(size=8))
 
 
-root_dir="~/R_work/mito_mutations_blood/"
-plots_dir=paste0(root_dir,"rebuttal_plots/")
-mitoCN_metadata<-readr::read_csv(paste0(root_dir,"data/mitoCN_metadata.csv"),col_select = 1:5)
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
+plots_dir=paste0(root_dir,"/rebuttal_plots/")
+mitoCN_metadata<-readr::read_csv(paste0(root_dir,"/data/mitoCN_metadata.csv"),col_select = 1:5)
 table(mitoCN_metadata$`Cell type`)
 #Import the mitochondrial copy number data
-mito_cn=read.csv(paste0(root_dir,"data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
+mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
 
 sum(mitoCN_metadata$PD_number%in%mito_cn$Sample)
 

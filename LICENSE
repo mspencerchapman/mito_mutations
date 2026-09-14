@@ -1,0 +1,57 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Michael Spencer Chapman, Moritz J. Przybilla,
+Andrew R. J. Lawson, Emily Mitchell, Kevin Dawson, Nicholas Williams,
+Luke M. R. Harvey, Emily F. Calderbank-May, Anna Maria Ranzoni, Ana Cvejic,
+Krishnaa Mahbubani, Kourosh Saeb Parsy, Anthony R. Green, Jyoti Nangalia,
+Elisa Laurenti, Inigo Martincorena, Peter J. Campbell,
+and the Wellcome Sanger Institute.
+
+This work - the code in this repository and the accompanying processed data
+deposited at https://doi.org/10.5281/zenodo.22754723 - is licensed under the
+Creative Commons Attribution 4.0 International License.
+
+You are free to:
+
+  Share  - copy and redistribute the material in any medium or format
+  Adapt  - remix, transform, and build upon the material
+           for any purpose, even commercially.
+
+Under the following terms:
+
+  Attribution - You must give appropriate credit, provide a link to the
+  license, and indicate if changes were made. You may do so in any reasonable
+  manner, but not in any way that suggests the licensor endorses you or your
+  use.
+
+  No additional restrictions - You may not apply legal terms or technological
+  measures that legally restrict others from doing anything the license
+  permits.
+
+Notices:
+
+  You do not have to comply with the license for elements of the material in
+  the public domain or where your use is permitted by an applicable exception
+  or limitation.
+
+  No warranties are given. The license may not give you all of the permissions
+  necessary for your intended use. For example, other rights such as publicity,
+  privacy, or moral rights may limit how you use the material.
+
+To cite this work, please cite the accompanying publication:
+
+  Spencer Chapman M, Przybilla MJ, Lawson ARJ, et al. Mitochondrial mutation,
+  drift and selection during human development and ageing.
+  [journal, year, DOI to be completed on publication]
+
+The full legal text of the licence is available at:
+
+  https://creativecommons.org/licenses/by/4.0/legalcode
+
+A human-readable summary is available at:
+
+  https://creativecommons.org/licenses/by/4.0/
+
+Note on third-party components: this repository calls a number of separately
+licensed R packages (see install_dependencies.R). Those retain their own
+licences and are not covered by this one.

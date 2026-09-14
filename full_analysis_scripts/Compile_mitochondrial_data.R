@@ -8,8 +8,8 @@ library(phylosignal)
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/Documents/Reference_files/hs37d5.fa"
-root_dir="~/R_work/mito_mutations_blood/"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -202,7 +202,7 @@ pval_df_filt$qval<-p.adjust(pval_df_filt$pval,method="BH")
 qval_cutoff=1e-2
 sum(pval_df_filt$qval<qval_cutoff) #Number of correlating mutations (FDR set to 1%)
 CN_correlating_muts<-pval_df_filt%>%dplyr::filter(qval<qval_cutoff)%>%pull(mut_ref)%>%sort()
-saveRDS(CN_correlating_muts,file=paste0(root_dir,"data/CN_correlation.RDS"))
+saveRDS(CN_correlating_muts,file=paste0(root_dir,"/data/CN_correlation.RDS"))
 
 #Visualize this correlation for the top 20 strongest correlation mutations
 Individual_cols=RColorBrewer::brewer.pal(12,"Paired")

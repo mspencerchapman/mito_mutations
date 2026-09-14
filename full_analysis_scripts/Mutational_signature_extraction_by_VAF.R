@@ -10,8 +10,8 @@ library(Rsamtools)
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
-genomeFile="~/R_work/reference_files/genome.fa"
-root_dir="~/R_work/mito_mutations"
+#genomeFile is set in config.R
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the plotting theme for ggplot2
@@ -417,8 +417,14 @@ if(is.null(mito_data[[1]]$matrices$ML_Sig)) {
     }
     
   })
-  cat("Analysis completed. Saving updated mito_data file.",sep="\n")
-  saveRDS(mito_data,file=mito_data_file)
+  #Only write back when the cached result is actually new. This keeps the
+  #deposited data file byte-stable: without the guard, simply running this
+  #script changes mito_data.Rds and so invalidates its published checksum
+  #(see data/zenodo_manifest.csv).
+  if(!all(sapply(mito_data,function(list) !is.null(list$matrices$ML_Sig)))) {
+    cat("Analysis completed. Saving updated mito_data file.",sep="\n")
+    saveRDS(mito_data,file=mito_data_file)
+  } else {cat("ML_Sig already cached for every donor - mito_data.Rds left unchanged\n")}
 }
 
 ##---------------PRODUCE A "VAF.FILT" MATRIX-------------------
@@ -439,6 +445,12 @@ if(is.null(mito_data[[1]]$matrices$vaf.filt)) {
     list$matrices$vaf.filt<-vaf.filt
     return(list)
   })
-  cat("Analysis completed. Saving updated mito_data file.",sep="\n")
-  saveRDS(mito_data,file=mito_data_file)
+  #Only write back when the cached result is actually new. This keeps the
+  #deposited data file byte-stable: without the guard, simply running this
+  #script changes mito_data.Rds and so invalidates its published checksum
+  #(see data/zenodo_manifest.csv).
+  if(!all(sapply(mito_data,function(list) !is.null(list$matrices$vaf.filt)))) {
+    cat("Analysis completed. Saving updated mito_data file.",sep="\n")
+    saveRDS(mito_data,file=mito_data_file)
+  } else {cat("vaf.filt already cached for every donor - mito_data.Rds left unchanged\n")}
 }
