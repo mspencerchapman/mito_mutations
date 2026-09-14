@@ -75,6 +75,28 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
                     legend.key.size = unit(5, "mm")) +
     theme(legend.key.height = unit(3, "mm"),
           legend.title = element_text(size = 8))
+
+  # Larger variant for the R Markdown notebooks. Their figures are read on
+  # screen rather than printed at panel size, so the manuscript's 5-8 pt text is
+  # too small to be legible. Roughly 1.5x throughout.
+  my_markdown_theme <- theme(text = element_text(family = "Helvetica"),
+                             axis.text = element_text(size = 8),
+                             axis.title = element_text(size = 10),
+                             legend.text = element_text(size = 8),
+                             legend.title = element_text(size = 10),
+                             strip.text = element_text(size = 11),
+                             legend.spacing = unit(1.2, "mm"),
+                             legend.key.size = unit(7, "mm")) +
+    theme(legend.key.height = unit(4, "mm"),
+          legend.title = element_text(size = 10))
+
+  # Default figure size for notebook chunks that do not set their own. Call
+  # set_markdown_figure_defaults() from a notebook's setup chunk.
+  set_markdown_figure_defaults <- function(width = 7, height = 4.5) {
+    if (requireNamespace("knitr", quietly = TRUE))
+      knitr::opts_chunk$set(fig.width = width, fig.height = height)
+    invisible(NULL)
+  }
 }
 
 #-----------------------------------------------------------------------------------#

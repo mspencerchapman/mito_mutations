@@ -13,7 +13,8 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 #genomeFile is set in config.R
-source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
+source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_markdown_theme
+set_markdown_figure_defaults() #larger default figure size for on-screen reading
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -37,7 +38,7 @@ coding_region <- 577:16023
 d_loop_region <- c(1:576,16024:16569)
 
 #Set the basic plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
+my_markdown_theme<-theme(text = element_text(family="Helvetica"),
                 axis.text = element_text(size = 5),
                 axis.title = element_text(size=7),
                 legend.text = element_text(size=5),
@@ -272,7 +273,7 @@ build_mito_haplotype_tree=function(tree=NULL,muts,vaf_mat,phasing_mat) {
 
 # Run the function over all the mutation data using the above functions
 
-```{r run_mut_phasing_function,fig.height=15,fig.width=5}
+```{r run_mut_phasing_function,fig.height=22.5,fig.width=7.5}
 temp=lapply(all_cohorts_plus_CML,function(cohort) {
   cat(cohort,sep="\n")
   dataset_mito_data<-all_mito_datasets[[cohort]]

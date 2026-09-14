@@ -66,6 +66,10 @@ and each has a rendered `.html` you can read without running anything:
 | `Nonblood_mtDNA_drift_analysis.Rmd` | Drift and homoplasmy across tissues |
 | `mtDNA_mut_phasing.Rmd` | Phasing of mtDNA mutations |
 
+Notebook figures use `my_markdown_theme` and larger default dimensions, since
+they are read on screen rather than printed at panel size. The manuscript figure
+scripts keep the smaller `my_theme`. Both are defined in `config.R`.
+
 The notebooks display every plot inline, and do not write files by default -
 the figure panels are produced by `generate_figures/` instead. To have a notebook
 also save its plots, set `save_plots <- TRUE` in `config.R`; they are written to
