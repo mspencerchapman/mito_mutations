@@ -21,9 +21,9 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
-figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
+figures_dir=notebook_plots_dir("mtDNA_mut_phasing") #see save_plots in config.R
 rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
-plots_dir=rebuttal_figs_dir
+plots_dir=notebook_plots_dir("mtDNA_mut_phasing")
 
 # read in the trinucleotide context data
 mtdna_trinuc_freq_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds"),"/lustre/scratch126/casm/team154pc/ms56/mito_mutations_blood/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds")
@@ -328,7 +328,7 @@ temp=lapply(all_cohorts_plus_CML,function(cohort) {
     plot(tree,show.node.label=T,cex=0.3)
     
     #Now save it for later scrutiny
-    pdf(tree_pdf_path,height=15,width=4)
+    save_pdf(tree_pdf_path,height=15,width=4)
     plot(tree,show.node.label=T,cex=0.3)
     dev.off()
     

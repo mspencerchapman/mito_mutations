@@ -78,7 +78,49 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 }
 
 #-----------------------------------------------------------------------------------#
-# 4. HELPERS
+# 4. NOTEBOOK PLOT SAVING
+#
+# The R Markdown notebooks display every plot inline in their rendered .html, so
+# they do not need to write files to be useful - and the figure panels for the
+# manuscript are produced by generate_figures/ instead. Saving from a notebook is
+# therefore off by default.
+#
+# Set save_plots <- TRUE to have the notebooks also write their plots to disk.
+# They go to plots/notebook_output/<notebook>/, a separate namespace, so they can
+# never overwrite the figure panels in plots/Figure_NN/.
+#-----------------------------------------------------------------------------------#
+
+save_plots <- FALSE
+
+#' Output directory for one notebook's plots
+notebook_plots_dir <- function(notebook) paste0(plots_dir, "notebook_output/", notebook, "/")
+
+#' ggsave(), honouring save_plots and creating the directory if needed
+save_plot <- function(filename, ...) {
+  if (!isTRUE(save_plots)) return(invisible(NULL))
+  dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+  ggplot2::ggsave(filename = filename, ...)
+}
+
+#' gganimate::anim_save(), honouring save_plots
+save_anim <- function(filename, ...) {
+  if (!isTRUE(save_plots)) return(invisible(NULL))
+  dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+  gganimate::anim_save(filename = filename, ...)
+}
+
+#' Open a pdf device, honouring save_plots
+#'
+#' When saving is off the device is opened on the null file, so that the plotting
+#' calls and the matching dev.off() that follow still work unchanged.
+save_pdf <- function(file, ...) {
+  if (!isTRUE(save_plots)) return(invisible(grDevices::pdf(file = nullfile(), ...)))
+  dir.create(dirname(file), showWarnings = FALSE, recursive = TRUE)
+  grDevices::pdf(file = file, ...)
+}
+
+#-----------------------------------------------------------------------------------#
+# 5. HELPERS
 #-----------------------------------------------------------------------------------#
 
 #' Load packages, installing any that are missing

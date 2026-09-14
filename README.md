@@ -66,6 +66,12 @@ and each has a rendered `.html` you can read without running anything:
 | `Nonblood_mtDNA_drift_analysis.Rmd` | Drift and homoplasmy across tissues |
 | `mtDNA_mut_phasing.Rmd` | Phasing of mtDNA mutations |
 
+The notebooks display every plot inline, and do not write files by default -
+the figure panels are produced by `generate_figures/` instead. To have a notebook
+also save its plots, set `save_plots <- TRUE` in `config.R`; they are written to
+`plots/notebook_output/<notebook>/`, kept separate so they cannot overwrite the
+manuscript panels.
+
 **These notebooks do not cover everything.** The ABC inference of drift rates
 through phylogenies, the dN/dS selection analysis, the mutational signature
 extraction itself, and the simulation work all live in the script folders below.

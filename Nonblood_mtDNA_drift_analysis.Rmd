@@ -71,9 +71,9 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
-figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
+figures_dir=notebook_plots_dir("Nonblood_mtDNA_drift_analysis") #see save_plots in config.R
 rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
-plots_dir=rebuttal_figs_dir
+plots_dir=notebook_plots_dir("Nonblood_mtDNA_drift_analysis")
 
 # read in the trinucleotide context data
 mtdna_trinuc_freq_path=paste0(root_dir,"/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds")
@@ -350,7 +350,7 @@ all_VAF_distribution_plots=Map(mat=VAF_distribution_mats,dataset=all_cohorts,fun
     theme(axis.text.x=element_text(angle=90),strip.text.y=element_text(angle=0))+
     labs(x="Heteroplasmy level",y="mtDNA mutations per cell",title = name_conversion_vec[dataset])
   
-  ggsave(filename=paste0(plots_dir,"VAF_dist_plot2_",dataset,".pdf"),VAF_dist_plot,width=2.5,height=(0.6*nrow(mat)))
+  save_plot(filename=paste0(plots_dir,"VAF_dist_plot2_",dataset,".pdf"),VAF_dist_plot,width=2.5,height=(0.6*nrow(mat)))
   return(VAF_dist_plot)
 })
 
@@ -389,7 +389,7 @@ combined_VAF_dist_plot<-comb_VAF_distribution%>%
         strip.text=element_text(angle=0,size = 7, margin = margin(1,0.5,1,0.5)))+
   labs(x="Heteroplasmy level",y="mtDNA mutations per cell")
 combined_VAF_dist_plot
-ggsave(filename=paste0(plots_dir,"combined_VAF_distirbution_plot.pdf"),combined_VAF_dist_plot,width=7,height=12)
+save_plot(filename=paste0(plots_dir,"combined_VAF_distirbution_plot.pdf"),combined_VAF_dist_plot,width=7,height=12)
 ```
 
 This plot is a bit overwhelming to interpret. Once of the most interesting comparisons is between HSCs and lymphoid cells.
@@ -423,7 +423,7 @@ blood_vs_lymph_VAF_distribution<-blood_lymph_common_data%>%
 
 blood_vs_lymph_VAF_distribution
 
-ggsave(filename=paste0(plots_dir,"blood_vs_lymph_VAF_dist.pdf"),blood_vs_lymph_VAF_distribution,width=3.3,height=2.5)
+save_plot(filename=paste0(plots_dir,"blood_vs_lymph_VAF_dist.pdf"),blood_vs_lymph_VAF_distribution,width=3.3,height=2.5)
 ```
 
 Let's do a Kolmogorov Smirnov test to compare the distribution of mutations in the lymphocytes vs HSCs for each of these individuals.
@@ -509,7 +509,7 @@ homo_muts_per_sample<-n_near_homoplasmic_per_sample%>%
   labs(x="Individual sample",col="",y="Burden of homoplasmic mutations")
 
 homo_muts_per_sample
-ggsave(plot = homo_muts_per_sample,filename = paste0(plots_dir,"homo_muts_per_sample.pdf"),width=15,height=3)
+save_plot(plot = homo_muts_per_sample,filename = paste0(plots_dir,"homo_muts_per_sample.pdf"),width=15,height=3)
 ```
 
 ## LINEAR REGRESSION MODEL
@@ -553,7 +553,7 @@ HSC_vs_lymph_mean_homo_burden<-blood_vs_lymph_homo_muts_dat%>%
 
 HSC_vs_lymph_mean_homo_burden
 
-ggsave(plot = HSC_vs_lymph_mean_homo_burden,filename = paste0(plots_dir,"HSC_vs_lymph_mean_homo_burden.pdf"),width=3,height=2)
+save_plot(plot = HSC_vs_lymph_mean_homo_burden,filename = paste0(plots_dir,"HSC_vs_lymph_mean_homo_burden.pdf"),width=3,height=2)
 
 ```
 
@@ -585,7 +585,7 @@ Mean_vs_Variance_plot<-n_near_homoplasmic_per_sample%>%
 
 Mean_vs_Variance_plot
 
-ggsave(plot = Mean_vs_Variance_plot,filename = paste0(plots_dir,"homo_muts_mean_vs_variance.pdf"),width=3,height=2)
+save_plot(plot = Mean_vs_Variance_plot,filename = paste0(plots_dir,"homo_muts_mean_vs_variance.pdf"),width=3,height=2)
 ```
 
 Perform the poisson regression on the full data set. Here, each data point is an individual sample, individual is a random effect.
@@ -649,7 +649,7 @@ data_vs_regression<-n_near_homoplasmic_per_sample%>%
 
 data_vs_regression
 
-ggsave(plot = data_vs_regression,filename = paste0(plots_dir,"data_vs_regression.pdf"),width=3,height=2)
+save_plot(plot = data_vs_regression,filename = paste0(plots_dir,"data_vs_regression.pdf"),width=3,height=2)
 ```
 
 Visualize the tissue-specific coefficients (relative to blood)
@@ -675,7 +675,7 @@ homo_muts_glm_coefficients<-summary(glmer.res)$coefficients%>%
   labs(x="Tissue drift coefficient\n(relative to normal blood)")
 
 homo_muts_glm_coefficients
-ggsave(plot = homo_muts_glm_coefficients,filename = paste0(plots_dir,"homo_muts_glm_coefficients.pdf"),width=2,height=2.2)
+save_plot(plot = homo_muts_glm_coefficients,filename = paste0(plots_dir,"homo_muts_glm_coefficients.pdf"),width=2,height=2.2)
 ```
 
 ### Cell type-specific analysis for the lymphoid cells
@@ -744,7 +744,7 @@ data_vs_regression_lymph_subdivided<-n_homoplasmic_lymph_type%>%
   theme_classic()+
   my_theme
 data_vs_regression_lymph_subdivided
-ggsave(plot = data_vs_regression_lymph_subdivided,filename = paste0(plots_dir,"data_vs_regression_lymph_subdivided.pdf"),width=3,height=2)
+save_plot(plot = data_vs_regression_lymph_subdivided,filename = paste0(plots_dir,"data_vs_regression_lymph_subdivided.pdf"),width=3,height=2)
 ```
 
 Visualize the coefficients for these different lymphocyte types.
@@ -772,7 +772,7 @@ blood_vs_lymph_subdivided_homo_muts_glm_coefficients<-summary(glmer.res_blood_vs
 
 blood_vs_lymph_subdivided_homo_muts_glm_coefficients
 
-ggsave(plot = blood_vs_lymph_subdivided_homo_muts_glm_coefficients,filename = paste0(plots_dir,"blood_vs_lymph_subdivided_homo_muts_glm_coefficients.pdf"),width=2,height=2.2)
+save_plot(plot = blood_vs_lymph_subdivided_homo_muts_glm_coefficients,filename = paste0(plots_dir,"blood_vs_lymph_subdivided_homo_muts_glm_coefficients.pdf"),width=2,height=2.2)
 ```
 
 Note that there were initial attempts to repeat the Wright-Fisher model based ABC model that we performed on blood. However, the distributions clearly did not fit the assumptions implicity in that model (i.e. a constant population size and mutation rate) leading to unstable, uninformative results.

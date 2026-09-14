@@ -73,9 +73,9 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
-figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
+figures_dir=notebook_plots_dir("mtDNA_mutations_comparator_tissues") #see save_plots in config.R
 rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
-plots_dir=rebuttal_figs_dir
+plots_dir=notebook_plots_dir("mtDNA_mutations_comparator_tissues")
 
 # read in the trinucleotide context data
 mtdna_trinuc_freq_path=paste0(root_dir,"/data/mtDNA_trinuc_freqs_coding_dloop_heavy_light.Rds")
@@ -283,7 +283,7 @@ coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Mean mitochondrial DNA coverage",y="Count")
 coverage.plot
-ggsave(filename=paste0(plots_dir,"coverage_by_tissue_plot.pdf"),coverage.plot,width=7,height=2.5)
+save_plot(filename=paste0(plots_dir,"coverage_by_tissue_plot.pdf"),coverage.plot,width=7,height=2.5)
 ```
 
 Now use the median coverage across the mitochondrial, a more standard figure utilised in these studies.
@@ -306,7 +306,7 @@ median.coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="")
 median.coverage.plot
-ggsave(filename=paste0(plots_dir,"median.coverage.plot.pdf"),median.coverage.plot,width=3.3,height=2.5)
+save_plot(filename=paste0(plots_dir,"median.coverage.plot.pdf"),median.coverage.plot,width=3.3,height=2.5)
 ```
 
 Uniformity across the mtDNA genome is also a key marker of coverage quality.
@@ -330,7 +330,7 @@ uniformity_plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Coverage uniformity\n(proportion of mtDNA genome with coverage >80% of mean)",y="")
 uniformity_plot
-ggsave(filename=paste0(plots_dir,"uniformity_plot.pdf"),uniformity_plot,width=3.3,height=2.5)
+save_plot(filename=paste0(plots_dir,"uniformity_plot.pdf"),uniformity_plot,width=3.3,height=2.5)
 ```
 
 
@@ -465,13 +465,13 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     if(length(list[[tree_to_show]]$tip.label)<8) {stop(return(NULL))}
     
     if(is.null(list$shared_muts_df)) {
-      pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
       plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=F,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
     }
     if(nrow(list$shared_muts_df)==0) {
-      pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
       plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=F,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -505,7 +505,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     }
     
     par(mfrow=c(1,1))
-    pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
+    save_pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
     list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
     dev.off()
@@ -524,13 +524,13 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     
     #Plot the trees even if there are no shared muts
     if(is.null(list$shared_muts_df)) {
-      pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
     }
     if(nrow(list$shared_muts_df)==0) {
-      pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -541,7 +541,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
       pull(mut)
     
     if(length(plot_muts)==0) {
-      pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -565,7 +565,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     }
     
     par(mfrow=c(1,1))
-    pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+    save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
     list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,cex.axis=0.5,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
     dev.off()
@@ -583,7 +583,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     plot_muts<-rownames(list$matrices$vaf.filt)
     
     if(length(plot_muts)==0) {
-      pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : All mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -607,7 +607,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     }
     
     par(mfrow=c(1,1))
-    pdf(file = paste0(figures_dir,exp_ID,"_all_muts_filt.pdf"),width = 7,height=8)
+    save_pdf(file = paste0(figures_dir,exp_ID,"_all_muts_filt.pdf"),width = 7,height=8)
     list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 4,title=paste0(exp_ID," (",Age," years old) : All mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
     dev.off()
@@ -625,7 +625,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     plot_muts<-grep(pattern = "\\*",rownames(list$matrices$vaf),value=T)
     
     if(length(plot_muts)==0) {
-      pdf(file = paste0(figures_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(figures_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=4)
       list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : germline mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -646,7 +646,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     if(length(plot_muts)>=2) {plot_muts.clustered<-hclust(stats::dist((vaf.mtx^(1/4))[plot_muts,]))} else {plot_muts.clustered=list(order=1)}
     
     par(mfrow=c(1,1))
-    pdf(file = paste0(figures_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=8)
+    save_pdf(file = paste0(figures_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=8)
     list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 4,title=paste0(exp_ID," (",Age," years old) : germline mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
     dev.off()
@@ -677,7 +677,7 @@ expanded.clades.plot<-dplyr::bind_rows(Map(list=dataset_mito_data,exp_ID=names(d
   my_theme+
   theme(axis.text.x=element_text(angle=90))
 expanded.clades.plot
-ggsave(filename=paste0(plots_dir,dataset,"_expanded_clades_plot.pdf"),expanded.clades.plot,width=4,height=2.5)
+save_plot(filename=paste0(plots_dir,dataset,"_expanded_clades_plot.pdf"),expanded.clades.plot,width=4,height=2.5)
 ```
 #### Get info on 'marker mutations'
 For the previously selected dataset, find the best "marker mutations" and visualize this.
@@ -766,7 +766,7 @@ expanded.clades.marking.plot<-expanded_clades_df%>%
   labs(x="Clonal expansion",y=str_wrap("Number of samples within expansion",width=15),fill=str_wrap("Best mitochondrial marker mutation",width=10))
 
 expanded.clades.marking.plot
-ggsave(filename=paste0(plots_dir,"expanded_clades_marking_plot_",dataset,".pdf"),expanded.clades.marking.plot,width=7,height=2.3)
+save_plot(filename=paste0(plots_dir,"expanded_clades_marking_plot_",dataset,".pdf"),expanded.clades.marking.plot,width=7,height=2.3)
 ```
 
 
@@ -802,7 +802,7 @@ cn_by_tissue_plot<-mito_cn%>%
   theme(axis.text.x=element_text(angle=90,size = 4),legend.position="none")+
   labs(x="",y="mtDNA copy number")
 cn_by_tissue_plot
-ggsave(filename=paste0(plots_dir,"cn_by_tissue_plot.pdf"),cn_by_tissue_plot,width=10,height=4)
+save_plot(filename=paste0(plots_dir,"cn_by_tissue_plot.pdf"),cn_by_tissue_plot,width=10,height=4)
 ```
 
 Given that tissue type is a major driver of mtDNA copy number, summarise this by group all samples from a given tissue (aggregating across individuals) into a single ridge plot.
@@ -824,7 +824,7 @@ mitoCN_ridges_plot<-mito_cn%>%
   theme(legend.position="none",axis.title.y=element_blank())+
   labs(x="mtDNA copy number")
 mitoCN_ridges_plot
-ggsave(filename=paste0(plots_dir,"mitoCN_ridges_plot.pdf"),mitoCN_ridges_plot,width=3,height=2)
+save_plot(filename=paste0(plots_dir,"mitoCN_ridges_plot.pdf"),mitoCN_ridges_plot,width=3,height=2)
 ```
 
 Within each tissue, is there a difference in copy number through life? No - nothing convincing.
@@ -850,7 +850,7 @@ median_cn_by_age_plot<-mito_cn%>%
   theme(legend.position="right")+
   labs(x="Age",y="mtDNA copy number")
 median_cn_by_age_plot
-ggsave(filename=paste0(plots_dir,"median_cn_by_age_plot.pdf"),median_cn_by_age_plot,width=3.3,height=2)
+save_plot(filename=paste0(plots_dir,"median_cn_by_age_plot.pdf"),median_cn_by_age_plot,width=3.3,height=2)
 ```
 
 Mean copy number by tissue.
@@ -885,7 +885,7 @@ mean_cn_plot<-mito_cn%>%
   labs(x="Mean tissue mtDNA copy number")+
   theme(legend.position="none")
 mean_cn_plot
-ggsave(filename=paste0(plots_dir,"mean_cn_plot.pdf"),mean_cn_plot,width=3,height=2)
+save_plot(filename=paste0(plots_dir,"mean_cn_plot.pdf"),mean_cn_plot,width=3,height=2)
 ```
 
 Create a dataframe to use with the linear mixed effects model.
@@ -963,7 +963,7 @@ tissue_lmer_coefs_plot<-as.data.frame(summary(mito_cn.lmer)$coefficients)%>%
   labs(x="Tissue-specific log(mtDNA copy number)\nfixed effect coefficients")+
   theme(legend.position="none")
 tissue_lmer_coefs_plot
-ggsave(filename=paste0(plots_dir,"tissue_lmer_coefs_plot.pdf"),tissue_lmer_coefs_plot,width=3,height=2)
+save_plot(filename=paste0(plots_dir,"tissue_lmer_coefs_plot.pdf"),tissue_lmer_coefs_plot,width=3,height=2)
 ```
 Here, convert back to the absolute values.  This is essentially like doing a regression on the geometric mean mtDNA value.
 
@@ -991,7 +991,7 @@ tissue_lmer_exp_coefs_plot<-as.data.frame(summary(mito_cn.lmer)$coefficients)%>%
   labs(x="Tissue-specific mtDNA copy number\nfixed effect coefficients")+
   theme(legend.position="none")
 tissue_lmer_exp_coefs_plot
-ggsave(filename=paste0(plots_dir,"tissue_lmer_exp_coefs_plot.pdf"),tissue_lmer_exp_coefs_plot,width=3,height=2)
+save_plot(filename=paste0(plots_dir,"tissue_lmer_exp_coefs_plot.pdf"),tissue_lmer_exp_coefs_plot,width=3,height=2)
 ```
 
 # MUTATIONAL PROFILES - 96-profile plots
@@ -1117,7 +1117,7 @@ plot_list=Map(dataset_mito_data=all_mito_datasets[all_cohorts],df_tidy=all_df_ti
          col="Individual",title = name_conversion_vec[this_dataset])+
     my_theme+
     theme(legend.key.height = unit(2.8,"mm"),legend.title = element_text(size=7))
-  ggsave(filename=paste0(plots_dir,"Sample_proportions_with_mut_",this_dataset,".pdf"),prop.of.samples.with.mut,width=3.5,height=2)
+  save_plot(filename=paste0(plots_dir,"Sample_proportions_with_mut_",this_dataset,".pdf"),prop.of.samples.with.mut,width=3.5,height=2)
   return(prop.of.samples.with.mut)
 })
 wrap_plots(plot_list,ncol=2)
@@ -1211,7 +1211,7 @@ plot_list=lapply(all_cohorts,function(this_dataset) {
       theme(panel.spacing.x=unit(1, "mm"),strip.text.x = element_text(angle=90))
     
   }
-    ggsave(filename = paste0(plots_dir,"sum_of_vaf_log_",this_dataset,".pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
+    save_plot(filename = paste0(plots_dir,"sum_of_vaf_log_",this_dataset,".pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
   return(sum_of_vaf_plot_log)
 })
 
@@ -1394,7 +1394,7 @@ mutburden_by_age_and_tissue_plot<-ggplot() +
   labs(y = "Mean mutation burden (sum of VAF)")+
   theme(legend.position="none")
 mutburden_by_age_and_tissue_plot
-ggsave(filename = paste0(plots_dir,"mutburden_by_age_and_tissue_plot.pdf"),mutburden_by_age_and_tissue_plot,width=7,height=2)
+save_plot(filename = paste0(plots_dir,"mutburden_by_age_and_tissue_plot.pdf"),mutburden_by_age_and_tissue_plot,width=7,height=2)
 ```
 
 ## SELECTION ANALYSIS
@@ -1530,7 +1530,7 @@ consequence_change_plot<-impact_comparison_df%>%
   my_theme+
   labs(y="Consequence of updating to\nmitochondrial genetic code")
 consequence_change_plot
-ggsave(filename = paste0(plots_dir,"consequence_change_plot_CROSSTISSUE.pdf"),consequence_change_plot,width=3.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"consequence_change_plot_CROSSTISSUE.pdf"),consequence_change_plot,width=3.5,height=2.5)
 ```
 
 
@@ -1558,7 +1558,7 @@ total_numbers_old_vs_new_plot<-impact_comparison_df%>%
   labs(fill="",y="")+
   theme(legend.position="top")
 total_numbers_old_vs_new_plot
-ggsave(filename = paste0(plots_dir,"total_numbers_old_vs_new_plot_CROSSTISSUE.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
+save_plot(filename = paste0(plots_dir,"total_numbers_old_vs_new_plot_CROSSTISSUE.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
 ```
 
 
@@ -1623,7 +1623,7 @@ mutation_type_by_gene<-complete.annotated.mutation.table%>%
         axis.text.y=element_text(face="italic"))+
   labs(x="Number of variants",fill="Mutation\nconsequence")
 mutation_type_by_gene
-ggsave(filename = paste0(rebuttal_figs_dir,"mutation_type_by_gene_CROSSTISSUE.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_by_gene_CROSSTISSUE.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
 ```
 
 Now summarise the coding mutation consequences per tissue (across genes).
@@ -1645,7 +1645,7 @@ mutation_type_by_tissue<-complete.annotated.mutation.table%>%
         axis.text.y=element_text(face="italic"))+
   labs(x="Number of coding variants",fill="Mutation\nconsequence")
 mutation_type_by_tissue
-ggsave(filename = paste0(rebuttal_figs_dir,"mutation_type_by_tissue_CROSSTISSUE.pdf"),mutation_type_by_tissue,width=3.5,height=2)
+save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_by_tissue_CROSSTISSUE.pdf"),mutation_type_by_tissue,width=3.5,height=2)
 ```
 ### Combine epithelial tissues
 
@@ -1768,7 +1768,7 @@ mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
         legend.position = c(0.3, 0.8)) +
   labs(col = "Mutation type")
 mutation_type_ecdf_plot
-ggsave(filename = paste0(rebuttal_figs_dir,"mutation_type_ecdf_plot_EPITHELIAL.pdf"),mutation_type_ecdf_plot,width=2.5,height=2)
+save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_ecdf_plot_EPITHELIAL.pdf"),mutation_type_ecdf_plot,width=2.5,height=2)
 ```
 
 Now, SPLIT THE EPITHELIAL TISSUE analysis at the dichotomous vaf threshold from blood (20%)
@@ -1827,7 +1827,7 @@ dnds_global_by_dichotomous_vaf_epithelial_plot<-globaldnds_by_vaf_epithelial%>%
   theme(axis.text.x = element_text(angle=0),
         legend.position="none")
 dnds_global_by_dichotomous_vaf_epithelial_plot
-ggsave(filename = paste0(plots_dir,"dnds_global_by_dichotomous_vaf_epithelial_plot.pdf"),dnds_global_by_dichotomous_vaf_epithelial_plot,width=3,height=2)
+save_plot(filename = paste0(plots_dir,"dnds_global_by_dichotomous_vaf_epithelial_plot.pdf"),dnds_global_by_dichotomous_vaf_epithelial_plot,width=3,height=2)
 ```
 
 
@@ -1857,7 +1857,7 @@ dnds_heatmap_epithelial_and_vaf_by_gene<-selcv_res_by_tissue_and_vaf%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"))+
   labs(x="Variant allele fraction",y="")
 dnds_heatmap_epithelial_and_vaf_by_gene
-ggsave(filename = paste0(plots_dir,"dnds_heatmap_epithelial_and_vaf_by_gene.pdf"),dnds_heatmap_epithelial_and_vaf_by_gene,width=2.5,height=2)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_epithelial_and_vaf_by_gene.pdf"),dnds_heatmap_epithelial_and_vaf_by_gene,width=2.5,height=2)
 ```
 ### Generate global dnds by each individual tissue dataset
 
@@ -1913,7 +1913,7 @@ global_dnds_nonblood<-globaldnds_res%>%
         legend.position="none")
 
 global_dnds_nonblood
-ggsave(filename = paste0(plots_dir,"global_dnds_CROSSTISSUE.pdf"),global_dnds_nonblood,width=2,height=2)
+save_plot(filename = paste0(plots_dir,"global_dnds_CROSSTISSUE.pdf"),global_dnds_nonblood,width=2,height=2)
 ```
 
 ### Get gene-level dNdS info by tissue
@@ -1946,7 +1946,7 @@ dnds_heatmap_by_gene_by_tissue<-selcv_res_by_tissue%>%
   labs(x="Variant allele fraction",y="")
 
 dnds_heatmap_by_gene_by_tissue
-ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_gene_by_tissue.pdf"),dnds_heatmap_by_gene_by_tissue,width=4,height=2.5)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_gene_by_tissue.pdf"),dnds_heatmap_by_gene_by_tissue,width=4,height=2.5)
 ```
 
 ### Selection split by heteroplasmy
@@ -2038,7 +2038,7 @@ global_dnds_by_tissue_and_vaf_plot<-globaldnds_res_by_tissue_and_vaf%>%
         axis.title.x=element_blank(),
         strip.text.y = element_text(angle = 0))
 global_dnds_by_tissue_and_vaf_plot
-ggsave(filename = paste0(plots_dir,"global_dnds_by_tissue_and_vaf_plot_CROSSTISSUE.pdf"),global_dnds_by_tissue_and_vaf_plot,width=7,height=2)
+save_plot(filename = paste0(plots_dir,"global_dnds_by_tissue_and_vaf_plot_CROSSTISSUE.pdf"),global_dnds_by_tissue_and_vaf_plot,width=7,height=2)
 ```
 
 
@@ -2067,7 +2067,7 @@ global_dnds_by_vaf_MPN_and_lymph_onlyplot<-globaldnds_res_by_tissue_and_vaf%>%
         axis.title.x=element_blank(),
         strip.text.y = element_text(angle = 0))
 global_dnds_by_vaf_MPN_and_lymph_onlyplot
-ggsave(filename = paste0(plots_dir,"global_dnds_by_vaf_MPN_and_lymph_onlyplot.pdf"),global_dnds_by_vaf_MPN_and_lymph_onlyplot,width=2,height=2)
+save_plot(filename = paste0(plots_dir,"global_dnds_by_vaf_MPN_and_lymph_onlyplot.pdf"),global_dnds_by_vaf_MPN_and_lymph_onlyplot,width=2,height=2)
 ```
 
 
@@ -2096,7 +2096,7 @@ global_dnds_by_vaf_normal_nonblood_onlyplot<-globaldnds_res_by_tissue_and_vaf%>%
         axis.title.x=element_blank(),
         strip.text.y = element_text(angle = 0))
 global_dnds_by_vaf_normal_nonblood_onlyplot
-ggsave(filename = paste0(plots_dir,"global_dnds_by_vaf_normal_nonblood_onlyplot.pdf"),global_dnds_by_vaf_normal_nonblood_onlyplot,width=2.5,height=2)
+save_plot(filename = paste0(plots_dir,"global_dnds_by_vaf_normal_nonblood_onlyplot.pdf"),global_dnds_by_vaf_normal_nonblood_onlyplot,width=2.5,height=2)
 ```
 
 
@@ -2134,7 +2134,7 @@ dnds_heatmap_by_tissue_and_vaf_by_gene<-selcv_res_by_tissue_and_vaf%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"))+
   labs(x="Variant allele fraction",y="")
 dnds_heatmap_by_tissue_and_vaf_by_gene
-ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene,width=4,height=6.5)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene,width=4,height=6.5)
 ```
 
 Split into two groups so that can fit in the figure.
@@ -2178,8 +2178,8 @@ dnds_heatmap_by_tissue_and_vaf_by_gene_group2<-selcv_res_by_tissue_and_vaf%>%
   labs(x="Variant allele fraction",y="")
 
 
-ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_group1.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene_group1,width=3.5,height=4)
-ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_group2.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene_group2,width=3.5,height=3.2)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_group1.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene_group1,width=3.5,height=4)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_group2.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene_group2,width=3.5,height=3.2)
 
 dnds_heatmap_by_tissue_and_vaf_by_gene_group1+dnds_heatmap_by_tissue_and_vaf_by_gene_group2
 ```
@@ -2204,7 +2204,7 @@ dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only<-selcv_res_by_tissue
   labs(x="Variant allele fraction",y="")
 
 dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only
-ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only,width=4,height=4)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only.pdf"),dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only,width=4,height=4)
 ```
 
 ### Split by dichotomous VAF group (less or greater than 20% only) 
@@ -2290,7 +2290,7 @@ global_dnds_by_tissue_and_dichotomous_vaf_plot<-globaldnds_res_by_tissue_and_dic
   coord_flip()
 
 global_dnds_by_tissue_and_dichotomous_vaf_plot
-ggsave(filename = paste0(plots_dir,"global_dnds_by_tissue_and_dichotomous_vaf_plot_CROSSTISSUE.pdf"),global_dnds_by_tissue_and_dichotomous_vaf_plot,width=2.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"global_dnds_by_tissue_and_dichotomous_vaf_plot_CROSSTISSUE.pdf"),global_dnds_by_tissue_and_dichotomous_vaf_plot,width=2.5,height=2.5)
 ```
 
 
@@ -2319,7 +2319,7 @@ global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot<-globaldnds_res_by_tissue_
         axis.title.x=element_blank(),
         strip.text.y = element_text(angle = 0))
 
-ggsave(filename = paste0(plots_dir,"global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot.pdf"),global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot,width=2,height=2)
+save_plot(filename = paste0(plots_dir,"global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot.pdf"),global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot,width=2,height=2)
 
 
 global_dnds_by_dichotomous_vaf_normal_nonblood_onlyplot<-globaldnds_res_by_tissue_and_dichotomous_vaf%>%
@@ -2346,7 +2346,7 @@ global_dnds_by_dichotomous_vaf_normal_nonblood_onlyplot<-globaldnds_res_by_tissu
         strip.text.y = element_text(angle = 0))
 
 
-ggsave(filename = paste0(plots_dir,"global_dnds_by_dichotomous_vaf_normal_nonblood_onlyplot.pdf"),global_dnds_by_dichotomous_vaf_normal_nonblood_onlyplot,width=2.5,height=2)
+save_plot(filename = paste0(plots_dir,"global_dnds_by_dichotomous_vaf_normal_nonblood_onlyplot.pdf"),global_dnds_by_dichotomous_vaf_normal_nonblood_onlyplot,width=2.5,height=2)
 
 global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot+global_dnds_by_dichotomous_vaf_normal_nonblood_onlyplot
 ```
@@ -2387,7 +2387,7 @@ dnds_heatmap_by_tissue_and_dichotomous_vaf_by_gene<-selcv_res_by_tissue_and_dich
   labs(x="Variant allele fraction",y="")
 
 dnds_heatmap_by_tissue_and_dichotomous_vaf_by_gene
-ggsave(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_dichotomous_vaf_by_gene.pdf"),dnds_heatmap_by_tissue_and_dichotomous_vaf_by_gene,width=4,height=6.5)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_dichotomous_vaf_by_gene.pdf"),dnds_heatmap_by_tissue_and_dichotomous_vaf_by_gene,width=4,height=6.5)
 ```
 
 ## MPN analysis, test global dNdS by driver clone/ wild-type
@@ -2518,7 +2518,7 @@ MPN_global_dnds_by_mut_status_plot<-global_dnds_by_mut_status%>%
   theme(legend.position="top",axis.text.x=element_text(angle=90))
 
 MPN_global_dnds_by_mut_status_plot
-ggsave(filename = paste0(plots_dir,"MPN_global_dnds_by_mut_status_plot.pdf"),MPN_global_dnds_by_mut_status_plot,width=3.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"MPN_global_dnds_by_mut_status_plot.pdf"),MPN_global_dnds_by_mut_status_plot,width=3.5,height=2.5)
 ```
 
 # MPN analysis, test gene-level dNdS by driver clone/ wild-type and VAF
@@ -2559,7 +2559,7 @@ MPN_dnds_heatmap_by_mut_status_by_gene<-selcv_res_by_mut_status%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"))+
   labs(x="Variant allele fraction",y="")
 MPN_dnds_heatmap_by_mut_status_by_gene
-ggsave(filename = paste0(plots_dir,"MPN_dnds_heatmap_by_mut_status_by_gene.pdf"),MPN_dnds_heatmap_by_mut_status_by_gene,width=3.5,height=3.5)
+save_plot(filename = paste0(plots_dir,"MPN_dnds_heatmap_by_mut_status_by_gene.pdf"),MPN_dnds_heatmap_by_mut_status_by_gene,width=3.5,height=3.5)
 ```
 
 # HETEROPLASMIC OOCYTE MUT ANALYSIS
@@ -2652,7 +2652,7 @@ prop_of_samples_with_ho_mut<-data.frame(threshold=seq(0.005,0.9,0.005),n=n_sampl
   my_theme+
   labs(x="Heteroplasmy level",y="Proportion of individuals with\n at least one heteroplasmic oocyte\nmutation above threshold")
 prop_of_samples_with_ho_mut
-ggsave(filename = paste0(plots_dir,"prop_of_samples_with_ho_mut.pdf"),prop_of_samples_with_ho_mut,width=2.5,height=1.8)
+save_plot(filename = paste0(plots_dir,"prop_of_samples_with_ho_mut.pdf"),prop_of_samples_with_ho_mut,width=2.5,height=1.8)
 ```
 
 
@@ -2720,7 +2720,7 @@ n_of_het_oocyte_muts_plot<-all_het_oocyte_mut_df_annotated%>%
   labs(x="Number of heteroplasmic oocyte mutations\nwith VAF inferred >1%",y="Number of individuals")
 
 n_of_het_oocyte_muts_plot
-ggsave(filename = paste0(plots_dir,"n_of_het_oocyte_muts_plot.pdf"),n_of_het_oocyte_muts_plot,width=2,height=1.8)
+save_plot(filename = paste0(plots_dir,"n_of_het_oocyte_muts_plot.pdf"),n_of_het_oocyte_muts_plot,width=2,height=1.8)
 ```
 
 Compare mutation distribution with full somatic mutation set
@@ -2754,7 +2754,7 @@ het_oocyte_mut_type_summary%>%
   group_by(cat)%>%dplyr::summarise(n=sum(n))
 
 Mut_cat_comparison
-ggsave(filename = paste0(plots_dir,"Mut_cat_comparison.pdf"),Mut_cat_comparison,width=3,height=2.5)
+save_plot(filename = paste0(plots_dir,"Mut_cat_comparison.pdf"),Mut_cat_comparison,width=3,height=2.5)
 ```
 
 Save plot of het oocyte mutations by genome position.
@@ -2767,7 +2767,7 @@ mtDNA_mut_pos<-plot_df(all_het_oocyte_mut_df_annotated%>%
           pos_col = "pos", ref_col = "ref", alt_col = "mut")
 
 mtDNA_mut_pos
-ggsave(filename = paste0(plots_dir,"mtDNA_mut_pos.pdf"),mtDNA_mut_pos,width=5,height=5)
+save_plot(filename = paste0(plots_dir,"mtDNA_mut_pos.pdf"),mtDNA_mut_pos,width=5,height=5)
 ```
 
 ## Do example clone inferences on an individuals with heteroplasmic oocyte muts
@@ -2941,7 +2941,7 @@ for (i in 1:nrow(patient.info)){
                 show_column_names = FALSE)
   
   # save heatmaps
-  pdf(paste0(plots_dir, patient.tmp, "_mito_mutation_heatmap.pdf"), width=15, height=8)
+  save_pdf(paste0(plots_dir, patient.tmp, "_mito_mutation_heatmap.pdf"), width=15, height=8)
   print(hm) 
   dev.off()
   
@@ -2960,7 +2960,7 @@ for (i in 1:nrow(patient.info)){
     # Do cosine distance; note that we used sqrt transformation already when creating the pseudo bulk-cell matrix
     mito.hc <- hclust(stats::dist(lsa::cosine((matty))))
     
-    pdf(paste0(plots_dir, patient.tmp, "_hierarchical_tree.pdf"), width = 5, height = 5)
+    save_pdf(paste0(plots_dir, patient.tmp, "_hierarchical_tree.pdf"), width = 5, height = 5)
     print(plot(mito.hc))
     dev.off()
     
@@ -3011,7 +3011,7 @@ for(j in 1:nrow(patient.info)) {
          names(exp_cluster_cols), fill=exp_cluster_cols, horiz=F, cex=0.7,ncol=1)
   
   #Now save it
-  pdf(file=paste0(plots_dir,"Inferred_clones_",patient.tmp,".pdf"),width = 7,height=3)
+  save_pdf(file=paste0(plots_dir,"Inferred_clones_",patient.tmp,".pdf"),width = 7,height=3)
   par(mfrow=c(1,1))
   this.patient.info$tree=plot_tree(tree = this.patient.info$tree,cex.label = 0)
   clone_hm<-matrix(NA,nrow=1,ncol=length(this.patient.info$tree$tip.label),dimnames = list("Clones",this.patient.info$tree$tip.label))

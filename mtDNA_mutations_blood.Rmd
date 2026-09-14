@@ -50,8 +50,8 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
-plots_dir=paste0(root_dir,"/plots/")
+figures_dir=notebook_plots_dir("mtDNA_mutations_blood") #see save_plots in config.R
+plots_dir=notebook_plots_dir("mtDNA_mutations_blood")
 rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Set the basic plotting theme for ggplot2
@@ -119,7 +119,7 @@ coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Mean mitochondrial DNA coverage",y="Count")
 coverage.plot
-ggsave(filename=paste0(figures_dir,"Supp_Figure_01/Coverage_plot.pdf"),coverage.plot,width=4,height=3)
+save_plot(filename=paste0(figures_dir,"Supp_Figure_01/Coverage_plot.pdf"),coverage.plot,width=4,height=3)
 ```
 
 
@@ -135,7 +135,7 @@ median.coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="Count")
 median.coverage.plot
-ggsave(filename=paste0(figures_dir,"Supp_Figure_01/Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
+save_plot(filename=paste0(figures_dir,"Supp_Figure_01/Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
 ```
 
 A ridges plot is perhaps better here to compare.
@@ -150,7 +150,7 @@ median.coverage.ridges.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="")
 median.coverage.ridges.plot
-ggsave(filename=paste0(figures_dir,"Supp_Figure_01/median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
+save_plot(filename=paste0(figures_dir,"Supp_Figure_01/median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
 ```
 
 Uniformity across the mtDNA genome is also a key marker of coverage quality.
@@ -167,7 +167,7 @@ uniformity_ridges.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Coverage uniformity\n(proportion of mtDNA genome with coverage >80% of mean)",y="")
 uniformity_ridges.plot
-ggsave(filename=paste0(figures_dir,"Supp_Figure_01/Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
+save_plot(filename=paste0(figures_dir,"Supp_Figure_01/Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
 ```
 
 Print coverage summary statistics
@@ -233,7 +233,7 @@ mito_cn_by_pheno<-mito_cn%>%
         legend.key.size = unit(0,"mm"),
         legend.position="right")
 mito_cn_by_pheno
-ggsave(filename=paste0(figures_dir,"additional_plots/mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
+save_plot(filename=paste0(figures_dir,"additional_plots/mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
 ```
 
 
@@ -254,7 +254,7 @@ mito_cn_by_pheno_all_HSCprog<-mito_cn%>%
   my_theme+
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(t=1,r=0,b=1,l=0,unit="mm")),legend.position="none",legend.title = element_text(size=7))
 mito_cn_by_pheno_all_HSCprog
-ggsave(filename=paste0(figures_dir,"Figure_01/mito_cn_by_pheno_HSCprog.pdf"),mito_cn_by_pheno_all_HSCprog,width=4,height=2)
+save_plot(filename=paste0(figures_dir,"Figure_01/mito_cn_by_pheno_HSCprog.pdf"),mito_cn_by_pheno_all_HSCprog,width=4,height=2)
 
 #Generate the table of average CN by cell type - these values are overlaid onto the above plot
 mito_cn%>%
@@ -305,7 +305,7 @@ mtDNA.copy.number.logscale<-mito_cn%>%
 
 mtDNA.copy.number.logscale
 
-ggsave(filename = paste0(figures_dir,"Figure_01/mtDNA.copy.number.logscale.pdf"),plot=mtDNA.copy.number.logscale,height=2,width=7)
+save_plot(filename = paste0(figures_dir,"Figure_01/mtDNA.copy.number.logscale.pdf"),plot=mtDNA.copy.number.logscale,height=2,width=7)
 ```
 
 Generate the same plot, but now colour points by the colony phenotype. This is slightly difficult to interpret due to the multitude of colours!
@@ -341,7 +341,7 @@ mtDNA.copy.number.logscale.by.phenotype<-mito_cn%>%
 
 mtDNA.copy.number.logscale.by.phenotype
 
-ggsave(filename = paste0(figures_dir,"Figure_01/mtDNA.copy.number.logscale.by.phenotype.pdf"),plot=mtDNA.copy.number.logscale.by.phenotype,height=2,width=7)
+save_plot(filename = paste0(figures_dir,"Figure_01/mtDNA.copy.number.logscale.by.phenotype.pdf"),plot=mtDNA.copy.number.logscale.by.phenotype,height=2,width=7)
 ```
 
 
@@ -367,7 +367,7 @@ foetal_18pcw_by_cell_type_loc<-mito_cn%>%
   labs(x="Cell type & location",y="mtDNA copies per cell",col="Founder cell\nphenotype")
 
 foetal_18pcw_by_cell_type_loc
-ggsave(filename=paste0(figures_dir,"Figure_01/foetal_18pcw_by_cell_type_loc.pdf"),foetal_18pcw_by_cell_type_loc,width=3,height=2)
+save_plot(filename=paste0(figures_dir,"Figure_01/foetal_18pcw_by_cell_type_loc.pdf"),foetal_18pcw_by_cell_type_loc,width=3,height=2)
 ```
 
 ### Assess for a relationship between age and mtDNA copy number
@@ -393,7 +393,7 @@ median_mtDNA_CN_by_age<-mito_cn%>%
   my_theme+
   theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size=7),legend.text=element_text(size=6))
 median_mtDNA_CN_by_age
-ggsave(filename = paste0(figures_dir,"Supp_Figure_01/median_mtDNA_CN_by_age.pdf"),plot = median_mtDNA_CN_by_age,width=3.5,height=2)
+save_plot(filename = paste0(figures_dir,"Supp_Figure_01/median_mtDNA_CN_by_age.pdf"),plot = median_mtDNA_CN_by_age,width=3.5,height=2)
 ```
 
 Now do a formal regression to confirm if there is any kind of significant relationship (although not evident visually).
@@ -597,7 +597,7 @@ prop.of.samples.with.mut<-samples_with_mut_df%>%
 
 prop.of.samples.with.mut
 
-ggsave(filename=paste0(figures_dir,"Figure_01/Sample_proportions_with_mut.pdf"),prop.of.samples.with.mut,width=3,height=2)
+save_plot(filename=paste0(figures_dir,"Figure_01/Sample_proportions_with_mut.pdf"),prop.of.samples.with.mut,width=3,height=2)
 
 ```
 
@@ -651,7 +651,7 @@ mean_sum_of_vaf_by_age<-sum_of_vaf_summary%>%
 
 mean_sum_of_vaf_by_age
 
-ggsave(filename=paste0(figures_dir,"Figure_01/mean_sum_of_vaf_by_age.pdf"),plot=mean_sum_of_vaf_by_age,height=2,width=3)
+save_plot(filename=paste0(figures_dir,"Figure_01/mean_sum_of_vaf_by_age.pdf"),plot=mean_sum_of_vaf_by_age,height=2,width=3)
 ```
 
 
@@ -679,7 +679,7 @@ sum_of_vaf_plot_log<-sum_of_vaf_df%>%
 
 sum_of_vaf_plot_log
 
-ggsave(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
+save_plot(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
 ```
 
 Now coloured by cell type, as requested by the reviewer.
@@ -704,7 +704,7 @@ sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
 
 sum_of_vaf_plot_log_by_celltype
 
-ggsave(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log_by_celltype.pdf"),plot=sum_of_vaf_plot_log_by_celltype,height=2.2,width=7)
+save_plot(filename = paste0(figures_dir,"Figure_01/sum_of_vaf_log_by_celltype.pdf"),plot=sum_of_vaf_plot_log_by_celltype,height=2.2,width=7)
 ```
 
 Comparison of mutation burden by cell type (HSCs and progenitor cell types) - violin plot, with overlaid comparisons using the non-parametric Wilcoxon test.
@@ -728,7 +728,7 @@ sum_of_vaf_by_celltype<-sum_of_vaf_df%>%
 
 sum_of_vaf_by_celltype
 
-ggsave(filename = paste0(rebuttal_figs_dir,"sum_of_vaf_by_celltype_comparison.pdf"),plot=sum_of_vaf_by_celltype,height=2.2,width=7)
+save_plot(filename = paste0(rebuttal_figs_dir,"sum_of_vaf_by_celltype_comparison.pdf"),plot=sum_of_vaf_by_celltype,height=2.2,width=7)
 
 ```
 
@@ -920,7 +920,7 @@ sov_mut_vs_wt<-sov_mut_vs_wt_df%>%
 
 sov_mut_vs_wt
 
-ggsave(filename = paste0(rebuttal_figs_dir,"sov_mut_vs_wt.pdf"),sov_mut_vs_wt,width=3.3,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"sov_mut_vs_wt.pdf"),sov_mut_vs_wt,width=3.3,height=2.5)
 ```
 
 Do a formal regression using a linear mixed effects model: does the mutation burden differ by driver status?  Individual is included here as a random effect.
@@ -982,7 +982,7 @@ sov_exp_vs_singleton<-exp_vs_singleton_df%>%
 
 sov_exp_vs_singleton
 
-ggsave(filename = paste0(rebuttal_figs_dir,"sov_exp_vs_singleton.pdf"),sov_exp_vs_singleton,width=3.3,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"sov_exp_vs_singleton.pdf"),sov_exp_vs_singleton,width=3.3,height=2.5)
 ```
 
 Again, do a formal regression with a linear mixed effects regression model.
@@ -1133,7 +1133,7 @@ consequence_change_plot<-impact_comparison_df%>%
 
 consequence_change_plot
 
-ggsave(filename = paste0(rebuttal_figs_dir,"consequence_change_plot.pdf"),consequence_change_plot,width=3.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"consequence_change_plot.pdf"),consequence_change_plot,width=3.5,height=2.5)
 ```
 
 
@@ -1162,7 +1162,7 @@ total_numbers_old_vs_new_plot<-impact_comparison_df%>%
 
 total_numbers_old_vs_new_plot
 
-ggsave(filename = paste0(rebuttal_figs_dir,"total_numbers_old_vs_new_plot.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"total_numbers_old_vs_new_plot.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
 ```
 
 
@@ -1308,7 +1308,7 @@ mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
 
 mutation_type_ecdf_plot
 
-ggsave(filename = paste0(rebuttal_figs_dir,"mutation_type_ecdf_plot.pdf"),mutation_type_ecdf_plot,width=2.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_ecdf_plot.pdf"),mutation_type_ecdf_plot,width=2.5,height=2.5)
 ```
 
 
@@ -1331,7 +1331,7 @@ mutation_type_by_gene<-complete.annotated.mutation.table%>%
 
 mutation_type_by_gene
 
-ggsave(filename = paste0(rebuttal_figs_dir,"mutation_type_by_gene_blood.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_by_gene_blood.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
 
 ```
 
@@ -1403,7 +1403,7 @@ global_dnds_blood<-globaldnds_res%>%
         legend.title=element_blank(),
         legend.position="none")
 
-ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_blood.pdf"),global_dnds_blood,width=1.3,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_blood.pdf"),global_dnds_blood,width=1.3,height=2.5)
 ```
 
 
@@ -1435,7 +1435,7 @@ dnds_heatmap_by_gene<-selcv_res_by_tissue%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
   labs(x="",y="")
 
-ggsave(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_gene.pdf"),dnds_heatmap_by_gene,width=1.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_gene.pdf"),dnds_heatmap_by_gene,width=1.5,height=2.5)
 
 ```
 
@@ -1503,7 +1503,7 @@ global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
   #facet_wrap(~tissue,nrow=1)+
   theme(legend.position="none",axis.text.x=element_text(angle=90))
 
-ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_by_vaf_blood.pdf"),global_dnds_by_vaf_plot,width=1.6,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_by_vaf_blood.pdf"),global_dnds_by_vaf_plot,width=1.6,height=2.5)
 
 max_dnds_value<-2
 stats_to_include=c("Truncating","Missense")
@@ -1525,7 +1525,7 @@ global_dnds_bytype_by_vaf_plot<-globaldnds_res_by_vaf%>%
   facet_grid(cols=vars(name))+
   theme(legend.position="none",axis.text.x=element_text(angle=90))
 
-ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_bytype_by_vaf_plot.pdf"),global_dnds_bytype_by_vaf_plot,width=2.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_bytype_by_vaf_plot.pdf"),global_dnds_bytype_by_vaf_plot,width=2.5,height=2.5)
 
 max_dnds_value<-1.5
 stats_to_include=c("Missense")
@@ -1547,7 +1547,7 @@ global_dnds_missense_by_vaf_plot<-globaldnds_res_by_vaf%>%
   #facet_wrap(~tissue,nrow=1)+
   theme(legend.position="none",axis.text.x=element_text(angle=90))
 
-ggsave(filename = paste0(rebuttal_figs_dir,"global_dnds_missense_by_vaf_plot.pdf"),global_dnds_missense_by_vaf_plot,width=1.6,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_missense_by_vaf_plot.pdf"),global_dnds_missense_by_vaf_plot,width=1.6,height=2.5)
 
 ```
 
@@ -1583,7 +1583,7 @@ dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
   labs(x="Variant allele fraction",y="",fill="dN/dS")
 
-ggsave(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_vaf_by_gene.pdf"),dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_vaf_by_gene.pdf"),dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
 
 ```
 
@@ -1652,7 +1652,7 @@ dnds_heatmap_by_dichotomous_vaf_by_gene<-selcv_res_by_dichotomous_vaf%>%
 
 dnds_heatmap_by_dichotomous_vaf_by_gene
 
-ggsave(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_dichotomous_vaf_by_gene.pdf"),dnds_heatmap_by_dichotomous_vaf_by_gene,width=2.2,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_dichotomous_vaf_by_gene.pdf"),dnds_heatmap_by_dichotomous_vaf_by_gene,width=2.2,height=2.5)
 
 ```
 
@@ -1676,7 +1676,7 @@ ju_vaf_distribution<-ju_dat_reduced%>%
   my_theme+
   labs(x="Variant allele fraction")
 ju_vaf_distribution
-ggsave(filename = paste0(rebuttal_figs_dir,"ju_vaf_distribution.pdf"),ju_vaf_distribution,width=2,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"ju_vaf_distribution.pdf"),ju_vaf_distribution,width=2,height=2.5)
 ```
 
 
@@ -1731,7 +1731,7 @@ ju_global_dnds_plot<-dndsout$globaldnds%>%
         legend.title=element_blank(),
         legend.position="none")
 ju_global_dnds_plot
-ggsave(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_plot.pdf"),ju_global_dnds_plot,width=2,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_plot.pdf"),ju_global_dnds_plot,width=2,height=2.5)
 ```
 
 
@@ -1755,7 +1755,7 @@ ju_dnds_by_gene_heatmap<-dplyr::bind_rows(temp%>%dplyr::select(gene_name,"dNdS"=
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
   labs(x="",y="",fill="dN/dS")
 ju_dnds_by_gene_heatmap
-ggsave(filename = paste0(rebuttal_figs_dir,"ju_dnds_by_gene_heatmap.pdf"),ju_dnds_by_gene_heatmap,width=2,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"ju_dnds_by_gene_heatmap.pdf"),ju_dnds_by_gene_heatmap,width=2,height=2.5)
 ```
 
 Analyse by heteroplasmy, as for the normal blood data
@@ -1823,7 +1823,7 @@ ju_global_dnds_missense_by_vaf_plot<-globaldnds_res_by_vaf%>%
 
 ju_global_dnds_missense_by_vaf_plot
 
-ggsave(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_missense_by_vaf_plot.pdf"),ju_global_dnds_missense_by_vaf_plot,width=4,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_missense_by_vaf_plot.pdf"),ju_global_dnds_missense_by_vaf_plot,width=4,height=2.5)
 ```
 
 
@@ -1858,7 +1858,7 @@ ju_dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
 
 ju_dnds_heatmap_by_vaf_by_gene
 
-ggsave(filename = paste0(rebuttal_figs_dir,"ju_dnds_heatmap_by_vaf_by_gene.pdf"),ju_dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
+save_plot(filename = paste0(rebuttal_figs_dir,"ju_dnds_heatmap_by_vaf_by_gene.pdf"),ju_dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
 
 ```
 
