@@ -294,13 +294,13 @@ drift_with_age_animation<-gens_record_summary%>%
   theme(title = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle=90,size=15),axis.title.x=element_text(size=12),axis.title.y=element_text(size=12))+
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(8,"Spectral"))+
   labs(title='{current_frame} generations',x="Observed VAF",y="Count")
-anim_save(filename=paste0(plots_dir,"driftwithage.gif"),animation = drift_with_age_animation)
+anim_save(filename=paste0(rebuttal_figs_dir,"driftwithage.gif"),animation = drift_with_age_animation)
 
 #Plot the colour scale for these figures
 max_gen=1500
 lut=colorRampPalette(RColorBrewer::brewer.pal(8,"Spectral"))(max_gen)
 scale = (length(lut)-1)
-pdf(paste0(plots_dir,"mito_muts_by_gen_scale.pdf"),height=6,width = 3)
+pdf(paste0(rebuttal_figs_dir,"mito_muts_by_gen_scale.pdf"),height=6,width = 3)
 plot(c(0,10), c(0,1), type='n', bty='n', xaxt='n', xlab='', yaxt='n', ylab='', main="")
 axis(side=2,pos=1,las=1,at=seq(0,max_gen,200)/scale,labels=seq(0,max_gen,200))
 for (i in 1:(length(lut)-1)) {

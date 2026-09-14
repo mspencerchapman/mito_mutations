@@ -22,7 +22,7 @@ raw_data_foetal_folder=paste0(root_dir,"/data/blood_foetal/")
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 mito_data_file=paste0(root_dir,"/data/mito_data.Rds")
 ref_df<-read.csv(ref_file)
-figures_dir=paste0(root_dir,"/figures/")
+figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
 
 ##---------------------COMPILE THE ADULT DATA---------------------
 #Samples from initial sequencing analysis that showed high levels of specific artefacts & may skew attribution algorithms

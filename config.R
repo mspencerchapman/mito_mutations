@@ -32,8 +32,12 @@ genomeFile <- "~/R_work/reference_files/genome.fa"
 
 root_dir   <- here::here()
 data_dir   <- file.path(root_dir, "data")
-plots_dir  <- file.path(root_dir, "plots")
 tables_dir <- file.path(root_dir, "tables")
+
+# Trailing slash: the scripts build paths as paste0(plots_dir, "Figure_01/x.pdf"),
+# so these must end in a separator.
+plots_dir   <- paste0(file.path(root_dir, "plots"), "/")
+figures_dir <- plots_dir   # figures/ was merged into plots/; kept as an alias
 
 # Plots that do not appear in the manuscript figures - exploratory output, and
 # analyses produced during review.

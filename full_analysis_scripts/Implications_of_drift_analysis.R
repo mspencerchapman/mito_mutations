@@ -4,7 +4,7 @@ library(dplyr)
 library(tidyr)
 
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
-figures_dir=paste0(root_dir,"/figures/")
+figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 

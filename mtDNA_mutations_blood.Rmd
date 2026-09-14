@@ -50,7 +50,7 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-figures_dir=paste0(root_dir,"/figures/")
+figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
 plots_dir=paste0(root_dir,"/plots/")
 rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
@@ -760,7 +760,7 @@ trinucleotide_plot(mutations = df_tidy%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(plots_dir,"Mutational_signature.pdf"))
+                   file_name = paste0(rebuttal_figs_dir,"Mutational_signature.pdf"))
 ```
 
 Now limit to check the 0.5 - 1% VAF mutations.
@@ -774,7 +774,7 @@ trinucleotide_plot(mutations = df_tidy%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(plots_dir,"Mutational_signature_0.005_0.01.pdf"))
+                   file_name = paste0(rebuttal_figs_dir,"Mutational_signature_0.005_0.01.pdf"))
 ```
 
 Now check the <0.5 VAF mutations.
@@ -788,7 +788,7 @@ trinucleotide_plot(mutations = df_tidy%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(plots_dir,"Mutational_signature_<0.005.pdf"))
+                   file_name = paste0(rebuttal_figs_dir,"Mutational_signature_<0.005.pdf"))
 
 ```
 
@@ -1133,7 +1133,7 @@ consequence_change_plot<-impact_comparison_df%>%
 
 consequence_change_plot
 
-ggsave(filename = paste0(plots_dir,"consequence_change_plot.pdf"),consequence_change_plot,width=3.5,height=2.5)
+ggsave(filename = paste0(rebuttal_figs_dir,"consequence_change_plot.pdf"),consequence_change_plot,width=3.5,height=2.5)
 ```
 
 
@@ -1162,7 +1162,7 @@ total_numbers_old_vs_new_plot<-impact_comparison_df%>%
 
 total_numbers_old_vs_new_plot
 
-ggsave(filename = paste0(plots_dir,"total_numbers_old_vs_new_plot.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
+ggsave(filename = paste0(rebuttal_figs_dir,"total_numbers_old_vs_new_plot.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
 ```
 
 

@@ -18,7 +18,7 @@ sapply(R_scripts[-2],source)
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-figures_dir=paste0(root_dir,"/figures/")
+figures_dir=paste0(root_dir,"/plots/") #figures/ was merged into plots/
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
