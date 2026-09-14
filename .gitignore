@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+.AppData*
+
+# R session state
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+*.Rproj
+
+# Knitr / rmarkdown intermediates
+*_cache/
+*_files/
+*.knit.md
+*.utf8.md
+
+# ABC intermediates - large, regenerable from the simulation scripts.
+# The posterior tables under */output/ ARE tracked: they are the analysis
+# products the figures are built from.
+data/Drift_ABC*/sim.file.*
+data/Drift_ABC*/params_and_sumstats.*
+data/Drift_ABC*/abc.file.*
+
+# Large processed data objects - hosted on Zenodo, fetched by download_data.R.
+# The list of record is data/zenodo_manifest.csv (which IS tracked).
+data/mito_data.Rds
+data/mito_data_foetal.Rds
+data/whole_genome_coverage_pileup_and_bedtools_annotated.csv
+data/nonblood/mito_mutation_data_*.RDS
+data/colony_drift_simulations/model*_res.Rds
+
+# Staging directory for a Zenodo upload
+zenodo_upload/
