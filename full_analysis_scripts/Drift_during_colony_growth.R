@@ -10,7 +10,7 @@
 
 setwd("~/R_work/mito_mutations_blood/")
 save_dir<-"data/colony_drift_simulations/"
-plots_dir<-"rebuttal_plots/"
+plots_dir<-"plots/additional_plots/"
 CORES=5
 
 library(dplyr)

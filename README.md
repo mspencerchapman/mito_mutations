@@ -46,8 +46,61 @@ Rscript generate_figures/Generate_Fig4.R
 | `full_analysis_scripts/` | Full analyses behind each figure: compilation, drift, selection, signatures |
 | `simulation_scripts_for_ABCs/` | Forward simulations and approximate Bayesian computation for drift inference |
 | `mtDNA_mutation_calling_pipeline/` | Upstream variant calling (shearwater, coverage, haplotype assignment) |
-| `*.Rmd` | Narrative analysis notebooks with rendered `.html` output |
-| `figures/`, `plots/`, `tables/` | Generated outputs |
+| `*.Rmd` | Narrative analysis notebooks with rendered `.html` output (see **Start here**) |
+| `plots/`, `tables/` | Generated outputs. `plots/Figure_NN/` and `plots/Extended_Data_Figure_NN/` hold figure panels; `plots/additional_plots/` holds exploratory output that is not in the manuscript |
+
+---
+
+## Start here: the analysis notebooks
+
+If you want to understand what the analysis does rather than regenerate a
+specific figure, read the R Markdown notebooks first. They walk through the main
+mutation analyses in order, with the reasoning written out alongside the code,
+and each has a rendered `.html` you can read without running anything:
+
+| Notebook | Covers |
+|---|---|
+| `mtDNA_mutations_blood.Rmd` | Coverage and copy number, mutation calling and filtering, burden with age, mutational signatures - the normal haematopoiesis dataset |
+| `mtDNA_mutations_comparator_tissues.Rmd` | The same for the cross-tissue cohorts, plus tissue comparisons and heteroplasmic oocyte mutations |
+| `Mitochondrial_drift_analysis.Rmd` | Drift inference from VAF distributions with age |
+| `Nonblood_mtDNA_drift_analysis.Rmd` | Drift and homoplasmy across tissues |
+| `mtDNA_mut_phasing.Rmd` | Phasing of mtDNA mutations |
+
+**These notebooks do not cover everything.** The ABC inference of drift rates
+through phylogenies, the dN/dS selection analysis, the mutational signature
+extraction itself, and the simulation work all live in the script folders below.
+The notebooks are the readable entry point, not the complete record.
+
+---
+
+## Run order
+
+Nothing needs to run in a fixed order to regenerate a *figure* - each
+`generate_figures/` script is self-contained and reads the deposited data. The
+ordering below matters only if you are rebuilding from scratch.
+
+```
+1. Rscript install_dependencies.R          # once
+2. Rscript download_data.R                 # once, fetches the processed data
+3. (optional) full_analysis_scripts/Compile_*.R
+                                           # rebuilds the processed data objects
+                                           # from raw calls - NOT needed if you
+                                           # downloaded them in step 2
+4. simulation_scripts_for_ABCs/Mitochondrial_drift_through_tree_ABC_SEQ_local.R
+                                           # ABC drift inference, one run per
+                                           # cohort; writes posterior tables
+5. Rscript generate_figures/Generate_Fig1.R    ... Generate_Fig6.R
+   Rscript generate_figures/Generate_ExtData_Fig1.R ... Generate_ExtData_Fig12.R
+```
+
+Only step 5 is needed to reproduce the figures from the deposited data. Steps 3
+and 4 regenerate their own inputs and take considerably longer - the ABC is
+roughly 35 minutes per cohort.
+
+Two figure scripts depend on ABC output that is already included in the
+repository (`data/Drift_ABC_clonal_expansions/`), so step 4 is only necessary if
+you want to re-run the inference itself: `Generate_Fig6.R` (panel e) and
+`Generate_ExtData_Fig12.R`.
 
 ---
 
@@ -106,7 +159,7 @@ mutation (default 2e4, as published), `-j` single mutation index, `-c` cores,
 restarts.
 
 Posteriors are written to `data/Drift_ABC_<cohort>/output/posterior_table_<mut>.Rds`.
-`Plot_drift_seq_ABC_results.R` renders them, skipping any cohort not yet run.
+`full_analysis_scripts/Plot_drift_seq_ABC_results.R` renders them, skipping any cohort not yet run.
 
 The cohorts differ in three parameters that are **not interchangeable** - tree
 time units, heteroplasmy detection threshold, and where the phylogeny is stored.

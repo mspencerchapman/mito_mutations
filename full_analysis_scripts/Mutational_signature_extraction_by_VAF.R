@@ -307,9 +307,9 @@ sigs_2<-mitochondrial_extracted_signature_plot(components_SP[5:7,])
 real_sig<-mitochondrial_extracted_signature_plot(components_SP[1,])
 
 comb_sig<-gridExtra::arrangeGrob(grobs=list(sigs_1,sigs_2),ncol=2)
-ggsave(filename = paste0(root_dir,"/rebuttal_plots/SigProfiler_sigs.pdf"),plot = comb_sig,width=7,height=3)
+ggsave(filename = paste0(root_dir,"/plots/additional_plots/SigProfiler_sigs.pdf"),plot = comb_sig,width=7,height=3)
 
-pdf(file=paste0(root_dir,"/rebuttal_plots/HDP_vs_SigProfiler_cosine_sim.pdf"),height=3,width=3)
+pdf(file=paste0(root_dir,"/plots/additional_plots/HDP_vs_SigProfiler_cosine_sim.pdf"),height=3,width=3)
 pheatmap(MutationalPatterns::cos_sim_matrix(mut_matrix1 = t(components),mut_matrix2 = t(components_SP)),cluster_rows = F,cluster_cols = F,scale = "none")
 dev.off()
 
@@ -347,7 +347,7 @@ mito_sigs_plot_SP<-t(cbind(exposures_SP,excluded_mat))%>%
   facet_wrap(~exp_ID,ncol=6)+
   labs(x="VAF range",y="Number of mutations assigned")
 
-ggsave(filename = paste0(root_dir,"/rebuttal_plots/SigProfiler_contributions_by_VAF_bin.pdf"),plot = mito_sigs_plot_SP,width=7,height=3.5)
+ggsave(filename = paste0(root_dir,"/plots/additional_plots/SigProfiler_contributions_by_VAF_bin.pdf"),plot = mito_sigs_plot_SP,width=7,height=3.5)
 
 #Compare the numbers of 'real' mutations in each bin between SigProfiler & HDP
 muts_per_bin_per_sample_SP<-t(cbind(exposures_SP,excluded_mat))%>%
@@ -374,7 +374,7 @@ HDP_Sigprofiler_correlation<-bind_rows(muts_per_bin_per_sample_SP%>%filter(Signa
   ggpmisc::stat_poly_eq(ggpmisc::use_label("eq"))
   
 
-ggsave(filename = paste0(root_dir,"/rebuttal_plots/HDP_Sigprofiler_correlation.pdf"),plot = HDP_Sigprofiler_correlation,width=2.5,height=2)
+ggsave(filename = paste0(root_dir,"/plots/additional_plots/HDP_Sigprofiler_correlation.pdf"),plot = HDP_Sigprofiler_correlation,width=2.5,height=2)
 
 
 ##----------------PRODUCE THE 'ML_Sig' MATRIX----------------

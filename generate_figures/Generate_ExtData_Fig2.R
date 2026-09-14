@@ -222,7 +222,7 @@ if(file.exists(mito_cn_phylo_file)) {
 # In vitro clonal expansion perturbs mtDNA copy number, so bulk-sorted HSC
 # (CD34+CD38-) and HPC (CD34+CD38+) populations were sequenced at low coverage to
 # measure copy number in unmanipulated cells. Panel code from
-# mitoCN_bulkbloodpops.R.
+# full_analysis_scripts/mitoCN_bulkbloodpops.R.
 #
 # NB that script reads "data/mitoCN_metadata.csv"; the file is actually
 # MitoCN_metadata.csv, which works only on a case-insensitive filesystem.

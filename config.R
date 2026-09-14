@@ -35,6 +35,12 @@ data_dir   <- file.path(root_dir, "data")
 plots_dir  <- file.path(root_dir, "plots")
 tables_dir <- file.path(root_dir, "tables")
 
+# Plots that do not appear in the manuscript figures - exploratory output, and
+# analyses produced during review.
+rebuttal_figs_dir <- file.path(plots_dir, "additional_plots")
+dir.create(rebuttal_figs_dir, showWarnings = FALSE, recursive = TRUE)
+rebuttal_figs_dir <- paste0(rebuttal_figs_dir, "/")
+
 # Frequently used data files
 mito_data_file      <- file.path(data_dir, "mito_data.Rds")             # blood / normal haematopoiesis
 nonblood_dir        <- file.path(data_dir, "nonblood")                  # per-cohort cross-tissue data

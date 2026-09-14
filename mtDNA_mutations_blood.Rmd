@@ -52,7 +52,7 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 figures_dir=paste0(root_dir,"/figures/")
 plots_dir=paste0(root_dir,"/plots/")
-rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -233,7 +233,7 @@ mito_cn_by_pheno<-mito_cn%>%
         legend.key.size = unit(0,"mm"),
         legend.position="right")
 mito_cn_by_pheno
-ggsave(filename=paste0(figures_dir,"Additional_plots/mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
+ggsave(filename=paste0(figures_dir,"additional_plots/mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
 ```
 
 

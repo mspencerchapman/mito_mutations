@@ -39,7 +39,7 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 figures_dir=paste0(root_dir,"/figures/")
-rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Set the basic plotting theme for ggplot2
 my_theme<-theme(text = element_text(family="Helvetica"),
@@ -186,7 +186,7 @@ mito_cn_by_pheno<-mito_cn%>%
         strip.text.x = element_text(size=7,margin = unit(c(1,0,1,0),"mm")),
         legend.key.size = unit(0,"mm"),
         legend.position="right")
-ggsave(filename=paste0(figures_dir,"Additional_plots/mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
+ggsave(filename=paste0(figures_dir,"additional_plots/mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
 
 mito_cn_by_pheno_all_HSCprog<-mito_cn%>%
   filter(!is.na(Phenotype))%>%

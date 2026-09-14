@@ -15,7 +15,7 @@ my_theme<-theme(text = element_text(family="Helvetica"),
 
 
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
-plots_dir=paste0(root_dir,"/rebuttal_plots/")
+plots_dir=paste0(root_dir,"/plots/additional_plots/")
 mitoCN_metadata<-readr::read_csv(paste0(root_dir,"/data/mitoCN_metadata.csv"),col_select = 1:5)
 table(mitoCN_metadata$`Cell type`)
 #Import the mitochondrial copy number data

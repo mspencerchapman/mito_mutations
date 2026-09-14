@@ -118,7 +118,7 @@ posterior_probability_cumsum<-data.frame(log_generation_time=as.numeric(names(co
 #Using this plot estimate posterior intervals as:
 #1.05 - 1.45, max posterior density = 1.25
 
-ggsave(filename = paste0(figures_dir,"Additional_plots/Drift_ABC2_posterior_probability_cumsum.pdf"),posterior_probability_cumsum,width = 2,height=1.5)
+ggsave(filename = paste0(figures_dir,"additional_plots/Drift_ABC2_posterior_probability_cumsum.pdf"),posterior_probability_cumsum,width = 2,height=1.5)
 
 
 

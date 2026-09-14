@@ -45,7 +45,7 @@ treemut_dir="~/Mounts/Lustre2/fetal_HSC/treemut"
 sapply(R_function_files[-2],source)
 setwd(treemut_dir); source("treemut.R"); setwd(my_working_directory)
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
-plots_dir=paste0(root_dir,"/rebuttal_plots/")
+plots_dir=paste0(root_dir,"/plots/additional_plots/")
 
 #Import the mitochondrial copy number data
 mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)

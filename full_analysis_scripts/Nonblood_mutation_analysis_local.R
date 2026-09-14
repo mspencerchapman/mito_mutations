@@ -19,7 +19,7 @@ ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
 figures_dir=paste0(root_dir,"/figures/")
-rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 plots_dir=rebuttal_figs_dir
 
 #Set the basic plotting theme for ggplot2

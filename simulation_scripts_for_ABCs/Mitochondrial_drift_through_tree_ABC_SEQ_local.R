@@ -137,7 +137,7 @@ out_subdir=if(opt$abc_type=="individual") config$out_subdir_individual else conf
 abc_output_dir=if(nchar(opt$out_dir)) path.expand(opt$out_dir) else paste0(root_dir,"/data/",out_subdir,"/")
 if(!grepl("/$",abc_output_dir)) {abc_output_dir<-paste0(abc_output_dir,"/")}
 
-# Layout expected by Plot_drift_seq_ABC_results.R: an "abc_muts" csv in the ABC
+# Layout expected by full_analysis_scripts/Plot_drift_seq_ABC_results.R: an "abc_muts" csv in the ABC
 # directory, posteriors under output/, figures under plots/.
 dir.create(abc_output_dir,showWarnings=FALSE,recursive=TRUE)
 dir.create(paste0(abc_output_dir,"output"),showWarnings=FALSE)
@@ -428,7 +428,7 @@ for(j in j_to_run) {
   # Posterior table
   #
   # This is the file the original _combine_sumstats.R wrote and that
-  # Plot_drift_seq_ABC_results.R reads. Its format is pinned by how the original
+  # full_analysis_scripts/Plot_drift_seq_ABC_results.R reads. Its format is pinned by how the original
   # script read it back in as a prior: it needs log_generation_time, plus
   # starting_vaf and generation_time for plotting.
   #-----------------------------------------------------------------------------

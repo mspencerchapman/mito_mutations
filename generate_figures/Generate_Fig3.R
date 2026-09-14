@@ -51,7 +51,7 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 plots_dir=paste0(root_dir,"/plots/")
-rebuttal_figs_dir=paste0(root_dir,"/rebuttal_plots/")
+rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Create the figure output directories if they do not already exist
 for(d in c("Figure_03")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
