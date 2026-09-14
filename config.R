@@ -78,7 +78,9 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 
   # Larger variant for the R Markdown notebooks. Their figures are read on
   # screen rather than printed at panel size, so the manuscript's 5-8 pt text is
-  # too small to be legible. Roughly 1.5x throughout.
+  # too small to be legible. Text is scaled by markdown_plot_scale throughout,
+  # and save_plot()/save_pdf() scale saved dimensions by the same factor so that
+  # the text-to-panel ratio matches the manuscript version.
   my_markdown_theme <- theme(text = element_text(family = "Helvetica"),
                              axis.text = element_text(size = 8),
                              axis.title = element_text(size = 10),
@@ -114,14 +116,25 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 
 save_plots <- FALSE
 
+# How much larger notebook figures are than the manuscript panels
+markdown_plot_scale <- 1.5
+
 #' Output directory for one notebook's plots
 notebook_plots_dir <- function(notebook) paste0(plots_dir, "notebook_output/", notebook, "/")
 
 #' ggsave(), honouring save_plots and creating the directory if needed
-save_plot <- function(filename, ...) {
+save_plot <- function(filename, ..., width = NULL, height = NULL) {
   if (!isTRUE(save_plots)) return(invisible(NULL))
   dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
-  ggplot2::ggsave(filename = filename, ...)
+  # The notebooks draw with my_markdown_theme, whose text is markdown_plot_scale
+  # times the manuscript size. Scale the requested dimensions to match, or the
+  # labels would be too large for the panel.
+  # Build the argument list rather than passing width/height through directly:
+  # ggsave() errors on an explicit NULL, so an unsized call must omit them.
+  args <- list(filename = filename, ...)
+  if (!is.null(width))  args$width  <- width  * markdown_plot_scale
+  if (!is.null(height)) args$height <- height * markdown_plot_scale
+  do.call(ggplot2::ggsave, args)
 }
 
 #' gganimate::anim_save(), honouring save_plots
@@ -135,10 +148,14 @@ save_anim <- function(filename, ...) {
 #'
 #' When saving is off the device is opened on the null file, so that the plotting
 #' calls and the matching dev.off() that follow still work unchanged.
-save_pdf <- function(file, ...) {
-  if (!isTRUE(save_plots)) return(invisible(grDevices::pdf(file = nullfile(), ...)))
+save_pdf <- function(file, ..., width = NULL, height = NULL) {
+  scaled <- list(...)
+  if (!is.null(width))  scaled$width  <- width  * markdown_plot_scale
+  if (!is.null(height)) scaled$height <- height * markdown_plot_scale
+  if (!isTRUE(save_plots))
+    return(invisible(do.call(grDevices::pdf, c(list(file = nullfile()), scaled))))
   dir.create(dirname(file), showWarnings = FALSE, recursive = TRUE)
-  grDevices::pdf(file = file, ...)
+  do.call(grDevices::pdf, c(list(file = file), scaled))
 }
 
 #-----------------------------------------------------------------------------------#
