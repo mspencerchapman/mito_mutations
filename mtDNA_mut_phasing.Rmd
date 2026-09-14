@@ -273,7 +273,7 @@ build_mito_haplotype_tree=function(tree=NULL,muts,vaf_mat,phasing_mat) {
 
 # Run the function over all the mutation data using the above functions
 
-```{r run_mut_phasing_function,fig.height=22.5,fig.width=7.5}
+```{r run_mut_phasing_function,fig.height=15,fig.width=5}
 temp=lapply(all_cohorts_plus_CML,function(cohort) {
   cat(cohort,sep="\n")
   dataset_mito_data<-all_mito_datasets[[cohort]]

@@ -113,7 +113,7 @@ head(real_muts_dist_df)
 ```
 
 
-```{r fig.width=12,fig.height=6}
+```{r fig.width=8,fig.height=4}
 real_mut_distribution_plot<-real_muts_dist_df%>%
   ggplot(aes(x=VAF_range,y=abs_muts))+
   geom_bar(stat="identity",fill="#FDBF6F",col="black",linewidth=0.25)+
@@ -130,7 +130,7 @@ real_mut_distribution_plot+my_markdown_theme+theme(strip.text.x = element_text(s
 
 Normalize mutation numbers by the number of samples included.
 
-```{r fig.width=12,fig.height=6}
+```{r fig.width=8,fig.height=4}
 nsamp_df<-Map(list=mito_data,Exp_ID=names(mito_data),function(list,Exp_ID) {
   data.frame(exp_ID=Exp_ID,n_samp=length(colnames(list$matrices$SW)))
 })%>%dplyr::bind_rows()%>%
@@ -230,7 +230,7 @@ gens_record$VAF_group=sapply(1:nrow(gens_record),function(i) {
 
 Visualize the distribution at a selection of "generations" to get a sense of the evolution of the distribution through time
 
-```{r fig.width=10.5,fig.height=3.8}
+```{r fig.width=7,fig.height=2.5}
 modelled_VAF_dist<-gens_record%>%
   filter(total_gens%in%c(100,200,400,800,1200))%>%
   mutate(total_gens=factor(paste(total_gens,"generations"),levels=paste(c(100,200,400,800,1200),"generations")))%>%
@@ -250,7 +250,7 @@ save_plot(filename=paste0(figures_dir,"Modelled_VAF_dist.pdf"),modelled_VAF_dist
 
 How many 'high VAF' (>50%) mutaitons are there depending on the generation?
 
-```{r fig.width=4.5,fig.height=3.8}
+```{r fig.width=3,fig.height=2.5}
 gens_record%>%
   filter(VAF_group==">50%")%>%
   #mutate(total_gens=factor(total_gens,levels=seq(10,1500,10)))%>%
@@ -267,7 +267,7 @@ gens_record%>%
 One notable feature is that these simulations suggest that high VAF mutations were acquired early in life.
 Conversely, low VAF mutations were invariably acquired very recently.
 
-```{r fig.width=7.5,fig.height=6}
+```{r fig.width=5,fig.height=4}
 acquisition_time_by_VAF<-gens_record%>%
   mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels))%>%
   filter(total_gens==1250)%>%
@@ -283,7 +283,7 @@ save_plot(filename = paste0(figures_dir,"Acquisition_time_by_VAF.pdf"),acquisiti
 ```
 
 Plot same data but as a ridges plot.
-```{r fig.width=7.5,fig.height=6}
+```{r fig.width=5,fig.height=4}
 acquisition_time_by_VAF_ridges<-gens_record%>%
   mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels))%>%
   filter(total_gens==1250)%>%
@@ -302,7 +302,7 @@ save_plot(filename = paste0(figures_dir,"acquisition_time_by_VAF_ridges.pdf"),ac
 
 Can also be informative to visualize the evolving distribution over time as an animation.
 
-```{r fig.width=7.5,fig.height=6}
+```{r fig.width=5,fig.height=4}
 gens_record_summary<-gens_record%>%
   group_by(total_gens,gen,VAF_group)%>%
   summarise(n=n(),.groups = "drop_last")
@@ -327,7 +327,7 @@ save_anim(filename=paste0(rebuttal_figs_dir,"driftwithage.gif"),animation = anim
 ```
 
 Plot the colour scale for these figures.
-```{r fig.width=1.5,fig.height=3.8}
+```{r fig.width=1,fig.height=2.5}
 max_gen=1500
 lut=colorRampPalette(RColorBrewer::brewer.pal(8,"Spectral"))(max_gen)
 scale = (length(lut)-1)
@@ -371,7 +371,7 @@ abc_res_df<-lapply(1:nrow(sumstats.data),function(i) {
 ```
 
 
-```{r fig.width=7.5,fig.height=6}
+```{r fig.width=5,fig.height=4}
 abc_res_plot_mut_rate<-abc_res_df%>%
   filter(Age>=0)%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
@@ -422,7 +422,7 @@ mtDNA_CN*365/confint(lme.gens_by_age)["Age",]
 ```
 
 Plot these results.
-```{r fig.width=7.5,fig.height=6}
+```{r fig.width=5,fig.height=4}
 abc_res_plot_total_generations<-abc_res_df%>%
   dplyr::filter(!exp_ID%in%c("8pcw","18pcw"))%>%
   mutate(exp_ID=factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]))%>%
@@ -516,7 +516,7 @@ df_tidy_syn_noncoding_only<-df_tidy_annotated%>%filter(impact=="Synonymous"|impa
 Visualize the distribution of these.
 Note that this is visually a simlar shape to the distributions from all the mutations, but with lower absolute mutations per cell.
 
-```{r fig.width=12,fig.height=6}
+```{r fig.width=8,fig.height=4}
 syn_muts_distribution_df<-lapply(names(mito_data),function(this_exp_ID) {
   #print(this_exp_ID)
   exp_bins<-lapply(1:length(bins),function(i) {
@@ -593,7 +593,7 @@ head(abc_syn_res_df)
 
 The "synonymous/ non-coding" mutation rates look similar but ~half of the rate with the full mutation set (as expected given this is only ~50% of the mutations).
 
-```{r fig.width=7.5,fig.height=6}
+```{r fig.width=5,fig.height=4}
 abc_synres_plot_mut_rate<-abc_syn_res_df%>%
   filter(Age>=0)%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
@@ -642,7 +642,7 @@ mtDNA_CN*365/confint(lme.gens_by_age.syn)["Age",]
 
 Plot these results.
 
-```{r fig.width=7.5,fig.height=6}
+```{r fig.width=5,fig.height=4}
 abc_synres_plot_total_generations<-abc_syn_res_df%>%
   dplyr::filter(!exp_ID%in%c("8pcw","18pcw"))%>%
   mutate(exp_ID=factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]))%>%
@@ -676,7 +676,7 @@ save_plot(filename=paste0(figures_dir,"abc_synres_plot_total_generations.pdf"),a
 This shows that the estimates are very similar with highly overlapping confidence intervals.
 Interestingly, despite being a smaller dataset, the non-coding mutation set has narrower confidence intervals and slightly lower drift parameter estimates - though clearly this is not statistically significant.
 
-```{r fig.width=3.8,fig.height=4.5}
+```{r fig.width=2.5,fig.height=3}
 lme.syn.CIs<-mtDNA_CN*365/confint(lme.gens_by_age.syn)["Age",]
 lme.full.CIs<-mtDNA_CN*365/confint(lme.gens_by_age)["Age",]
 

@@ -57,6 +57,13 @@ functions_file      <- file.path(data_dir, "mito_mutations_blood_functions.R")
 
 genomeFile <- path.expand(genomeFile)
 
+# How much larger the notebook theme's text is than the manuscript panels.
+# Also applied to the dimensions of anything the notebooks save, so that saved
+# files keep the same text-to-panel ratio. NOT applied to chunk figure sizes:
+# a figure wider than the html container is scaled down to fit, which would
+# shrink the text again and cancel the effect out.
+markdown_plot_scale <- 2
+
 #-----------------------------------------------------------------------------------#
 # 3. SHARED PLOTTING THEME
 #
@@ -81,16 +88,18 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   # too small to be legible. Text is scaled by markdown_plot_scale throughout,
   # and save_plot()/save_pdf() scale saved dimensions by the same factor so that
   # the text-to-panel ratio matches the manuscript version.
+  .s <- markdown_plot_scale
   my_markdown_theme <- theme(text = element_text(family = "Helvetica"),
-                             axis.text = element_text(size = 8),
-                             axis.title = element_text(size = 10),
-                             legend.text = element_text(size = 8),
-                             legend.title = element_text(size = 10),
-                             strip.text = element_text(size = 11),
-                             legend.spacing = unit(1.2, "mm"),
-                             legend.key.size = unit(7, "mm")) +
-    theme(legend.key.height = unit(4, "mm"),
-          legend.title = element_text(size = 10))
+                             axis.text = element_text(size = 5 * .s),
+                             axis.title = element_text(size = 7 * .s),
+                             legend.text = element_text(size = 5 * .s),
+                             legend.title = element_text(size = 7 * .s),
+                             strip.text = element_text(size = 7 * .s),
+                             legend.spacing = unit(1 * .s, "mm"),
+                             legend.key.size = unit(5 * .s, "mm")) +
+    theme(legend.key.height = unit(3 * .s, "mm"),
+          legend.title = element_text(size = 8 * .s))
+  rm(.s)
 
   # Default figure size for notebook chunks that do not set their own. Call
   # set_markdown_figure_defaults() from a notebook's setup chunk.
@@ -115,9 +124,6 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 #-----------------------------------------------------------------------------------#
 
 save_plots <- FALSE
-
-# How much larger notebook figures are than the manuscript panels
-markdown_plot_scale <- 1.5
 
 #' Output directory for one notebook's plots
 notebook_plots_dir <- function(notebook) paste0(plots_dir, "notebook_output/", notebook, "/")
