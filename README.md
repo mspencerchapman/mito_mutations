@@ -43,7 +43,7 @@ Rscript generate_figures/Generate_Fig4.R
 |---|---|
 | `data/` | Processed mutation calls, phylogenies, metadata and ABC posteriors (see **Data**) |
 | `generate_figures/` | One script per manuscript figure - the entry point for reproducing results |
-| `full_analysis_scripts/` | Full analyses behind each figure: compilation, drift, selection, signatures |
+| `full_analysis_scripts/` | Full analyses behind each figure: compilation, drift, selection, signatures. `archive/` holds superseded versions, kept for provenance only |
 | `simulation_scripts_for_ABCs/` | Forward simulations and approximate Bayesian computation for drift inference |
 | `mtDNA_mutation_calling_pipeline/` | Upstream variant calling (shearwater, coverage, haplotype assignment) |
 | `*.Rmd` | Narrative analysis notebooks with rendered `.html` output (see **Start here**) |
