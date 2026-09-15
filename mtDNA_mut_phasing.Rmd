@@ -321,7 +321,9 @@ temp=lapply(all_cohorts_plus_CML,function(cohort) {
     plot(tree,show.node.label=T,cex=0.3)
     
     #Now save it for later scrutiny
-    save_pdf(tree_pdf_path,height=15,width=4)
+    #scale=FALSE: these are base-R tree plots written as analysis output, not
+    #notebook figures, so they keep their intended 4 x 15 inch page.
+    save_pdf(tree_pdf_path,height=15,width=4,scale=FALSE)
     plot(tree,show.node.label=T,cex=0.3)
     dev.off()
     

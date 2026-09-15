@@ -160,10 +160,15 @@ save_anim <- function(filename, ...) {
 #'
 #' When saving is off the device is opened on the null file, so that the plotting
 #' calls and the matching dev.off() that follow still work unchanged.
-save_pdf <- function(file, ..., width = NULL, height = NULL) {
+#' @param scale whether to enlarge the dimensions by markdown_plot_scale. Right
+#'   for ggplot output, whose theme text is enlarged to match; wrong for base-R
+#'   and grid graphics, whose text is fixed in points, so a larger canvas only
+#'   makes the text smaller relative to the page. Pass scale = FALSE for those.
+save_pdf <- function(file, ..., width = NULL, height = NULL, scale = TRUE) {
   scaled <- list(...)
-  if (!is.null(width))  scaled$width  <- width  * markdown_plot_scale
-  if (!is.null(height)) scaled$height <- height * markdown_plot_scale
+  factor <- if (isTRUE(scale)) markdown_plot_scale else 1
+  if (!is.null(width))  scaled$width  <- width  * factor
+  if (!is.null(height)) scaled$height <- height * factor
   if (!isTRUE(save_plots))
     return(invisible(do.call(grDevices::pdf, c(list(file = nullfile()), scaled))))
   dir.create(dirname(file), showWarnings = FALSE, recursive = TRUE)
