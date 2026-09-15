@@ -437,9 +437,9 @@ mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(nb.cols)
 max_dnds_value<-1.5
 stats_to_include=c("Overall")
 global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[-1] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]))%>%
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[-1]))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
@@ -535,7 +535,7 @@ selcv_res_by_dichotomous_vaf<-Map(dndsout=dndscv_by_dichotomous_vaf_blood,VAF_bi
 dnds_heatmap_by_dichotomous_vaf_by_gene<-selcv_res_by_dichotomous_vaf%>%
   mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(round(dNdS,2),"*"),""),
          gene_name=factor(gene_name,levels=rev(gene_order)))%>%
-  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)])%>%
+  filter(VAF_group%in%VAF_groups$labels[-1])%>%
   dplyr::filter(type=="Missense")%>%
   ggplot(aes(y=gene_name,x=VAF_group,fill=pmin(dNdS,2),label=dnds_if_signif))+
   geom_tile()+
@@ -615,9 +615,9 @@ rename_mut_status_vec=c("Clonal\nexpansion","Singleton")
 names(rename_mut_status_vec)<-c("mut","wt")
 
 global_dnds_by_expansion_status_dichotomous_VAF_plot<-global_dnds_by_expansion_status%>%
-  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[-1] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[-1]),
          mut_status=rename_mut_status_vec[mut_status])%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +

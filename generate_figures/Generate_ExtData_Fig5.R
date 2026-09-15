@@ -284,9 +284,9 @@ globaldnds_res_by_vaf<-Map(dndsout=dndscv_by_vaf_blood,VAF_bin=new_VAF_groups,fu
 max_dnds_value<-1.5
 stats_to_include=c("Overall")
 global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[-1] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]))%>%
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[-1]))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
@@ -306,9 +306,9 @@ global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
 max_dnds_value<-2
 stats_to_include=c("Truncating","Missense")
 global_dnds_bytype_by_vaf_plot<-globaldnds_res_by_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[-1] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]))%>%
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[-1]))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_linerange(position= position_dodge2(width=0.5), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.5), size = 1.5) +
@@ -328,9 +328,9 @@ global_dnds_bytype_by_vaf_plot<-globaldnds_res_by_vaf%>%
 max_dnds_value<-1.5
 stats_to_include=c("Missense")
 global_dnds_missense_by_vaf_plot<-globaldnds_res_by_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[-1] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]))%>%
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[-1]))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
@@ -701,9 +701,9 @@ mycolors <- colorRampPalette(ggsci::pal_lancet(palette = "lanonc")(9))(3)
 max_dnds_value<-5
 stats_to_include=c("Overall")
 global_dnds_by_tissue_and_vaf_plot<-globaldnds_res_by_tissue_and_vaf%>%
-  filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
+  filter(VAF_group%in%VAF_groups$labels[-1] & name%in%stats_to_include)%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
-         VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
+         VAF_group=factor(VAF_group,levels=VAF_groups$labels[-1]),
          tissue=factor(name_conversion_vec[tissue],levels=name_conversion_vec))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
   geom_hline(yintercept=1, linetype='dashed', col = 'black', linewidth = 0.5) +
