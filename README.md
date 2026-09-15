@@ -165,8 +165,11 @@ Seurat version recorded in [`SESSIONINFO.md`](SESSIONINFO.md) (5.5.1).
 `FindClusters()` fails inside `GroupSingletons()` (`sample.int`: "invalid first
 argument"). Setting `group.singletons=FALSE` avoids the error but returns a
 single cluster containing every colony, so the panel cannot be reproduced by
-forcing it through. The panel was originally produced in 2021-2022, so Seurat
-4.x is the version to try (the exact patch version was not recorded).
+forcing it through. The panel was originally produced in 2021-2022, under Seurat
+4.x. Note that installing Seurat 4.x is not straightforward on a current system:
+under R 4.6 its dependencies install but SeuratObject 4.1.4 and Seurat 4.4.0
+themselves fail to build, so reproducing this panel needs an R and Seurat of that
+period together - for example in a container - rather than just an older Seurat.
 Extended Data Fig. 11 is a flow-sorting schematic and has no code.
 
 ---
