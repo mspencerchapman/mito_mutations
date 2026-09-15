@@ -21,7 +21,7 @@ cran_packages <- c(
   # modelling / inference
   "lme4","lmerTest","abc","VGAM","lsa",
   # utilities
-  "optparse","ids","devtools","BiocManager"
+  "optparse","ids","devtools","remotes","BiocManager"
 )
 
 bioc_packages <- c(
@@ -43,22 +43,36 @@ github_packages <- c(
   hdp       = "NickWilliamsSanger/hdp"        # mutational signature extraction (fork that builds on modern R)
 )
 
+# Returns the packages that are still missing after attempting installation, so
+# the caller can report them. Without this the failures are silent and the
+# script claims success while leaving dependencies uninstalled.
 install_if_missing <- function(pkgs, installer) {
   missing <- pkgs[!pkgs %in% rownames(installed.packages())]
-  if (!length(missing)) { cat("  all present\n"); return(invisible(NULL)) }
+  if (!length(missing)) { cat("  all present\n"); return(invisible(character(0))) }
   cat("  installing:", paste(missing, collapse = ", "), "\n")
   for (p in missing) try(installer(p))
+  still_missing <- pkgs[!pkgs %in% rownames(installed.packages())]
+  invisible(still_missing)
 }
 
 cat("CRAN packages:\n")
-install_if_missing(cran_packages, function(p) install.packages(p, repos = "https://cloud.r-project.org"))
+failed <- install_if_missing(cran_packages, function(p) install.packages(p, repos = "https://cloud.r-project.org"))
 
 cat("Bioconductor packages:\n")
 if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager", repos = "https://cloud.r-project.org")
-install_if_missing(bioc_packages, function(p) BiocManager::install(p, ask = FALSE, update = FALSE))
+failed <- c(failed, install_if_missing(bioc_packages, function(p) BiocManager::install(p, ask = FALSE, update = FALSE)))
 
 cat("GitHub packages:\n")
-if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools", repos = "https://cloud.r-project.org")
-install_if_missing(names(github_packages), function(p) devtools::install_github(github_packages[[p]]))
+# remotes, not devtools: install_github() lives in remotes, and current devtools
+# only Suggests it, so devtools alone errors with 'The package "remotes" is required'.
+if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes", repos = "https://cloud.r-project.org")
+failed <- c(failed, install_if_missing(names(github_packages),
+                                       function(p) remotes::install_github(github_packages[[p]])))
+
+if (length(failed)) {
+  cat("\nFAILED to install:", paste(failed, collapse = ", "), "\n")
+  cat("Re-run this script, or install these manually, before running the analysis.\n")
+  quit(status = 1)
+}
 
 cat("\nDone. Run sessionInfo() to record your versions.\n")
