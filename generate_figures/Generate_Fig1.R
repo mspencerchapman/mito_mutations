@@ -35,26 +35,17 @@ options(stringsAsFactors = F)
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
+#geom_jitter() displaces points at random, so fix the seed to make the saved
+#panels reproducible between runs.
+set.seed(42)
+
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-plots_dir=paste0(root_dir,"/plots/")
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 
 #Create the figure output directories if they do not already exist
 for(d in c("Figure_01")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
-
-#Set the basic plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
 
 #Read in the mitochondrial copy number data
 mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
@@ -94,7 +85,6 @@ exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_567_A_C","MT_574_A_C","MT_16181_A_C
 convert_vec=c("HSC","HSC","HPC","HPC","HPC","HPC")
 names(convert_vec)=c("H","HSC","C","M","HSPC","Progenitor")
 
-
 Individual_means_df<-mito_cn%>%
   mutate(Cell_type=convert_vec[Cell_type])%>%
   filter(Sample%in%unlist(lapply(mito_data,function(list) list$tree$tip.label))&
@@ -112,6 +102,9 @@ studies_to_include=ref_df$Canapps.project
 #-----------------------------------------------------------------------------------#
 
 #Colour points by the colony phenotype
+#Defined before first use below - the phenotype colours are built from it.
+pheno_levels=c("Ery","EryMy","Gran","MyGran","MyMono","Mono","NKMy")
+
 phenotype_cols=c("red",RColorBrewer::brewer.pal(n=length(pheno_levels)-1,name = "Set2"),"darkgray") #Make the erythroid red, and 'unknown' dark grey
 names(phenotype_cols)<-c(pheno_levels,"Unknown")
 mtDNA.copy.number.logscale.by.phenotype<-mito_cn%>%
@@ -159,7 +152,6 @@ mtDNA_by_pheno_summary<-mito_cn%>%
 readr::write_csv(x=mtDNA_by_pheno_summary,file=paste0(root_dir,"/tables/Supplementary_table3.csv"))
 
 #Review the average copy number of colonies with different phenotypes relative to the average copy number of erythroid colonies
-pheno_levels=c("Ery","EryMy","Gran","MyGran","MyMono","Mono","NKMy")
 mtDNA_by_pheno_and_ID_summary%>%
   dplyr::select(-n)%>%
   pivot_wider(id_cols=c("exp_ID"),names_from="Phenotype",values_from="median_mtDNA_genomes")%>%
@@ -230,7 +222,6 @@ df_tidy<-df_tidy%>%
   mutate(implied_mut_CN=vaf*bedtools_mtDNA_genomes)%>%
   dplyr::filter(!(mut_ref%in%CN_correlating_muts & implied_mut_CN<=mutCN_cutoff))
 
-
 ## ----------------------Sum of VAF mutation burden measures----------------------
 
 sum_of_vaf_df<-Map(list=mito_data,Exp_ID=names(mito_data),function(list,Exp_ID){
@@ -255,7 +246,6 @@ sum_of_vaf_summary<-sum_of_vaf_df%>%
   mutate(exp_ID=gsub("8 pcw","8pcw",exp_ID))%>%
   group_by(exp_ID)%>%
   summarise(mean=mean(sum_of_vaf,na.rm=T),median=median(sum_of_vaf,na.rm = T))
-
 
 sum_of_vaf_plot_log<-sum_of_vaf_df%>%
   mutate(exp_ID=gsub("8 pcw","8pcw",exp_ID))%>%
@@ -301,13 +291,24 @@ ggsave(filename = paste0(plots_dir,"Figure_01/Fig1c.sum_of_vaf_log_by_celltype.p
 
 #Comparison of mutaiton burden by cell type
 individuals_with_both=c("18pcw","CB002","SX001","AX001","KX004")
+
+#Wilcoxon per individual. Computed directly rather than with
+#ggpubr::stat_compare_means(), which fails against the installed ggplot2
+#(its internal create_p_label() is not found).
+wilcox_labels<-sum_of_vaf_df%>%
+  filter(exp_ID%in%individuals_with_both,!is.na(Cell_type),!is.na(sum_of_vaf))%>%
+  group_by(exp_ID)%>%
+  dplyr::summarise(label=tryCatch(paste0("p = ",signif(wilcox.test(sum_of_vaf~Cell_type)$p.value,2)),
+                                  error=function(e) ""),
+                   y=max(sum_of_vaf,na.rm=TRUE),.groups="drop")
+
 sum_of_vaf_by_celltype<-sum_of_vaf_df%>%
-  filter(exp_ID%in%individuals_with_both)%>%
+  filter(exp_ID%in%individuals_with_both,!is.na(Cell_type))%>%
   ggplot(aes(x=Cell_type,y=sum_of_vaf))+
   geom_violin(aes(fill=Cell_type),alpha=0.2)+
   scale_color_manual(values=c("#1a80bb", "#ea801c"))+
   scale_fill_manual(values=c("#1a80bb", "#ea801c"))+
-  stat_compare_means(method = "wilcox.test",label = "p.format",fontface="italic",vjust = +1,size=2.6)+
+  geom_text(data=wilcox_labels,aes(x=1.5,y=y,label=label),size=2.6,fontface="italic",inherit.aes=FALSE)+
   geom_jitter(aes(col=Cell_type),width=0.2,alpha=0.5)+
   facet_grid(cols=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales = "free",space="free")+
   theme_classic()+

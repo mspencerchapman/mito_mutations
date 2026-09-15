@@ -27,19 +27,9 @@ for(package in cran_packages){
 options(stringsAsFactors = F)
 
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
-plots_dir=paste0(root_dir,"/plots/")
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 dir.create(paste0(plots_dir,"Extended_Data_Figure_04"),showWarnings=FALSE,recursive=TRUE)
 ed4_dir=paste0(plots_dir,"Extended_Data_Figure_04/")
-
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),legend.title = element_text(size=8))
 
 #-----------------------------------------------------------------------------------#
 # Data
@@ -190,7 +180,6 @@ sum_of_vaf_by_celltype<-sum_of_vaf_df%>%
 
 ggsave(filename=paste0(ed4_dir,"ExtDataFig4b.sum_of_vaf_by_celltype.pdf"),sum_of_vaf_by_celltype,width=7,height=2.2)
 cat("ED4b: written\n")
-
 
 #-----------------------------------------------------------------------------------#
 # Fig ED4c and ED4d | Burden by driver status, and by clonal expansion

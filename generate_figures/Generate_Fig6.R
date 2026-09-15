@@ -51,26 +51,18 @@ source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R")) #supplies fisher_wright_drift, get_mito_mut_vaf_df, plot_tree, getTips, get_expanded_clade_nodes
 
 #Set the key file paths using the root dir
-plots_dir=paste0(root_dir,"/plots/")
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 
 #Create the figure output directories if they do not already exist
 for(d in c("Figure_06")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 fig6_dir=paste0(plots_dir,"Figure_06/")
 dir.create(fig6_dir,showWarnings=FALSE,recursive=TRUE)
 
-#Set the basic plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
-
 set.seed(42) #the panels below are stochastic simulations; fix the seed so the figure is reproducible
+#rsimpop draws from its own C-level generator, which set.seed() does not reach,
+#so panel c needs initSimPop() as well or the simulated expansions differ on
+#every run. bForce=TRUE re-seeds even if the package initialised itself on load.
+if(have_rsimpop) initSimPop(42, bForce = TRUE)
 
 #-----------------------------------------------------------------------------------#
 # Fig 6a | VAF distribution of a heteroplasmic oocyte mutation through life

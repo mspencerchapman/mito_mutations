@@ -33,19 +33,9 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
-plots_dir=paste0(root_dir,"/plots/")
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 dir.create(paste0(plots_dir,"Extended_Data_Figure_12"),showWarnings=FALSE,recursive=TRUE)
 ed12_dir=paste0(plots_dir,"Extended_Data_Figure_12/")
-
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),legend.title = element_text(size=8))
 
 #The prior: log-uniform over 0.1-500 days, i.e. flat on the log10 x-axis used
 #throughout. Drawn once and shared by every panel so they are directly comparable.

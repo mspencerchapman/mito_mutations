@@ -38,24 +38,11 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-plots_dir=paste0(root_dir,"/plots/")
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Create the figure output directories if they do not already exist
 for(d in c("Extended_Data_Figure_10")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
-
-#Set the basic plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
 
 #Read in the mitochondrial copy number data
 mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)

@@ -50,23 +50,10 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-plots_dir=paste0(root_dir,"/plots/")
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 
 #Create the figure output directories if they do not already exist
 for(d in c("Figure_03")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
-
-#Set the basic plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
 
 #Read in the mitochondrial copy number data
 mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
@@ -195,4 +182,14 @@ het_oocyte_muts<-lapply(young_IDs,function(Exp_ID) {
 })
 
 names(het_oocyte_muts)<-young_IDs
-saveRDS(het_oocyte_muts,paste0(root_dir,"/data/het_oocyte_muts.Rds"))
+
+#Only write this out when it does not already exist. data/het_oocyte_muts.Rds is
+#tracked input data that other scripts read, so writing it here on every run
+#would mean simply regenerating a figure silently changes an analysis input.
+#Delete the file first if you intend to recompute it.
+het_oocyte_muts_file<-paste0(root_dir,"/data/het_oocyte_muts.Rds")
+if(!file.exists(het_oocyte_muts_file)) {
+  saveRDS(het_oocyte_muts,het_oocyte_muts_file)
+} else {
+  cat("data/het_oocyte_muts.Rds already exists - not overwriting\n")
+}

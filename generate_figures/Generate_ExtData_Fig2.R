@@ -34,22 +34,16 @@ options(stringsAsFactors = F)
 
 #Set these file paths before running the script
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
-plots_dir=paste0(root_dir,"/plots/")
+
+#geom_jitter() displaces points at random, so fix the seed to make the saved
+#panels reproducible between runs.
+set.seed(42)
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 dir.create(paste0(plots_dir,"Extended_Data_Figure_02"),showWarnings=FALSE,recursive=TRUE)
 ed2_dir=paste0(plots_dir,"Extended_Data_Figure_02/")
 
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R")) #supplies plot_tree
-
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),legend.title = element_text(size=8))
 
 #-----------------------------------------------------------------------------------#
 # Cohorts, tissue labels and colours (as in the cross-tissue notebook)

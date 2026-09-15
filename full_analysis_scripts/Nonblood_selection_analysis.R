@@ -218,8 +218,7 @@ for (i in 1:length(valid.tissues)){
   
   # run dnds with the mtDNA variants to annotate them (the selection analysis isn't actually used here)
   mtdna.dndsout <- dndscv(mtdna.variant.data, gene_list=target_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
-  
+                          refdb = mtref_rda_path, numcode = 2, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
   # get the results with the annotated variants
   annotated.mtdna.variants <- mtdna.dndsout$annotmuts
   annotated.vaf.mutation.table <- merge(annotated.mtdna.variants, mtdna.variant.data, by.x = c("sampleID", "chr", "pos", "ref", "mut"), by.y = c("Sample", "chr", "pos", "ref", "mut"), all.y = T)
@@ -350,8 +349,7 @@ for (i in 1:length(valid.tissues)){
   
   # run dnds with the mtDNA variants to annotate them
   mtdna.dndsout <- dndscv(mtdna.variant.data, gene_list=target_genes, 
-                          refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
-  
+                          refdb = mtref_rda_path, numcode = 2, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
   # get the results with the annotated variants
   annotated.mtdna.variants <- mtdna.dndsout$annotmuts
   write.table(annotated.mtdna.variants, paste0(input.dir, "/", tissue.id, "_all_mtDNA_variants_dNdS_annotated.txt"),  sep = "\t", quote = F, row.names = F, col.names = T)
@@ -486,8 +484,7 @@ for(tissue in tissues){
       
       # run dnds with the mtDNA variants to annotate them
       mtdna.dndsout <- dndscv(vaf.group.data, gene_list=target_genes, 
-                              refdb = mtref_rda_path, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
-      
+                              refdb = mtref_rda_path, numcode = 2, max_coding_muts_per_sample = Inf, max_muts_per_gene_per_sample = Inf)
       # add results to list
       sel_cv <- mtdna.dndsout$sel_cv
       sel_cv$vaf_cat <- cat

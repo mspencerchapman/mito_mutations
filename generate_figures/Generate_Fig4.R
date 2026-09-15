@@ -38,25 +38,12 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-plots_dir=paste0(root_dir,"/plots/")
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Create the figure output directories if they do not already exist
 for(d in c("Extended_Data_Figure_07")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 for(d in c("Figure_04")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
-
-#Set the basic plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
 
 #Read in the mitochondrial copy number data
 mito_cn=read.csv(paste0(root_dir,"/data/whole_genome_coverage_pileup_and_bedtools_annotated.csv"),header=T)
@@ -105,7 +92,6 @@ rownames(components)<-paste0("N",0:(nrow(components)-1))
 rownames(exposures)<-paste0("N",0:(nrow(exposures)-1))
 colnames(exposures)<-gsub("^X","",colnames(exposures))
 colnames(exposures)<-gsub("\\.pcw"," pcw",colnames(exposures))
-
 
 VAF_groups=unique(sapply(stringr::str_split(colnames(exposures),pattern="_"),function(vec) paste(vec[2:3],collapse="_")))
 new_VAF_groups=c("<0.1%","0.1-0.2%","0.2-0.4%","0.4-0.8%","0.8-1.6%","1.6-3.1%","3.1-6.2%","6.2-12.5%","12.5-25%","25-50%",">50%")
@@ -185,6 +171,11 @@ VAF_groups=data.frame(
   lower_limit=c(0,2^(-10:-1)),
   upper_limit=2^(-10:0)
 )
+
+#The Wright-Fisher simulation below is stochastic (fisher_wright_drift), as is
+#the binomial resampling of its output, so fix the seed here - before the loop -
+#to make Fig 4b and Extended Data Fig 7a exactly reproducible.
+set.seed(42)
 
 #Record the distribution of VAFs every 10 generations, though the generation of mutation acquisition is recorded exactly
 gens_to_include=seq(10,1500,10)
@@ -294,7 +285,12 @@ drift_with_age_animation<-gens_record_summary%>%
   theme(title = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle=90,size=15),axis.title.x=element_text(size=12),axis.title.y=element_text(size=12))+
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(8,"Spectral"))+
   labs(title='{current_frame} generations',x="Observed VAF",y="Count")
-anim_save(filename=paste0(rebuttal_figs_dir,"driftwithage.gif"),animation = drift_with_age_animation)
+#Render at an explicit size: gganimate's default (480x480) depends on the
+#package version, so without this the animation silently changes dimensions
+#between environments. 960x768 matches the committed gif.
+anim_save(filename=paste0(rebuttal_figs_dir,"driftwithage.gif"),
+          animation = animate(drift_with_age_animation, width = 960, height = 768,
+                              renderer = gifski_renderer()))
 
 #Plot the colour scale for these figures
 max_gen=1500
@@ -367,7 +363,6 @@ abc_res_plot_mut_rate<-abc_res_df%>%
 
 ggsave(filename=paste0(plots_dir,"Figure_04/Fig4e.abc_res_plot_mut_rate.pdf"),abc_res_plot_mut_rate,width=1.75,height=2)
 
-
 #-----------------------------------------------------------------------------------#
 ### Generate FIG. 4C ---------
 #-----------------------------------------------------------------------------------#
@@ -394,10 +389,15 @@ mtDNA_CN*365/lme.gens_by_age@beta[2]
 mtDNA_CN*365/confint(lme.gens_by_age)["Age",]
 
 #Plot these results
+#95% CI of the fitted trend - see lmer_confidence_band() for what the band covers
+gens_by_age_band<-lmer_confidence_band(lme.gens_by_age,abc_res_df,predictor="Age")
+
 abc_res_plot_total_generations<-abc_res_df%>%
   dplyr::filter(!exp_ID%in%c("8pcw","18pcw"))%>%
   mutate(exp_ID=factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]))%>%
   ggplot(aes(x=Age,y=total_generations))+
+  geom_ribbon(data=gens_by_age_band,aes(x=Age,ymin=lower,ymax=upper),
+              inherit.aes=FALSE,fill="grey50",alpha=0.25)+
   geom_point(aes(col=exp_ID),alpha=0.05,size=0.25)+
   scale_y_continuous(limits=c(0,1700))+
   geom_abline(slope=lme.gens_by_age@beta[2],intercept = lme.gens_by_age@beta[1],linetype=1)+
@@ -422,7 +422,6 @@ drift_parameter_ml=mtDNA_CN*365/lme.gens_by_age@beta[2]
 drift_parameter_CI<-mtDNA_CN*365/confint(lme.gens_by_age)["Age",]
 drift_parameter_lowerCI=drift_parameter_CI[2]
 drift_parameter_upperCI=drift_parameter_CI[1]
-
 
 population_size_estimate_1=740
 population_size_estimate_2=population_size_estimate_1/5

@@ -31,21 +31,11 @@ for(package in cran_packages){
 options(stringsAsFactors = F)
 
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
-plots_dir=paste0(root_dir,"/plots/")
+#plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 dir.create(paste0(plots_dir,"Extended_Data_Figure_06"),showWarnings=FALSE,recursive=TRUE)
 ed6_dir=paste0(plots_dir,"Extended_Data_Figure_06/")
 
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R")) #detect_het_oocyte_mutation, find_latest_acquisition_node, get_expanded_clade_nodes, getTips
-
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),legend.title = element_text(size=8))
 
 #One independent sample is drawn at random per post-developmental clade, so fix
 #the seed to make the inferred oocyte VAFs reproducible.
