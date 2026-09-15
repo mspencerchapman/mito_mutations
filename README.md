@@ -159,10 +159,14 @@ longer - a few minutes each, and up to ~50 minutes for `mtDNA_mut_phasing.Rmd`.
 Scripts whose output is stochastic set a fixed seed, so repeated runs reproduce
 the committed panels.
 
-One known exception: `Generate_ExtData_Fig10.R` fails against current Seurat,
-inside `FindClusters()` (`GroupSingletons` -> `sample.int`: "invalid first
-argument"). The panel it produces is committed; reproducing it needs the Seurat
-version in [`SESSIONINFO.md`](SESSIONINFO.md).
+One known exception: `Generate_ExtData_Fig10.R` does not reproduce under the
+Seurat version recorded in [`SESSIONINFO.md`](SESSIONINFO.md) (5.5.1).
+`FindNeighbors()` returns an SNN graph in which every colony is a singleton, so
+`FindClusters()` fails inside `GroupSingletons()` (`sample.int`: "invalid first
+argument"). Setting `group.singletons=FALSE` avoids the error but returns a
+single cluster containing every colony, so the panel cannot be reproduced by
+forcing it through. It needs the older Seurat used for the original analysis.
+Extended Data Fig. 11 is a flow-sorting schematic and has no code.
 
 ---
 
@@ -231,6 +235,10 @@ ordering below matters only if you are rebuilding from scratch.
 5. Rscript generate_figures/Generate_Fig1.R    ... Generate_Fig6.R
    Rscript generate_figures/Generate_ExtData_Fig1.R ... Generate_ExtData_Fig12.R
 ```
+
+There is one script per manuscript figure: `Generate_Fig1.R` to
+`Generate_Fig6.R`, and `Generate_ExtData_Fig1.R` to `Generate_ExtData_Fig12.R`
+except `Fig11` - Extended Data Fig. 11 is a flow-sorting schematic with no code.
 
 Only step 5 is needed to reproduce the figures from the deposited data. Steps 3
 and 4 regenerate their own inputs and take considerably longer - the ABC is
