@@ -366,10 +366,17 @@ Please cite the manuscript. <!-- TODO: add full citation and DOI on acceptance -
 
 ## License
 
-This work is licensed under the
-[Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
-You are free to share and adapt the material for any purpose, including
-commercially, provided you give appropriate credit. See [LICENSE](LICENSE).
+The **code** in this repository is released under the
+[MIT License](https://opensource.org/licenses/MIT), an OSI-approved licence -
+see [LICENSE](LICENSE). You are free to use, modify and redistribute it,
+including commercially, provided the copyright notice is retained.
+
+The **processed data** deposited at
+[Zenodo](https://doi.org/10.5281/zenodo.22754723), and the figures and
+documentation here, are licensed under the
+[Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) -
+see [LICENSE-CC-BY-4.0](LICENSE-CC-BY-4.0). Creative Commons licences are not
+intended for software, which is why the code carries a separate licence.
 
 The R packages this code depends on (see `install_dependencies.R`) retain their
-own licences.
+own licences; several are GPL-2 or GPL-3.

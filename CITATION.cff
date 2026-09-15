@@ -75,7 +75,7 @@ keywords:
   - clonal haematopoiesis
   - phylogenetics
   - approximate Bayesian computation
-license: CC-BY-4.0
+license: MIT
 # TODO on acceptance: add the paper under references, and the Zenodo DOI as
 # identifiers, e.g.
 # identifiers:
