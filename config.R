@@ -39,11 +39,13 @@ tables_dir <- file.path(root_dir, "tables")
 plots_dir   <- paste0(file.path(root_dir, "plots"), "/")
 figures_dir <- plots_dir   # figures/ was merged into plots/; kept as an alias
 
-# Plots that do not appear in the manuscript figures - exploratory output, and
-# analyses produced during review.
-rebuttal_figs_dir <- file.path(plots_dir, "additional_plots")
-dir.create(rebuttal_figs_dir, showWarnings = FALSE, recursive = TRUE)
-rebuttal_figs_dir <- paste0(rebuttal_figs_dir, "/")
+# Non-manuscript plots (exploratory output, and analyses produced during review)
+# from the standalone scripts in full_analysis_scripts/ and generate_figures/.
+# The notebooks do not use this: each writes everything to its own
+# notebook_plots_dir(). Not created here - save_plot()/save_pdf() make the
+# directory on demand, so nothing appears when save_plots is FALSE.
+# plots_dir already ends in a separator, so paste0 rather than file.path.
+rebuttal_figs_dir <- paste0(plots_dir, "additional_plots/")
 
 # Frequently used data files
 mito_data_file      <- file.path(data_dir, "mito_data.Rds")             # blood / normal haematopoiesis
@@ -124,6 +126,10 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 #-----------------------------------------------------------------------------------#
 
 save_plots <- FALSE
+# Optional override, so plots can be regenerated for a one-off run without
+# editing this file: MITO_SAVE_PLOTS=TRUE Rscript -e 'rmarkdown::render(...)'
+if (nzchar(Sys.getenv("MITO_SAVE_PLOTS")))
+  save_plots <- isTRUE(as.logical(Sys.getenv("MITO_SAVE_PLOTS")))
 
 #' Output directory for one notebook's plots
 notebook_plots_dir <- function(notebook) paste0(plots_dir, "notebook_output/", notebook, "/")
@@ -164,6 +170,19 @@ save_pdf <- function(file, ..., width = NULL, height = NULL) {
   do.call(grDevices::pdf, c(list(file = file), scaled))
 }
 
+#' Resolve an output path for a function that writes its own plot file
+#'
+#' Some plotting functions in the function library (e.g. trinucleotide_plot) take a
+#' file_name and open their own device, so save_plot()/save_pdf() cannot gate them.
+#' They all skip writing when file_name is NULL, so pass the path through here:
+#' NULL when saving is off, otherwise the path with its directory created.
+#' The generate_figures/ scripts write unconditionally and so do not use this.
+plot_file <- function(path) {
+  if (!isTRUE(save_plots)) return(NULL)
+  dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
+  path
+}
+
 #-----------------------------------------------------------------------------------#
 # 5. HELPERS
 #-----------------------------------------------------------------------------------#
@@ -183,10 +202,12 @@ load_packages <- function(cran = NULL, bioc = NULL, github = NULL) {
       BiocManager::install(p, ask = FALSE, update = FALSE)
   }
   if (length(github)) {
-    if (!requireNamespace("devtools", quietly = TRUE))
-      install.packages("devtools", repos = "https://cloud.r-project.org")
+    # remotes, not devtools: install_github() lives in remotes, and current
+    # devtools only Suggests it, so devtools alone fails on a clean library.
+    if (!requireNamespace("remotes", quietly = TRUE))
+      install.packages("remotes", repos = "https://cloud.r-project.org")
     for (p in names(github)) if (!requireNamespace(p, quietly = TRUE))
-      devtools::install_github(github[[p]])
+      remotes::install_github(github[[p]])
   }
   invisible(lapply(c(cran, bioc, names(github)),
                    function(p) suppressPackageStartupMessages(

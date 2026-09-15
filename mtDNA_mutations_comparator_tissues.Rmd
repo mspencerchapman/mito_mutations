@@ -32,22 +32,22 @@ for(package in bioconductor_packages){
 
 #Install & load github packages
 if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("im3sanger/dndscv")
+  remotes::install_github("im3sanger/dndscv")
   library("dndscv",character.only=T,quietly = T, warn.conflicts = F)
 }
 
 if(!require("treemut", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("nangalialab/treemut")
+  remotes::install_github("nangalialab/treemut")
   library("treemut",character.only=T,quietly = T, warn.conflicts = F)
 }
 
 if(!require("BuenColors", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("caleblareau/BuenColors")
+  remotes::install_github("caleblareau/BuenColors")
   library("BuenColors",character.only=T,quietly = T, warn.conflicts = F)
 }
 
 if(!require("mitovizR", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("robertopreste/mitovizR", build_vignettes = TRUE)
+  remotes::install_github("robertopreste/mitovizR", build_vignettes = TRUE)
   library("mitovizR",character.only=T,quietly = T, warn.conflicts = F)
 }
 
@@ -74,8 +74,6 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
-figures_dir=notebook_plots_dir("mtDNA_mutations_comparator_tissues") #see save_plots in config.R
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 plots_dir=notebook_plots_dir("mtDNA_mutations_comparator_tissues")
 
 # read in the trinucleotide context data
@@ -247,7 +245,7 @@ all_df_tidy<-Map(dataset=all_cohorts_plus_CML,dataset_mito_data=all_mito_dataset
 First just look at the mean mitochondrial coverage per sample as determined by bedtools.
 Plot this as tissue-specific histograms.
 
-```{r mean_coverage,fig.width=7,fig.height=2.5}
+```{r mean_coverage,fig.width=7,fig.height=4.5}
 name_conversion_vec=c("Normal blood","Lymphoid","MPN","Colon","IBD-affected\nColon","MUTYH-mutant\nColon","Endometrium","Bronchial\nepithelium")
 names(name_conversion_vec)=c("blood","lymph","NW","HL","SO","PR","LM","KY")
 tissue_cols<-c("#96e97c","#fd81c8","#145a6a","#65e6f9","#781486","#5f70cc","#aea2eb","#1d6d1f")
@@ -280,7 +278,7 @@ save_plot(filename=paste0(plots_dir,"coverage_by_tissue_plot.pdf"),coverage.plot
 
 Now use the median coverage across the mitochondrial, a more standard figure utilised in these studies.
 
-```{r median_coverage,fig.width=3,fig.height=2.5}
+```{r median_coverage,fig.width=7,fig.height=5.8}
 #Median coverage - ridges plot
 median.coverage.plot<-mito_cn%>%
   filter(Tissue%in%translate$al_ref)%>%
@@ -304,7 +302,7 @@ save_plot(filename=paste0(plots_dir,"median.coverage.plot.pdf"),median.coverage.
 Uniformity across the mtDNA genome is also a key marker of coverage quality.
 We use a very stringent marker of uniformity - the proportion of genome with >80% of the mean.
 
-```{r uniformity,fig.width=3,fig.height=2.5}
+```{r uniformity,fig.width=7,fig.height=5.8}
 
 uniformity_plot<-mito_cn%>%
   filter(Tissue%in%translate$al_ref)%>%
@@ -371,7 +369,6 @@ all_mito_datasets=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML],
   cat(dataset,sep="\n")
   
   CN_correlating_muts=dataset_mito_data[[1]]$CN_correlating_muts
-  figures_dir=paste0(dataset,"/")
   
   dataset_mito_data<-Map(list=dataset_mito_data,exp_ID=names(dataset_mito_data), function(list,exp_ID) {
     cat(exp_ID,sep="\n")
@@ -442,8 +439,9 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
   
   cat(dataset,sep="\n")
   CN_correlating_muts=dataset_mito_data[[1]]$CN_correlating_muts
-  figures_dir=paste0(plots_dir,dataset,"/")
-  dir.create(figures_dir)
+  #Per-dataset subfolder for the heatmaps below; save_pdf() creates it when
+  #save_plots is on, so there is no need to make it here.
+  dataset_plots_dir=paste0(plots_dir,dataset,"/")
   
   ### Visualize the shared mutations, showing only VAFs > 3% ----
   col_scheme<-c("white",colorRampPalette(RColorBrewer::brewer.pal(9,"YlOrRd")[2:9])(100))
@@ -457,13 +455,13 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     if(length(list[[tree_to_show]]$tip.label)<8) {stop(return(NULL))}
     
     if(is.null(list$shared_muts_df)) {
-      save_pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
       plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=F,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
     }
     if(nrow(list$shared_muts_df)==0) {
-      save_pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
       plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=F,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -497,7 +495,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     }
     
     par(mfrow=c(1,1))
-    save_pdf(file = paste0(figures_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
+    save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
     list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
     dev.off()
@@ -516,13 +514,13 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     
     #Plot the trees even if there are no shared muts
     if(is.null(list$shared_muts_df)) {
-      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
     }
     if(nrow(list$shared_muts_df)==0) {
-      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -533,7 +531,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
       pull(mut)
     
     if(length(plot_muts)==0) {
-      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -557,7 +555,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     }
     
     par(mfrow=c(1,1))
-    save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+    save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
     list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,cex.axis=0.5,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
     dev.off()
@@ -575,7 +573,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     plot_muts<-rownames(list$matrices$vaf.filt)
     
     if(length(plot_muts)==0) {
-      save_pdf(file = paste0(figures_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
       list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : All mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -599,7 +597,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     }
     
     par(mfrow=c(1,1))
-    save_pdf(file = paste0(figures_dir,exp_ID,"_all_muts_filt.pdf"),width = 7,height=8)
+    save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_all_muts_filt.pdf"),width = 7,height=8)
     list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 4,title=paste0(exp_ID," (",Age," years old) : All mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
     dev.off()
@@ -617,7 +615,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     plot_muts<-grep(pattern = "\\*",rownames(list$matrices$vaf),value=T)
     
     if(length(plot_muts)==0) {
-      save_pdf(file = paste0(figures_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=4)
+      save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=4)
       list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : germline mutations (VAF>",100*lowest_VAF_to_show,"%)"))
       dev.off()
       stop(return(NULL))
@@ -638,7 +636,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     if(length(plot_muts)>=2) {plot_muts.clustered<-hclust(stats::dist((vaf.mtx^(1/4))[plot_muts,]))} else {plot_muts.clustered=list(order=1)}
     
     par(mfrow=c(1,1))
-    save_pdf(file = paste0(figures_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=8)
+    save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=8)
     list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 4,title=paste0(exp_ID," (",Age," years old) : germline mutations (VAF>",100*lowest_VAF_to_show,"%)"))
     add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
     dev.off()
@@ -649,7 +647,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
 
 ### MEASURE 'CLONAL MARKING' OF EXPANDED CLADES BY MITOCHONDRIAL MUTATIONS
 
-```{r clonal_marking_plots,fig.width=3,fig.height=2.5}
+```{r clonal_marking_plots,fig.width=7,fig.height=5.8}
 dataset="CML"
 dataset_mito_data<-all_mito_datasets[[dataset]]
 
@@ -678,7 +676,7 @@ First, there is this slightly complex snippet of code to pull out any mutations 
  (1) shared by ≥2 clone samples
  (2) are not present in a large fraction of samples outside the clone (must be <20%)
 
-```{r clonal_marking_plots2,fig.width=5,fig.height=2.5}
+```{r clonal_marking_plots2,fig.width=7,fig.height=4.5}
 expanded_clades_df<-Map(list=dataset_mito_data,exp_ID=names(dataset_mito_data),function(list,exp_ID){
   cat(paste0(exp_ID,"\n"))
   
@@ -791,7 +789,11 @@ cn_by_tissue_plot<-mito_cn%>%
   facet_grid(~Tissue,scales="free",space="free")+
   theme_classic()+
   my_markdown_theme+
-  theme(axis.text.x=element_text(angle=90,size = 4),legend.position="none")+
+  #Tissue panels are sized by sample count (space="free"), so the narrow ones cannot
+  #fit a horizontal label - rotate the strips so the label length is limited by panel
+  #height rather than width, as done for the per-donor facets elsewhere in this notebook.
+  theme(axis.text.x=element_text(angle=90,size = 6),legend.position="none",
+        strip.text.x = element_text(angle=90,size = 8))+
   labs(x="",y="mtDNA copy number")
 cn_by_tissue_plot
 save_plot(filename=paste0(plots_dir,"cn_by_tissue_plot.pdf"),cn_by_tissue_plot,width=10,height=4)
@@ -799,7 +801,7 @@ save_plot(filename=paste0(plots_dir,"cn_by_tissue_plot.pdf"),cn_by_tissue_plot,w
 
 Given that tissue type is a major driver of mtDNA copy number, summarise this by group all samples from a given tissue (aggregating across individuals) into a single ridge plot.
 
-```{r copy_number_analysis_ridge_plot,fig.width=3,fig.height=2}
+```{r copy_number_analysis_ridge_plot,fig.width=7,fig.height=4.7}
 #Ridges plots of copy number distribution across the tissue
 mitoCN_ridges_plot<-mito_cn%>%
   filter(Tissue%in%translate$al_ref)%>%
@@ -821,7 +823,7 @@ save_plot(filename=paste0(plots_dir,"mitoCN_ridges_plot.pdf"),mitoCN_ridges_plot
 
 Within each tissue, is there a difference in copy number through life? No - nothing convincing.
 
-```{r copy_number_by_age,fig.width=3,fig.height=2}
+```{r copy_number_by_age,fig.width=7,fig.height=4.7}
 #Dot plot of median copy number against age, points coloured by tissue plot
 #There are overlying regression lines to show the relationship against age
 median_cn_by_age_plot<-mito_cn%>%
@@ -848,7 +850,7 @@ save_plot(filename=paste0(plots_dir,"median_cn_by_age_plot.pdf"),median_cn_by_ag
 Mean copy number by tissue.
 Given the log-normal distribution, perform the means on the log-transformed data then transform back to absolute numbers.
 
-```{r mean_cn_by_tissue_plot,fig.width=3,fig.height=2}
+```{r mean_cn_by_tissue_plot,fig.width=7,fig.height=4.7}
 
 mean_cn_plot<-mito_cn%>%
   filter(Tissue%in%translate$al_ref)%>%
@@ -882,7 +884,7 @@ save_plot(filename=paste0(plots_dir,"mean_cn_plot.pdf"),mean_cn_plot,width=3,hei
 
 Create a dataframe to use with the linear mixed effects model.
 
-```{r mean_cn_regression_create_df,fig.width=3,fig.height=2}
+```{r mean_cn_regression_create_df,fig.width=7,fig.height=4.7}
 
 mito_cn_lmer_df<-mito_cn%>%
   filter(Tissue%in%translate$al_ref)%>%
@@ -894,7 +896,7 @@ mito_cn_lmer_df<-mito_cn%>%
 ```
 
 Given that CN is a log-normal distribution, do the model against log CN
-```{r mean_cn_regression,fig.width=3,fig.height=2}
+```{r mean_cn_regression,fig.width=7,fig.height=4.7}
 #LMER MODEL 1: LMER of logCN against Age and Tissue
 mito_cn.lmer_with_age<-lmerTest::lmer(log_mitoCN~Age+Tissue+(1|exp_ID),data=mito_cn_lmer_df)
 summary(mito_cn.lmer_with_age)
@@ -908,7 +910,7 @@ lmer.CIs<-confint(mito_cn.lmer)
 
 AIC analysis shows that adding in the age variable (model 2) actually increases the AIC. Suggesting that the model is slightly worse.
 
-```{r model_comparison_AIC,fig.width=3,fig.height=2}
+```{r model_comparison_AIC,fig.width=7,fig.height=4.7}
 #Do AIC on model 1 and 2 to give 
 m1<-lme4::lmer(log_mitoCN~Age+Tissue+(1|exp_ID),data=mito_cn_lmer_df,REML = F)
 m2<-lme4::lmer(log_mitoCN~Tissue+(1|exp_ID),data=mito_cn_lmer_df,REML = F)
@@ -921,7 +923,7 @@ LMER MODEL 3: See if bronchial CN correlates with smoking status?
 
 No significant correlation in our data. However, this may be confounded by the in vitro colony formation or the fact that these are purified epithelial cell.
 
-```{r model_smoking,fig.width=3,fig.height=2}
+```{r model_smoking,fig.width=7,fig.height=4.7}
 mito_cn.lmer_lung_smoking<-lme4::lmer(log_mitoCN~Smoking_years+(1|exp_ID),data=mito_cn_lmer_df%>%filter(dataset=="KY")%>%mutate(Smoking_years=as.numeric(Smoking_years))%>%replace_na(replace = list(Smoking_years=0)))
 summary(mito_cn.lmer_lung_smoking)
 confint(mito_cn.lmer_lung_smoking)
@@ -930,7 +932,7 @@ confint(mito_cn.lmer_lung_smoking)
 To visualize the different tissue effects on mtDNA copy number, show the tissue co-efficients from the LME model.
 This initial visualization shows the log values.
 
-```{r lmer2_visualization_log,fig.width=3,fig.height=3}
+```{r lmer2_visualization_log,fig.width=7,fig.height=7}
 #Visualize the LMER MODEL 2 tissue-specific coefficients
 intercept_value<-summary(mito_cn.lmer)$coefficients["(Intercept)","Estimate"]
 tissue_lmer_coefs_plot<-as.data.frame(summary(mito_cn.lmer)$coefficients)%>%
@@ -959,7 +961,7 @@ save_plot(filename=paste0(plots_dir,"tissue_lmer_coefs_plot.pdf"),tissue_lmer_co
 ```
 Here, convert back to the absolute values.  This is essentially like doing a regression on the geometric mean mtDNA value.
 
-```{r lmer2_visualization,fig.width=3,fig.height=2}
+```{r lmer2_visualization,fig.width=7,fig.height=4.7}
 #Visualize the LMER MODEL 2 tissue-specific coefficients - now transformed back to absolute scale
 intercept_value<-summary(mito_cn.lmer)$coefficients["(Intercept)","Estimate"]
 tissue_lmer_exp_coefs_plot<-as.data.frame(summary(mito_cn.lmer)$coefficients)%>%
@@ -999,7 +1001,7 @@ trinucleotide_plot(mutations = all_df_tidy[all_cohorts]%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(plots_dir,"Mutational_signature_nonblood_all.pdf"))
+                   file_name = plot_file(paste0(plots_dir,"Mutational_signature_nonblood_all.pdf")))
 ```
 
 
@@ -1016,7 +1018,7 @@ trinucleotide_plot(mutations = all_df_tidy[all_cohorts]%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(plots_dir,"Mutational_signature_non_blood_under0.1.pdf"))
+                   file_name = plot_file(paste0(plots_dir,"Mutational_signature_non_blood_under0.1.pdf")))
 ```
 
 
@@ -1024,7 +1026,7 @@ trinucleotide_plot(mutations = all_df_tidy[all_cohorts]%>%
 
 Print stats for total mutation numbers.
 
-```{r mut_burden_stats,fig.width=3,fig.height=2}
+```{r mut_burden_stats,fig.width=7,fig.height=4.7}
 mutCN_cutoff=25 #If the mitochondrial copy number is over 25, retain mutation even if is in the "CN correlating muts" list
 vaf_cut_off<-0.03
 rho_cut_off<-0
@@ -1118,7 +1120,7 @@ wrap_plots(plot_list,ncol=2)
 
 ### Get sum of vaf data for all datasets
 
-```{r sum_of_vaf_data,fig.width=3,fig.height=2}
+```{r sum_of_vaf_data,fig.width=7,fig.height=4.7}
 #Sum of VAF mutation burden measures
 mutCN_cutoff=25 #If the mitochondrial copy number is over 25, retain mutation even if is in the "CN correlating muts" list
 vaf_cut_off=0.03 #only include VAFs above a cutoff
@@ -1214,7 +1216,7 @@ wrap_plots(plot_list,ncol=1)
 ### ASSESSMENT OF MUTATION RATES ~ TISSUE
 
 
-```{r mutation_rate_by_tissue_prep_data,fig.width=3,fig.height=2}
+```{r mutation_rate_by_tissue_prep_data,fig.width=7,fig.height=4.7}
 # Highly clonally related samples are not 'independent' measures of mtDNA mutation burden.
 # Therefore, for some analyses, may choose to drop these co-correlated readings.
 # For these, randomly select one of any highly clonally related clades (those with >half of shared ancestry as assessed by ultrametric tree), and drop the rest
@@ -1261,7 +1263,7 @@ Do 3 models of increasing complexity:
 
 By AIC, by far the best model is the one with only an age term, and no tissue effect.
 
-```{r mutation_rate_by_tissue_lmer,fig.width=3,fig.height=2}
+```{r mutation_rate_by_tissue_lmer,fig.width=7,fig.height=4.7}
 # Get models of increasing complexity
 #MODEL 1: Fully null model, constant burden with age
 lmer.null<-lmerTest::lmer(mean~1+(1|exp_ID),data=all_sum_of_vaf_summary_df)
@@ -1284,7 +1286,7 @@ diff(AIC(lmer.null,lmer1,lmer2, lmer3)$AIC)
 Now categorise by tissue type, not just dataset as some studies actually include the same tissues. Could this be masking the tissue effect?
 No, the original model with only an age term is still the best model by AIC.
 
-```{r mutation_rate_by_tissue_lmer2,fig.width=3,fig.height=2}
+```{r mutation_rate_by_tissue_lmer2,fig.width=7,fig.height=4.7}
 
 #Add a "tissue_cat" variable which groups together Colon samples and the haematopoietic samples
 unique(all_sum_of_vaf_summary_df$Tissue_type)
@@ -1304,7 +1306,7 @@ diff(AIC(lmer.null,lmer1,lmer2.tissue_cat, lmer3.tissue_cat)$AIC)
 Plot the results of the model with tissue-specific age coefficients.
 While this wasn't the "best model" this is still helpful to give a hint of any tissue-specific differences in accumulation rate, and how big these might be.
 
-```{r mutation_rate_by_tissue_and_age_lmer_plots,fig.width=3,fig.height=2.5}
+```{r mutation_rate_by_tissue_and_age_lmer_plots,fig.width=7,fig.height=5.8}
 #Plot results of the lmer with both fixed and Age interaction term
 CI_table<-confint(lmer2)
 lmer_info_for_plotting<-as.data.frame(summary(lmer2)$coefficients)%>%
@@ -1331,7 +1333,7 @@ p1.1
 ```
 
 
-```{r mutation_rate_by_tissue_and_age_lmer_plots2,fig.width=7,fig.height=2.5}
+```{r mutation_rate_by_tissue_and_age_lmer_plots2,fig.width=7,fig.height=4.5}
 ## Tissue level plotting of lmer----
 
 # Create prediction dataframe
@@ -1463,7 +1465,7 @@ head(complete.annotated.mutation.table)
 Run analysis with the (incorrect) nuclear annotation for comparison.
 This is because in an initial version of the analysis, we used the incorrect genetic code, so want to show here how this initially altered the results, and how it compares with the correct annotation.
 
-```{r nuclear_genetic_code,fig.width=3,fig.height=2,warning=FALSE,message=FALSE}
+```{r nuclear_genetic_code,fig.width=7,fig.height=4.7,warning=FALSE,message=FALSE}
 ## Compare results with those from when annotated with the nuclear genetic code ----
 df_tidy_annotated_NUC<-Map(df_tidy=all_df_tidy,this_tissue=names(all_df_tidy),function(df_tidy,this_tissue) {
   
@@ -1502,7 +1504,7 @@ complete.annotated.mutation.table.NUC<-df_tidy_annotated_NUC%>%
 
 Here we show how the incorrect annotation changes  the numbers of mutations with different consequences (i.e. truncating vs missense vs synonymous)
 
-```{r consequence_change_plot,fig.width=3,fig.height=3}
+```{r consequence_change_plot,fig.width=7,fig.height=7}
 impact_comparison_df<-left_join(complete.annotated.mutation.table,
           complete.annotated.mutation.table.NUC%>%dplyr::select(tissue,sampleID,mut_ref,codonsub,"impact_NUC"=impact),
           by = join_by(tissue, sampleID, mut_ref, codonsub))%>%
@@ -1526,7 +1528,7 @@ save_plot(filename = paste0(plots_dir,"consequence_change_plot_CROSSTISSUE.pdf")
 ```
 
 
-```{r consequence_change_summary,fig.width=3,fig.height=2}
+```{r consequence_change_summary,fig.width=7,fig.height=4.7}
 impact_comparison_df%>%
   filter(impact!="Non-Coding" & tissue!="blood")%>%
   mutate(change=paste(impact_NUC,impact,sep=">"))%>%
@@ -1535,7 +1537,7 @@ impact_comparison_df%>%
 ```
 
 
-```{r consequence_change_plot2,fig.width=3,fig.height=2}
+```{r consequence_change_plot2,fig.width=7,fig.height=4.7}
 total_numbers_old_vs_new_plot<-impact_comparison_df%>%
   filter(tissue!="blood")%>%
   dplyr::select(mut_ref,"new_annotation"=impact,"original_annotation"=impact_NUC)%>%
@@ -1554,7 +1556,7 @@ save_plot(filename = paste0(plots_dir,"total_numbers_old_vs_new_plot_CROSSTISSUE
 ```
 
 
-```{r consequence_change2,fig.width=3,fig.height=2,message=FALSE}
+```{r consequence_change2,fig.width=7,fig.height=4.7,message=FALSE}
 impact_comparison_df%>%
   filter(tissue!="blood")%>%
   dplyr::select(mut_ref,"new_annotation"=impact,"original_annotation"=impact_NUC)%>%
@@ -1565,7 +1567,7 @@ impact_comparison_df%>%
 ```
 
 
-```{r consequence_change3,fig.width=3,fig.height=2}
+```{r consequence_change3,fig.width=7,fig.height=4.7}
 simple_impact_comparison_df<-impact_comparison_df%>%
   mutate(change=paste(impact_NUC,impact,sep=">"))%>%
   mutate(altered=ifelse(impact_NUC==impact,"unchanged","changed"))
@@ -1599,7 +1601,7 @@ simple_impact_comparison_df%>%
 First summarise the coding mutation consequences per gene.
 This is looking across all the comparator datasets (see we exclude only the original "blood" mutations that we analysed separately).
 
-```{r mut_type_per_gene,fig.width=3,fig.height=2}
+```{r mut_type_per_gene,fig.width=7,fig.height=4.7}
 mutation_type_by_gene<-complete.annotated.mutation.table%>%
   filter(impact!="Non-Coding" & tissue!="blood")%>%
   distinct(sampleID,mut_ref,gene,impact)%>%
@@ -1615,12 +1617,12 @@ mutation_type_by_gene<-complete.annotated.mutation.table%>%
         axis.text.y=element_text(face="italic"))+
   labs(x="Number of variants",fill="Mutation\nconsequence")
 mutation_type_by_gene
-save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_by_gene_CROSSTISSUE.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"mutation_type_by_gene_CROSSTISSUE.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
 ```
 
 Now summarise the coding mutation consequences per tissue (across genes).
 
-```{r mut_type_by_tissue,fig.width=3,fig.height=2}
+```{r mut_type_by_tissue,fig.width=7,fig.height=4.7}
 mutation_type_by_tissue<-complete.annotated.mutation.table%>%
   filter(impact!="Non-Coding" & !tissue%in%c("blood","CML"))%>%
   distinct(tissue,sampleID,mut_ref,gene,impact)%>%
@@ -1637,13 +1639,13 @@ mutation_type_by_tissue<-complete.annotated.mutation.table%>%
         axis.text.y=element_text(face="italic"))+
   labs(x="Number of coding variants",fill="Mutation\nconsequence")
 mutation_type_by_tissue
-save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_by_tissue_CROSSTISSUE.pdf"),mutation_type_by_tissue,width=3.5,height=2)
+save_plot(filename = paste0(plots_dir,"mutation_type_by_tissue_CROSSTISSUE.pdf"),mutation_type_by_tissue,width=3.5,height=2)
 ```
 ### Combine epithelial tissues
 
 Given the different cellular dynamics of epithelial tissues, it seems plausible that mitochondrial dynamics and selection may be different across epithelial tissues. Therefore, to increase power to detect this, combine results across colon, bronchial epithlium and endometrium.
 
-```{r combine_epithelial_tissues,fig.width=3,fig.height=2,warning=F,message=F}
+```{r combine_epithelial_tissues,fig.width=7,fig.height=4.7,warning=F,message=F}
 
 epithelial_datasets=c("HL","KY","LM","PR","SO")
 combined_epithelial_for_dnds<-complete.annotated.mutation.table%>%
@@ -1680,7 +1682,7 @@ mtdna.dndsout.combined.epithelial$globaldnds%>%
 ```
 
 
-```{r ecdf_epithelial_tissues,fig.width=3,fig.height=2.5,warning=F,message=F}
+```{r ecdf_epithelial_tissues,fig.width=7,fig.height=5.8,warning=F,message=F}
 #Gives some sense of differing heteroplasmy distributions
 #But bear in mind there are multiple non-independent measures for some variants
 #Would need to account for this e.g. by taking single measure of e.g. max VAF of variant per individual
@@ -1760,12 +1762,12 @@ mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
         legend.position = c(0.3, 0.8)) +
   labs(col = "Mutation type")
 mutation_type_ecdf_plot
-save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_ecdf_plot_EPITHELIAL.pdf"),mutation_type_ecdf_plot,width=2.5,height=2)
+save_plot(filename = paste0(plots_dir,"mutation_type_ecdf_plot_EPITHELIAL.pdf"),mutation_type_ecdf_plot,width=2.5,height=2)
 ```
 
 Now, SPLIT THE EPITHELIAL TISSUE analysis at the dichotomous vaf threshold from blood (20%)
 
-```{r epithelial_tissues_dnds_dichot_vaf,fig.width=3,fig.height=2,warning=F,message=F}
+```{r epithelial_tissues_dnds_dichot_vaf,fig.width=7,fig.height=4.7,warning=F,message=F}
 cutoffs=list(low_vaf=c(0.03,0.2),
              high_vaf=c(0.2,1.1))
 cutoff_names=c("<20%",">20%")
@@ -1823,7 +1825,7 @@ save_plot(filename = paste0(plots_dir,"dnds_global_by_dichotomous_vaf_epithelial
 ```
 
 
-```{r epithelial_tissues_dnds_by_vaf_and_gene,fig.width=3,fig.height=2}
+```{r epithelial_tissues_dnds_by_vaf_and_gene,fig.width=7,fig.height=4.7}
 selcv_res_by_tissue_and_vaf<-Map(dndsout=dndsout.epithelial,VAF_bin=c("<20%",">20%"),function(dndsout,VAF_bin) {
     temp<-dndsout$sel_cv%>%
       dplyr::select(gene_name,wmis_cv,wnon_cv,qmis_cv,qtrunc_cv)
@@ -1853,7 +1855,7 @@ save_plot(filename = paste0(plots_dir,"dnds_heatmap_epithelial_and_vaf_by_gene.p
 ```
 ### Generate global dnds by each individual tissue dataset
 
-```{r dnds_by_tissue,fig.width=3,fig.height=2,warning=F,message=F}
+```{r dnds_by_tissue,fig.width=7,fig.height=4.7,warning=F,message=F}
 dndscv_by_tissue<-Map(df_tidy=all_df_tidy[all_cohorts],this_tissue=all_cohorts,function(df_tidy,this_tissue) {
   
   #cat(this_tissue,sep="\n")
@@ -1910,7 +1912,7 @@ save_plot(filename = paste0(plots_dir,"global_dnds_CROSSTISSUE.pdf"),global_dnds
 
 ### Get gene-level dNdS info by tissue
 
-```{r gene_level_dnds_by_tissue,fig.width=5,fig.height=2.5}
+```{r gene_level_dnds_by_tissue,fig.width=7,fig.height=4.5}
 qval_cutoff=0.05
 selcv_res_by_tissue<-Map(dndsout=dndscv_by_tissue,this_tissue=all_cohorts,function(dndsout,this_tissue) {
   temp<-dndsout$sel_cv%>%
@@ -1945,7 +1947,7 @@ save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_gene_by_tissue.pdf"),dnds
 
 Enhance the tidy dataframe with 'VAF bin' info
 
-```{r dnds_by_tissue_by_vaf,fig.width=3,fig.height=2}
+```{r dnds_by_tissue_by_vaf,fig.width=7,fig.height=4.7}
 #Define the VAF 'bins' that will be used for comparing VAF distributions
 #Can set this on a log scale, or as decile bins, or dichotomous (>/< 20%)
 #Only mutations >3% are actually included
@@ -1968,7 +1970,7 @@ all_df_tidy<-lapply(all_df_tidy,function(df_tidy) {
 
 Run global dNdS by VAF group
 
-```{r global_dnds_by_tissue_by_vaf2,fig.width=7,fig.height=2.5,warning=F,message=F}
+```{r global_dnds_by_tissue_by_vaf2,fig.width=7,fig.height=4.5,warning=F,message=F}
 dndscv_by_tissue_and_vaf<-Map(df_tidy=all_df_tidy[all_cohorts],this_tissue=all_cohorts,function(df_tidy,this_tissue) {
   #cat(this_tissue,sep = "\n")
   dndscv_by_vaf_tissue<-lapply(new_VAF_groups[2:length(new_VAF_groups)],function(VAF_bin) {
@@ -2034,7 +2036,7 @@ save_plot(filename = paste0(plots_dir,"global_dnds_by_tissue_and_vaf_plot_CROSST
 ```
 
 
-```{r dnds_by_tissue_by_vaf_MPN_and_lymph_only,fig.width=3,fig.height=2}
+```{r dnds_by_tissue_by_vaf_MPN_and_lymph_only,fig.width=7,fig.height=4.7}
 max_dnds_value<-5
 global_dnds_by_vaf_MPN_and_lymph_onlyplot<-globaldnds_res_by_tissue_and_vaf%>%
   filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
@@ -2063,7 +2065,7 @@ save_plot(filename = paste0(plots_dir,"global_dnds_by_vaf_MPN_and_lymph_onlyplot
 ```
 
 
-```{r dnds_by_tissue_by_vaf_nonblood_only,fig.width=3,fig.height=2}
+```{r dnds_by_tissue_by_vaf_nonblood_only,fig.width=7,fig.height=4.7}
 max_dnds_value<-2.5
 global_dnds_by_vaf_normal_nonblood_onlyplot<-globaldnds_res_by_tissue_and_vaf%>%
   filter(VAF_group%in%VAF_groups$labels[2:length(boundaries)] & name%in%stats_to_include)%>%
@@ -2092,7 +2094,7 @@ save_plot(filename = paste0(plots_dir,"global_dnds_by_vaf_normal_nonblood_onlypl
 ```
 
 
-```{r gene_level_dnds_by_tissue_by_vaf,fig.width=4,fig.height=10}
+```{r gene_level_dnds_by_tissue_by_vaf,fig.width=7,fig.height=17.5}
 gene_order=c(paste0("MT-ND",1:6),"MT-ND4L","MT-CYB",paste0("MT-CO",1:3),"MT-ATP6","MT-ATP8")
 gene_order<-gene_order[gene_order%in%target_genes]
 
@@ -2177,7 +2179,7 @@ dnds_heatmap_by_tissue_and_vaf_by_gene_group1+dnds_heatmap_by_tissue_and_vaf_by_
 ```
 
 
-```{r dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only,fig.width=5,fig.height=5}
+```{r dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only,fig.width=7,fig.height=7}
 #Now including lymphoid and blood only
 dnds_heatmap_by_tissue_and_vaf_by_gene_blood_and_lymph_only<-selcv_res_by_tissue_and_vaf%>%
   mutate(dnds_if_signif=ifelse(qval<qval_cutoff,paste0(sprintf(dNdS, fmt = '%#.1f'),"*"),""),
@@ -2201,7 +2203,7 @@ save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_vaf_by_gene_bl
 
 ### Split by dichotomous VAF group (less or greater than 20% only) 
 
-```{r dnds_by_dichotomous_vaf_by_tissue,fig.width=3,fig.height=3,warning=F,message=F}
+```{r dnds_by_dichotomous_vaf_by_tissue,fig.width=7,fig.height=7,warning=F,message=F}
 boundaries<-c(0,0.03,0.2,1.000001)
 new_VAF_groups=paste0(round(100*head(boundaries,-1)),"-",round(100*tail(boundaries,-1)),"%")
 VAF_groups=data.frame(labels=new_VAF_groups,LL=head(boundaries,-1),UL=tail(boundaries,-1))
@@ -2286,7 +2288,7 @@ save_plot(filename = paste0(plots_dir,"global_dnds_by_tissue_and_dichotomous_vaf
 ```
 
 
-```{r dnds_by_dichotomous_vaf_by_tissue_split,fig.width=5,fig.height=2.5}
+```{r dnds_by_dichotomous_vaf_by_tissue_split,fig.width=7,fig.height=4.5}
 max_dnds_value<-2.8
 global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot<-globaldnds_res_by_tissue_and_dichotomous_vaf%>%
   filter(VAF_group%in%VAF_groups$labels[2:nrow(VAF_groups)] & name%in%stats_to_include)%>%
@@ -2344,7 +2346,7 @@ global_dnds_by_dichotomous_vaf_MPN_and_lymph_onlyplot+global_dnds_by_dichotomous
 ```
 
 
-```{r gene_dnds_by_tissue_and_dichotomous_vaf,fig.width=4,fig.height=10}
+```{r gene_dnds_by_tissue_and_dichotomous_vaf,fig.width=7,fig.height=17.5}
 gene_order=c(paste0("MT-ND",1:6),"MT-ND4L","MT-CYB",paste0("MT-CO",1:3),"MT-ATP6","MT-ATP8")
 gene_order<-gene_order[gene_order%in%target_genes]
 
@@ -2384,7 +2386,7 @@ save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_tissue_and_dichotomous_va
 
 ## MPN analysis, test global dNdS by driver clone/ wild-type
 
-```{r MPN_selection_by_driver_WT,fig.width=3,fig.height=2,eval=F}
+```{r MPN_selection_by_driver_WT,fig.width=7,fig.height=4.7,eval=F,message=FALSE,warning=FALSE}
 #1. Add basic nDNA driver mutation info to the object
 all_mito_datasets$NW<-Map(list=all_mito_datasets$NW,exp_ID=names(all_mito_datasets$NW),function(list,exp_ID) {
   annot_muts_file<-paste0(root_dir,"/data/nonblood/annot_files_filtered/annotated_muts_filt_",exp_ID,".Rds")
@@ -2515,7 +2517,7 @@ save_plot(filename = paste0(plots_dir,"MPN_global_dnds_by_mut_status_plot.pdf"),
 
 # MPN analysis, test gene-level dNdS by driver clone/ wild-type and VAF
 
-```{r MPN_selection_by_driver_WT2,fig.width=3,fig.height=2,eval=FALSE}
+```{r MPN_selection_by_driver_WT2,fig.width=7,fig.height=4.7,eval=FALSE}
 selcv_res_by_mut_status<-Map(list1=dndscv_by_vaf_and_mut_status,status=c("mut","wt"),function(list1,status) {
   
   Map(dndsout=list1,VAF_bin=names(list1),function(dndsout,VAF_bin) {
@@ -2561,7 +2563,7 @@ save_plot(filename = paste0(plots_dir,"MPN_dnds_heatmap_by_mut_status_by_gene.pd
 This is based on the principle that mutations present across multiple unrelated clones (till you go back to development),are most likely to have been present in the oocyte and drifted up in unrelated lineages.
 The alternative - possible for some of these - are that these are examples of independent acquisition.
 
-```{r heteroplasmic_oocyte_mutations,fig.width=3,fig.height=2}
+```{r heteroplasmic_oocyte_mutations,fig.width=7,fig.height=4.7}
 all_het_oocyte_mut_df=Map(dataset_mito_data=all_mito_datasets[all_cohorts],dataset=all_cohorts, function(dataset_mito_data,dataset) {
   cat(dataset,sep="\n")
   het_oocyte_mut_df<-Map(list=dataset_mito_data,Exp_ID=names(dataset_mito_data),function(list,Exp_ID){
@@ -2648,7 +2650,7 @@ save_plot(filename = paste0(plots_dir,"prop_of_samples_with_ho_mut.pdf"),prop_of
 ```
 
 
-```{r heteroplasmic_oocyte_mutations2,fig.width=3,fig.height=2,message=F,warning=F}
+```{r heteroplasmic_oocyte_mutations2,fig.width=7,fig.height=4.7,message=F,warning=F}
 library(dndscv)
 library(mitovizR)
 
@@ -2717,7 +2719,7 @@ save_plot(filename = paste0(plots_dir,"n_of_het_oocyte_muts_plot.pdf"),n_of_het_
 
 Compare mutation distribution with full somatic mutation set
 
-```{r compare_heteroplasmic_oocyte_to_all_somatic,fig.width=3,fig.height=2}
+```{r compare_heteroplasmic_oocyte_to_all_somatic,fig.width=7,fig.height=4.7}
 complete.annotated.mutation.table$Mutation_type<-sapply(complete.annotated.mutation.table$pos,
        function(pos) {mito_coords_reference_df$Mutation_type[mito_coords_reference_df$ymin<pos & mito_coords_reference_df$ymax>=pos]})
 
@@ -2751,7 +2753,7 @@ save_plot(filename = paste0(plots_dir,"Mut_cat_comparison.pdf"),Mut_cat_comparis
 
 Save plot of het oocyte mutations by genome position.
 
-```{r compare_heteroplasmic_oocyte_to_all_somatic2,fig.width=5,fig.height=5}
+```{r compare_heteroplasmic_oocyte_to_all_somatic2,fig.width=7,fig.height=7}
 mtDNA_mut_pos<-plot_df(all_het_oocyte_mut_df_annotated%>%
                          dplyr::filter(!grepl("\\*",mut))%>%
           dplyr::mutate(SAMPLE="all")%>%

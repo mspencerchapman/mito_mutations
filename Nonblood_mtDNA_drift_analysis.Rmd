@@ -30,22 +30,22 @@ for(package in bioconductor_packages){
 
 #Install & load github packages
 if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("im3sanger/dndscv")
+  remotes::install_github("im3sanger/dndscv")
   library("dndscv",character.only=T,quietly = T, warn.conflicts = F)
 }
 
 if(!require("treemut", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("nangalialab/treemut")
+  remotes::install_github("nangalialab/treemut")
   library("treemut",character.only=T,quietly = T, warn.conflicts = F)
 }
 
 if(!require("BuenColors", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("caleblareau/BuenColors")
+  remotes::install_github("caleblareau/BuenColors")
   library("BuenColors",character.only=T,quietly = T, warn.conflicts = F)
 }
 
 if(!require("mitovizR", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("robertopreste/mitovizR", build_vignettes = TRUE)
+  remotes::install_github("robertopreste/mitovizR", build_vignettes = TRUE)
   library("mitovizR",character.only=T,quietly = T, warn.conflicts = F)
 }
 
@@ -72,8 +72,6 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
-figures_dir=notebook_plots_dir("Nonblood_mtDNA_drift_analysis") #see save_plots in config.R
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 plots_dir=notebook_plots_dir("Nonblood_mtDNA_drift_analysis")
 
 # read in the trinucleotide context data
@@ -326,7 +324,6 @@ Generate plots of these VAF distributions by individual
 # Now generate the plots one dataset at a time
 all_VAF_distribution_plots=Map(mat=VAF_distribution_mats,dataset=all_cohorts,function(mat,dataset) {
   #cat(dataset,sep="\n")
-  figures_dir=paste0(dataset,"/")
   exp_ID_by_age<-ref_df%>%filter(ID%in%rownames(mat) & Cohort==dataset)%>%
     arrange(Age)%>%pull(ID)
   if(length(exp_ID_by_age)==0) {stop(return(NULL))}
@@ -378,7 +375,7 @@ combined_VAF_dist_plot<-comb_VAF_distribution%>%
   theme_classic()+
   my_markdown_theme+
   theme(axis.text.x=element_text(angle=90),
-        strip.text=element_text(angle=0,size = 7, margin = margin(1,0.5,1,0.5)))+
+        strip.text=element_text(angle=0,size = 9, margin = margin(1,0.5,1,0.5)))+
   labs(x="Heteroplasmy level",y="mtDNA mutations per cell")
 combined_VAF_dist_plot
 save_plot(filename=paste0(plots_dir,"combined_VAF_distirbution_plot.pdf"),combined_VAF_dist_plot,width=7,height=12)
@@ -390,7 +387,7 @@ We actually have data from lymphoid cells and HSCs from the SAME individuals. Le
 
 This shows that lymphoid cells have MORE homoplasmic mutations per cell, but far fewer lower heteroplasmy mutations.  This is consistent with a population bottleneck +/- a degree of selection.
 
-```{r fig.width=5,fig.height=5}
+```{r fig.width=7,fig.height=7}
 both_dataset_IDs<-intersect(rownames(VAF_distribution_mats$lymph),rownames(VAF_distribution_mats$blood))
 both_dataset_IDs<-ref_df%>%dplyr::filter(ID%in%both_dataset_IDs&Cohort=="blood")%>%arrange(Age)%>%pull(ID)
 
@@ -485,7 +482,7 @@ Sample_order<-ref_df%>%mutate(Cohort=name_conversion_vec[Cohort])%>%arrange(Coho
 
 Plot a basic summary of the number of homoplasmic mutations per sample by individual in a line plot.
 
-```{r fig.width=15,fig.height=3}
+```{r fig.width=15,fig.height=4.5}
 homo_muts_per_sample<-n_near_homoplasmic_per_sample%>%
   mutate(dataset=name_conversion_vec[dataset])%>%
   unite(col = "Cohort_ID",dataset,exp_ID,sep="_",remove = F)%>%
@@ -530,7 +527,7 @@ coef_df
 
 Plot the data points with the regression lines.
 
-```{r fig.width=3.5,fig.height=2.5}
+```{r fig.width=7,fig.height=5}
 HSC_vs_lymph_mean_homo_burden<-blood_vs_lymph_homo_muts_dat%>%
   mutate(dataset=name_conversion_vec[dataset])%>%
   ggplot(aes(x=Age,y=mean,ymin=(mean-1.96*sem),ymax=(mean+1.96*sem),col=dataset))+
@@ -557,7 +554,7 @@ Fixed effects are 'Age' and the 'Tissue' (defined by the dataset)
 Random effects are the individual ID and the Age
 Include only the adult data as this is the more linear region of the data
 
-```{r fig.width=3.5,fig.height=2.5}
+```{r fig.width=7,fig.height=5}
 #Check mean vs variance: generally very similar, therefore poisson regression is reasonable
 Mean_vs_Variance_plot<-n_near_homoplasmic_per_sample%>%
   group_by(exp_ID)%>%
@@ -595,7 +592,7 @@ overdispersion_ratio
 ```
 
 
-```{r fig.width=3.5,fig.height=3}
+```{r fig.width=7,fig.height=6}
 #Now generate the regression curves for plotting by using the 'predict' function on test data
 
 # get the scaling parameters used when creatining Age_scaled in the model data
@@ -646,7 +643,7 @@ save_plot(plot = data_vs_regression,filename = paste0(plots_dir,"data_vs_regress
 
 Visualize the tissue-specific coefficients (relative to blood)
 
-```{r fig.width=3,fig.height=2.2}
+```{r fig.width=7,fig.height=5.1}
 homo_muts_glm_coefficients<-summary(glmer.res)$coefficients%>%
   as.data.frame()%>%
   tibble::rownames_to_column(var="Coefficient")%>%
@@ -697,7 +694,7 @@ summary(glmer.res_blood_vs_lymph_subdivided)
 
 Now generate the regression curves for plotting by using the 'predict' function on test data
 
-```{r fig.width=3.5,fig.height=3}
+```{r fig.width=7,fig.height=6}
 # get the scaling parameters used when creatining Age_scaled in the model data
 age_center <- attr(n_homoplasmic_lymph_type$Age_scaled, "scaled:center")
 age_scale <- attr(n_homoplasmic_lymph_type$Age_scaled, "scaled:scale")
@@ -741,7 +738,7 @@ save_plot(plot = data_vs_regression_lymph_subdivided,filename = paste0(plots_dir
 
 Visualize the coefficients for these different lymphocyte types.
 
-```{r fig.width=2.5,fig.height=2.2}
+```{r fig.width=7,fig.height=6.2}
 # Visualize the lymphoid celltype-specific coefficients (relative to blood)
 blood_vs_lymph_subdivided_homo_muts_glm_coefficients<-summary(glmer.res_blood_vs_lymph_subdivided)$coefficients%>%
   as.data.frame()%>%

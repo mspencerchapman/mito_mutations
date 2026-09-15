@@ -15,6 +15,9 @@ options(stringsAsFactors = F)
 #genomeFile is set in config.R
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_markdown_theme
 set_markdown_figure_defaults() #larger default figure size for on-screen reading
+# This notebook uses base-R tree plotting plus a few tidyverse helpers; load them
+# explicitly so it knits from a clean R session, not just an interactive one.
+load_packages(cran = c("dplyr", "stringr", "readxl", "ape", "phangorn"))
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -22,8 +25,6 @@ tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree"
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 nonblood_ref_file=paste0(root_dir,"/data/metadata/non_blood_metadata.xlsx")
 colony_info_file=paste0(root_dir,"/data/metadata/colonyinfo_AX001_KX001_KX002_KX003_TX001_TX002_CB001.txt")
-figures_dir=notebook_plots_dir("mtDNA_mut_phasing") #see save_plots in config.R
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 plots_dir=notebook_plots_dir("mtDNA_mut_phasing")
 
 # read in the trinucleotide context data

@@ -27,12 +27,12 @@ for(package in bioconductor_packages){
 }
 
 if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("im3sanger/dndscv")
+  remotes::install_github("im3sanger/dndscv")
   library("dndscv",character.only=T,quietly = T, warn.conflicts = F)
 }
 
 if(!require("treemut", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("nangalialab/treemut")
+  remotes::install_github("nangalialab/treemut")
   library("treemut",character.only=T,quietly = T, warn.conflicts = F)
 }
 
@@ -51,9 +51,7 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
-figures_dir=notebook_plots_dir("mtDNA_mutations_blood") #see save_plots in config.R
 plots_dir=notebook_plots_dir("mtDNA_mutations_blood")
-rebuttal_figs_dir=paste0(root_dir,"/plots/additional_plots/") #plots that do not appear in the manuscript figures
 
 #Set the basic plotting theme for ggplot2
 #my_markdown_theme is defined in config.R
@@ -111,11 +109,11 @@ coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Mean mitochondrial DNA coverage",y="Count")
 coverage.plot
-save_plot(filename=paste0(figures_dir,"Coverage_plot.pdf"),coverage.plot,width=4,height=3)
+save_plot(filename=paste0(plots_dir,"Coverage_plot.pdf"),coverage.plot,width=4,height=3)
 ```
 
 
-```{r median_coverage_plot,fig.height=3,fig.width=7}
+```{r median_coverage_plot,fig.height=4.5,fig.width=7}
 median.coverage.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   ggplot(aes(x=pilup_median_mtDNA_coverage))+
@@ -127,11 +125,11 @@ median.coverage.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="Count")
 median.coverage.plot
-save_plot(filename=paste0(figures_dir,"Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
+save_plot(filename=paste0(plots_dir,"Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
 ```
 
 A ridges plot is perhaps better here to compare.
-```{r coverage_ridges,fig.height=3,fig.width=4}
+```{r coverage_ridges,fig.height=5.2,fig.width=7}
 median.coverage.ridges.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   ggplot(aes(x=pilup_median_mtDNA_coverage,y=exp_ID))+
@@ -142,13 +140,13 @@ median.coverage.ridges.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="")
 median.coverage.ridges.plot
-save_plot(filename=paste0(figures_dir,"median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
+save_plot(filename=paste0(plots_dir,"median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
 ```
 
 Uniformity across the mtDNA genome is also a key marker of coverage quality.
 We use a very stringent marker of uniformity - the proportion of genome with >80% of the mean.
 
-```{r uniformity_ridges,fig.height=3.5,fig.width=4}
+```{r uniformity_ridges,fig.height=6.1,fig.width=7}
 uniformity_ridges.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   ggplot(aes(x=perc_over0.8,y=exp_ID))+
@@ -159,7 +157,7 @@ uniformity_ridges.plot<-mito_cn%>%
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(1,0,1,0, "mm")))+
   labs(x="Coverage uniformity\n(proportion of mtDNA genome with coverage >80% of mean)",y="")
 uniformity_ridges.plot
-save_plot(filename=paste0(figures_dir,"Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
+save_plot(filename=paste0(plots_dir,"Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
 ```
 
 Print coverage summary statistics
@@ -199,7 +197,7 @@ mtDNA_by_pheno_summary<-mito_cn%>%
 
 Review the average copy number of colonies with different phenotypes relative to the average copy number of erythroid colonies
 
-```{r mito_cn_pheno_summary_plot,fig.height=2.5,fig.width=3.5}
+```{r mito_cn_pheno_summary_plot,fig.height=5,fig.width=7}
 pheno_levels=c("Ery","EryMy","Gran","MyGran","MyMono","Mono","NKMy")
 mtDNA_by_pheno_and_ID_summary%>%
   dplyr::select(-n)%>%
@@ -225,11 +223,11 @@ mito_cn_by_pheno<-mito_cn%>%
         legend.key.size = unit(0,"mm"),
         legend.position="right")
 mito_cn_by_pheno
-save_plot(filename=paste0(figures_dir,"mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
+save_plot(filename=paste0(plots_dir,"mito_cn_by_pheno.pdf"),mito_cn_by_pheno,width=4,height=2)
 ```
 
 
-```{r fig.height=2,fig.width=4}
+```{r fig.height=4.5,fig.width=7}
 mito_cn_by_pheno_all_HSCprog<-mito_cn%>%
   filter(!is.na(Phenotype))%>%
   mutate(Cell_type=ifelse(Cell_type=="Progenitor","HPC",Cell_type))%>%
@@ -246,7 +244,7 @@ mito_cn_by_pheno_all_HSCprog<-mito_cn%>%
   my_markdown_theme+
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size = 12,margin = margin(t=1,r=0,b=1,l=0,unit="mm")),legend.position="none",legend.title = element_text(size = 14))
 mito_cn_by_pheno_all_HSCprog
-save_plot(filename=paste0(figures_dir,"mito_cn_by_pheno_HSCprog.pdf"),mito_cn_by_pheno_all_HSCprog,width=4,height=2)
+save_plot(filename=paste0(plots_dir,"mito_cn_by_pheno_HSCprog.pdf"),mito_cn_by_pheno_all_HSCprog,width=4,height=2)
 
 #Generate the table of average CN by cell type - these values are overlaid onto the above plot
 mito_cn%>%
@@ -260,7 +258,7 @@ mito_cn%>%
 
 Generate a plot of mtDNA copy number across samples, grouped by individual.
 
-```{r mito_cn_by_sample_dot_plot,fig.height=2,fig.width=7}
+```{r mito_cn_by_sample_dot_plot,fig.height=4.5,fig.width=7}
 Individual_means_df<-mito_cn%>%
   mutate(Cell_type=convert_vec[Cell_type])%>%
   filter(Sample%in%unlist(lapply(mito_data,function(list) list$tree$tip.label))&
@@ -291,18 +289,18 @@ mtDNA.copy.number.logscale<-mito_cn%>%
         axis.ticks.x = element_blank(),
         legend.title = element_text(size = 16),
         legend.key.height = unit(2,"mm"),
-        strip.text.x = element_text(size = 12),
+        strip.text.x = element_text(size = 7), #narrow space="free" panels truncate larger strip labels
         panel.spacing.x=unit(1, "mm"))+
   guides(colour = guide_legend(override.aes = list(size=2)))
 
 mtDNA.copy.number.logscale
 
-save_plot(filename = paste0(figures_dir,"mtDNA.copy.number.logscale.pdf"),plot=mtDNA.copy.number.logscale,height=2,width=7)
+save_plot(filename = paste0(plots_dir,"mtDNA.copy.number.logscale.pdf"),plot=mtDNA.copy.number.logscale,height=2,width=7)
 ```
 
 Generate the same plot, but now colour points by the colony phenotype. This is slightly difficult to interpret due to the multitude of colours!
 
-```{r mito_cn_by_sample_dot_plot_by_phenotype,fig.height=2,fig.width=7}
+```{r mito_cn_by_sample_dot_plot_by_phenotype,fig.height=4.5,fig.width=7}
 phenotype_cols=c("red",RColorBrewer::brewer.pal(n=length(pheno_levels)-1,name = "Set2"),"darkgray") #Make the erythroid red, and 'unknown' dark grey
 names(phenotype_cols)<-c(pheno_levels,"Unknown")
 mtDNA.copy.number.logscale.by.phenotype<-mito_cn%>%
@@ -327,17 +325,17 @@ mtDNA.copy.number.logscale.by.phenotype<-mito_cn%>%
         axis.ticks.x = element_blank(),
         legend.title = element_text(size = 16),
         legend.key.height = unit(2,"mm"),
-        strip.text.x = element_text(size = 12),
+        strip.text.x = element_text(size = 7), #narrow space="free" panels truncate larger strip labels
         panel.spacing.x=unit(1, "mm"))+
   guides(colour = guide_legend(override.aes = list(size=2)))
 
 mtDNA.copy.number.logscale.by.phenotype
 
-save_plot(filename = paste0(figures_dir,"mtDNA.copy.number.logscale.by.phenotype.pdf"),plot=mtDNA.copy.number.logscale.by.phenotype,height=2,width=7)
+save_plot(filename = paste0(plots_dir,"mtDNA.copy.number.logscale.by.phenotype.pdf"),plot=mtDNA.copy.number.logscale.by.phenotype,height=2,width=7)
 ```
 
 
-```{r fig.height=2,fig.width=3}
+```{r fig.height=4.7,fig.width=7}
 #Look in more details at the 18 pcw copy number by cell type & location
 convert_vec2=c("HSC","MEP","CMP"); names(convert_vec2)=c("H","M","C")
 convert_vec3=c("fBM","fLiver");names(convert_vec3)<-c("F","L")
@@ -359,14 +357,14 @@ foetal_18pcw_by_cell_type_loc<-mito_cn%>%
   labs(x="Cell type & location",y="mtDNA copies per cell",col="Founder cell\nphenotype")
 
 foetal_18pcw_by_cell_type_loc
-save_plot(filename=paste0(figures_dir,"foetal_18pcw_by_cell_type_loc.pdf"),foetal_18pcw_by_cell_type_loc,width=3,height=2)
+save_plot(filename=paste0(plots_dir,"foetal_18pcw_by_cell_type_loc.pdf"),foetal_18pcw_by_cell_type_loc,width=3,height=2)
 ```
 
 ### Assess for a relationship between age and mtDNA copy number
 
 Plot the median mitochondrial CN by age
 
-```{r fig.height=2,fig.width=3}
+```{r fig.height=4.7,fig.width=7}
 median_mtDNA_CN_by_age<-mito_cn%>%
   filter(Sample%in%unlist(lapply(mito_data,function(list) list$tree$tip.label))&
            !is.na(bedtools_mtDNA_genomes)&
@@ -385,7 +383,7 @@ median_mtDNA_CN_by_age<-mito_cn%>%
   my_markdown_theme+
   theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size = 14),legend.text=element_text(size = 12))
 median_mtDNA_CN_by_age
-save_plot(filename = paste0(figures_dir,"median_mtDNA_CN_by_age.pdf"),plot = median_mtDNA_CN_by_age,width=3.5,height=2)
+save_plot(filename = paste0(plots_dir,"median_mtDNA_CN_by_age.pdf"),plot = median_mtDNA_CN_by_age,width=3.5,height=2)
 ```
 
 Now do a formal regression to confirm if there is any kind of significant relationship (although not evident visually).
@@ -433,7 +431,7 @@ Map(list=mito_data,mito_cn_phy=mito_cn_phylo,exp_ID=names(mito_data),function(li
 
 Plot a histogram of the p-values to show that, while there are a couple <0.5, overall there is not a convincing signal.
 
-```{r mtDNA_CN_phylogenetic_signal_pvals,fig.height=2,fig.width=2.5}
+```{r mtDNA_CN_phylogenetic_signal_pvals,fig.height=5.6,fig.width=7}
 #Histogram of p-values
 sapply(mito_cn_phylo,function(dat) dat[[3]]$pvalue["dt","Cmean"])%>%
   as.data.frame()%>%
@@ -554,7 +552,7 @@ head(Individual_burden_means_df)
 Generate Fig. 1
 This shows what proportion of samples have at least one mutation above the threshold value on the x-axis.
 
-```{r fig.height=2,fig.width=3}
+```{r fig.height=4.7,fig.width=7}
 #Cycle through the different thresholds (from 0.01 to 0.99) and see how many mutations are above that cut-off in each sample.
 #Then group by the different individuals and look at the proportion of samples with at >0 mutations at that cutoff.
 
@@ -589,7 +587,7 @@ prop.of.samples.with.mut<-samples_with_mut_df%>%
 
 prop.of.samples.with.mut
 
-save_plot(filename=paste0(figures_dir,"Sample_proportions_with_mut.pdf"),prop.of.samples.with.mut,width=3,height=2)
+save_plot(filename=paste0(plots_dir,"Sample_proportions_with_mut.pdf"),prop.of.samples.with.mut,width=3,height=2)
 
 ```
 
@@ -629,7 +627,7 @@ head(sum_of_vaf_summary)
 Look at the relationship between mean sum of vaf per cell, and the age of the individual.
 This has a clear linear relationship.
 
-```{r,fig.height=2,fig.width=3}
+```{r,fig.height=4.7,fig.width=7}
 mean_sum_of_vaf_by_age<-sum_of_vaf_summary%>%
   left_join(ref_df,by=c("exp_ID"="Sample"))%>%
   ggplot(aes(x=Age,y=mean,col=factor(exp_ID,levels = ref_df$Sample[order(ref_df$Age)])))+
@@ -643,11 +641,11 @@ mean_sum_of_vaf_by_age<-sum_of_vaf_summary%>%
 
 mean_sum_of_vaf_by_age
 
-save_plot(filename=paste0(figures_dir,"mean_sum_of_vaf_by_age.pdf"),plot=mean_sum_of_vaf_by_age,height=2,width=3)
+save_plot(filename=paste0(plots_dir,"mean_sum_of_vaf_by_age.pdf"),plot=mean_sum_of_vaf_by_age,height=2,width=3)
 ```
 
 
-```{r fig.height=2,fig.width=7}
+```{r fig.height=4.5,fig.width=7}
 lm.mean_mutburden_by_age=lm(mean~Age,data=sum_of_vaf_summary%>%
                               left_join(ref_df,by=c("exp_ID"="Sample")))
 summary(lm.mean_mutburden_by_age)$coefficients
@@ -661,7 +659,7 @@ sum_of_vaf_plot_log<-sum_of_vaf_df%>%
   geom_point(size=0.1)+
   theme_classic()+
   my_markdown_theme+
-  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 12))+
+  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 7))+ #narrow space="free" panels truncate larger strip labels
   facet_grid(cols=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales = "free",space="free")+
   scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
   geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",size=0.5)+
@@ -671,12 +669,12 @@ sum_of_vaf_plot_log<-sum_of_vaf_df%>%
 
 sum_of_vaf_plot_log
 
-save_plot(filename = paste0(figures_dir,"sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
+save_plot(filename = paste0(plots_dir,"sum_of_vaf_log.pdf"),plot=sum_of_vaf_plot_log,height=2,width=7)
 ```
 
 Now coloured by cell type, as requested by the reviewer.
 
-```{r fig.height=2.2,fig.width=7}
+```{r fig.height=4.5,fig.width=7}
 sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
   mutate(exp_ID=gsub("8 pcw","8pcw",exp_ID))%>%
   mutate(sum_of_vaf=ifelse(sum_of_vaf==0,0.001,sum_of_vaf))%>%
@@ -685,7 +683,7 @@ sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
   scale_color_manual(values=c("#1a80bb", "#ea801c"))+
   theme_classic()+
   my_markdown_theme+
-  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 12))+
+  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size = 7))+ #narrow space="free" panels truncate larger strip labels
   facet_grid(cols=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales = "free",space="free")+
   scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
   geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",size=0.5)+
@@ -696,13 +694,13 @@ sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
 
 sum_of_vaf_plot_log_by_celltype
 
-save_plot(filename = paste0(figures_dir,"sum_of_vaf_log_by_celltype.pdf"),plot=sum_of_vaf_plot_log_by_celltype,height=2.2,width=7)
+save_plot(filename = paste0(plots_dir,"sum_of_vaf_log_by_celltype.pdf"),plot=sum_of_vaf_plot_log_by_celltype,height=2.2,width=7)
 ```
 
 Comparison of mutation burden by cell type (HSCs and progenitor cell types) - violin plot, with overlaid comparisons using the non-parametric Wilcoxon test.
 This does not show any significant difference.
 
-```{r fig.height=2.2,fig.width=7}
+```{r fig.height=4.5,fig.width=7}
 individuals_with_both=c("18pcw","CB002","SX001","AX001","KX004")
 sum_of_vaf_by_celltype<-sum_of_vaf_df%>%
   filter(exp_ID%in%individuals_with_both)%>%
@@ -720,7 +718,7 @@ sum_of_vaf_by_celltype<-sum_of_vaf_df%>%
 
 sum_of_vaf_by_celltype
 
-save_plot(filename = paste0(rebuttal_figs_dir,"sum_of_vaf_by_celltype_comparison.pdf"),plot=sum_of_vaf_by_celltype,height=2.2,width=7)
+save_plot(filename = paste0(plots_dir,"sum_of_vaf_by_celltype_comparison.pdf"),plot=sum_of_vaf_by_celltype,height=2.2,width=7)
 
 ```
 
@@ -752,7 +750,7 @@ trinucleotide_plot(mutations = df_tidy%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(rebuttal_figs_dir,"Mutational_signature.pdf"))
+                   file_name = plot_file(paste0(plots_dir,"Mutational_signature.pdf")))
 ```
 
 Now limit to check the 0.5 - 1% VAF mutations.
@@ -766,7 +764,7 @@ trinucleotide_plot(mutations = df_tidy%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(rebuttal_figs_dir,"Mutational_signature_0.005_0.01.pdf"))
+                   file_name = plot_file(paste0(plots_dir,"Mutational_signature_0.005_0.01.pdf")))
 ```
 
 Now check the <0.5 VAF mutations.
@@ -780,7 +778,7 @@ trinucleotide_plot(mutations = df_tidy%>%
                      mutate(pos=as.numeric(pos)),
                    analysis_region = "all_mtDNA",
                    analysis_type = "obs_exp",
-                   file_name = paste0(rebuttal_figs_dir,"Mutational_signature_<0.005.pdf"))
+                   file_name = plot_file(paste0(plots_dir,"Mutational_signature_<0.005.pdf")))
 
 ```
 
@@ -869,7 +867,7 @@ mito_data<-Map(list=mito_data,exp_ID=names(mito_data),function(list,exp_ID) {
 
 Step 2. Generate a similar 'sum of vaf' dataframe, but now incorporating driver information
 
-```{r mutburden_by_driverstatus,fig.height=2,fig.width=6}
+```{r mutburden_by_driverstatus,fig.height=4.5,fig.width=7}
 sov_comparison_df<-Map(list=mito_data[3:10],exp_ID=names(mito_data)[3:10],function(list,exp_ID) {
   cat(exp_ID,sep="\n")
   #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
@@ -912,7 +910,7 @@ sov_mut_vs_wt<-sov_mut_vs_wt_df%>%
 
 sov_mut_vs_wt
 
-save_plot(filename = paste0(rebuttal_figs_dir,"sov_mut_vs_wt.pdf"),sov_mut_vs_wt,width=3.3,height=2.5)
+save_plot(filename = paste0(plots_dir,"sov_mut_vs_wt.pdf"),sov_mut_vs_wt,width=3.3,height=2.5)
 ```
 
 Do a formal regression using a linear mixed effects model: does the mutation burden differ by driver status?  Individual is included here as a random effect.
@@ -930,7 +928,7 @@ Assign cells as to whether they are unrelated to any other cell after developmen
 Now "mut_samples" means that they are part of a clonal expansion (≥2 cells related after development)
 "wt_samples" means that they are singletons.
 
-```{r mutburden_by_clonestatus,fig.height=2,fig.width=6}
+```{r mutburden_by_clonestatus,fig.height=4.5,fig.width=7}
 mut_vs_wt_list<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
   cat(exp_ID,sep="\n")
   #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
@@ -974,7 +972,7 @@ sov_exp_vs_singleton<-exp_vs_singleton_df%>%
 
 sov_exp_vs_singleton
 
-save_plot(filename = paste0(rebuttal_figs_dir,"sov_exp_vs_singleton.pdf"),sov_exp_vs_singleton,width=3.3,height=2.5)
+save_plot(filename = paste0(plots_dir,"sov_exp_vs_singleton.pdf"),sov_exp_vs_singleton,width=3.3,height=2.5)
 ```
 
 Again, do a formal regression with a linear mixed effects regression model.
@@ -994,7 +992,7 @@ This section uses two approaches to look for evidence of selection for or agains
 (1) Cumulative distribution function of heteroplasmy levels, divided by the mutation impact (i.e. synonymous, missense or nonsense).
 (2) dN/dS. This is the ratio of non-synonymous mutations compared to synonymous, corrected such that the anticipated ratio by chance is 1.  A ratio of >1 implies overall positive selection (i.e. there is an excess of non-synonymous variants), a ratio of <1 implies overall negative selection (i.e. there is a depletion of non-synonymous variants), and a ratio of ~1 implies overall neutrality.
 
-```{r annotate_variants_with_dndscv}
+```{r annotate_variants_with_dndscv,message=FALSE,warning=FALSE}
 library(dndscv)
 mtref_rda_path=ifelse(Sys.info()['sysname']=="Darwin",paste0(root_dir,"/data/mtref.rda"),"/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/mtref.rda")
 mtref_rda_path="~/Downloads/mtref.rda"
@@ -1063,7 +1061,7 @@ head(complete.annotated.mutation.table)
 Run analysis with the (incorrect) nuclear annotation for comparison.
 This is because in an initial version of the analysis, we used the incorrect genetic code, so want to show here how this initially altered the results, and how it compares with the correct annotation.
 
-```{r nuclear_genetic_code}
+```{r nuclear_genetic_code,message=FALSE,warning=FALSE}
 
 df_tidy_annotated_NUC<-lapply("x",function(tissue.id) {
   cat(tissue.id,sep="\n")
@@ -1104,7 +1102,7 @@ complete.annotated.mutation.table.NUC<-df_tidy_annotated_NUC%>%
 
 Here we show how the incorrect annotation changes  the numbers of mutations with different consequences (i.e. truncating vs missense vs synonymous)
 
-```{r consequence_change_plot,fig.height=3,fig.width=4}
+```{r consequence_change_plot,fig.height=5.2,fig.width=7}
 ## Plots of nuclear vs mitochondrial annotation----
 impact_comparison_df<-left_join(complete.annotated.mutation.table,
                                 complete.annotated.mutation.table.NUC%>%dplyr::select(tissue,sampleID,mut_ref,codonsub,"impact_NUC"=impact))%>%
@@ -1125,11 +1123,11 @@ consequence_change_plot<-impact_comparison_df%>%
 
 consequence_change_plot
 
-save_plot(filename = paste0(rebuttal_figs_dir,"consequence_change_plot.pdf"),consequence_change_plot,width=3.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"consequence_change_plot.pdf"),consequence_change_plot,width=3.5,height=2.5)
 ```
 
 
-```{r compare_misannotated_to_corrected1,fig.height=3,fig.width=3}
+```{r compare_misannotated_to_corrected1,fig.height=7,fig.width=7}
 impact_comparison_df%>%
   filter(impact!="Non-Coding")%>%
   mutate(change=paste(impact_NUC,impact,sep=">"))%>%
@@ -1138,7 +1136,7 @@ impact_comparison_df%>%
 ```
 
 
-```{r compare_misannotated_to_corrected2,fig.height=3,fig.width=3}
+```{r compare_misannotated_to_corrected2,fig.height=7,fig.width=7}
 total_numbers_old_vs_new_plot<-impact_comparison_df%>%
   dplyr::select(mut_ref,"corrected_annotation"=impact,"original_annotation"=impact_NUC)%>%
   tidyr::gather(-mut_ref,key="annotation",value="impact")%>%
@@ -1154,11 +1152,11 @@ total_numbers_old_vs_new_plot<-impact_comparison_df%>%
 
 total_numbers_old_vs_new_plot
 
-save_plot(filename = paste0(rebuttal_figs_dir,"total_numbers_old_vs_new_plot.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
+save_plot(filename = paste0(plots_dir,"total_numbers_old_vs_new_plot.pdf"),total_numbers_old_vs_new_plot,width=3,height=2.5)
 ```
 
 
-```{r compare_misannotated_to_corrected3,fig.height=3,fig.width=3}
+```{r compare_misannotated_to_corrected3,fig.height=7,fig.width=7}
 impact_comparison_df%>%
   dplyr::select(mut_ref,"new_annotation"=impact,"original_annotation"=impact_NUC)%>%
   tidyr::gather(-mut_ref,key="annotation",value="impact")%>%
@@ -1168,7 +1166,7 @@ impact_comparison_df%>%
 ```
 
 
-```{r compare_misannotated_to_corrected4,,fig.height=3,fig.width=3}
+```{r compare_misannotated_to_corrected4,,fig.height=7,fig.width=7}
 simple_impact_comparison_df<-impact_comparison_df%>%
   mutate(change=paste(impact_NUC,impact,sep=">"))%>%
   mutate(altered=ifelse(impact_NUC==impact,"unchanged","changed"))
@@ -1200,7 +1198,7 @@ simple_impact_comparison_df%>%
 
 ### Look at the numbers of synonymous/ non-synonymous mutations
 
-```{r mutations_by_type_violin,fig.height=3,fig.width=5}
+```{r mutations_by_type_violin,fig.height=4.2,fig.width=7}
 my_comparisons <- list(c("Missense", "Synonymous"),
                        c("Synonymous", "Nonsense"))
 
@@ -1222,7 +1220,7 @@ mutation_category_by_vaf_violin_plot<-complete.annotated.mutation.table%>%
 ```
 
 
-```{r heteroplasmy_cum_distribution,fig.height=3,fig.width=3}
+```{r heteroplasmy_cum_distribution,fig.height=7,fig.width=7}
 #Gives some sense of differing heteroplasmy distributions
 #But bear in mind there are multiple non-independent measures for some variants
 #Would need to account for this e.g. by taking single measure of e.g. max VAF of variant per individual
@@ -1300,11 +1298,11 @@ mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
 
 mutation_type_ecdf_plot
 
-save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_ecdf_plot.pdf"),mutation_type_ecdf_plot,width=2.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"mutation_type_ecdf_plot.pdf"),mutation_type_ecdf_plot,width=2.5,height=2.5)
 ```
 
 
-```{r mutation_type_by_gene,fig.height=2.5,fig.width=3}
+```{r mutation_type_by_gene,fig.height=5.8,fig.width=7}
 
 mutation_type_by_gene<-complete.annotated.mutation.table%>%
   filter(impact!="Non-Coding")%>%
@@ -1323,7 +1321,7 @@ mutation_type_by_gene<-complete.annotated.mutation.table%>%
 
 mutation_type_by_gene
 
-save_plot(filename = paste0(rebuttal_figs_dir,"mutation_type_by_gene_blood.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"mutation_type_by_gene_blood.pdf"),mutation_type_by_gene,width=3.5,height=2.5)
 
 ```
 
@@ -1333,7 +1331,7 @@ Combine across all the blood individuals and assess the dN/dS ratios of all vari
 Only count each variant once per individual.
 As before, using the argument "numcode=2" ensures that the mitochondrial genetic code is used for annotation.
 
-```{r run_dnds_across_tissues}
+```{r run_dnds_across_tissues,message=FALSE,warning=FALSE}
 dndscv_by_tissue<-lapply("x",function(tissue.id) {
   
   cat(tissue.id,sep="\n")
@@ -1395,7 +1393,7 @@ global_dnds_blood<-globaldnds_res%>%
         legend.title=element_blank(),
         legend.position="none")
 
-save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_blood.pdf"),global_dnds_blood,width=1.3,height=2.5)
+save_plot(filename = paste0(plots_dir,"global_dnds_blood.pdf"),global_dnds_blood,width=1.3,height=2.5)
 ```
 
 
@@ -1427,13 +1425,13 @@ dnds_heatmap_by_gene<-selcv_res_by_tissue%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
   labs(x="",y="")
 
-save_plot(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_gene.pdf"),dnds_heatmap_by_gene,width=1.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_gene.pdf"),dnds_heatmap_by_gene,width=1.5,height=2.5)
 
 ```
 
 ### dndscv - split by heteroplasmy
 
-```{r dnds_by_heteroplasmy}
+```{r dnds_by_heteroplasmy,message=FALSE,warning=FALSE}
 #Define the VAF 'bins' that will be used for comparing VAF distributions
 #Can set this on a log scale, or as decile bins
 boundaries<-c(0,0.01,0.1,0.2,0.5,1)
@@ -1495,7 +1493,7 @@ global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
   #facet_wrap(~tissue,nrow=1)+
   theme(legend.position="none",axis.text.x=element_text(angle=90))
 
-save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_by_vaf_blood.pdf"),global_dnds_by_vaf_plot,width=1.6,height=2.5)
+save_plot(filename = paste0(plots_dir,"global_dnds_by_vaf_blood.pdf"),global_dnds_by_vaf_plot,width=1.6,height=2.5)
 
 max_dnds_value<-2
 stats_to_include=c("Truncating","Missense")
@@ -1517,7 +1515,7 @@ global_dnds_bytype_by_vaf_plot<-globaldnds_res_by_vaf%>%
   facet_grid(cols=vars(name))+
   theme(legend.position="none",axis.text.x=element_text(angle=90))
 
-save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_bytype_by_vaf_plot.pdf"),global_dnds_bytype_by_vaf_plot,width=2.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"global_dnds_bytype_by_vaf_plot.pdf"),global_dnds_bytype_by_vaf_plot,width=2.5,height=2.5)
 
 max_dnds_value<-1.5
 stats_to_include=c("Missense")
@@ -1539,7 +1537,7 @@ global_dnds_missense_by_vaf_plot<-globaldnds_res_by_vaf%>%
   #facet_wrap(~tissue,nrow=1)+
   theme(legend.position="none",axis.text.x=element_text(angle=90))
 
-save_plot(filename = paste0(rebuttal_figs_dir,"global_dnds_missense_by_vaf_plot.pdf"),global_dnds_missense_by_vaf_plot,width=1.6,height=2.5)
+save_plot(filename = paste0(plots_dir,"global_dnds_missense_by_vaf_plot.pdf"),global_dnds_missense_by_vaf_plot,width=1.6,height=2.5)
 
 ```
 
@@ -1575,14 +1573,14 @@ dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
   labs(x="Variant allele fraction",y="",fill="dN/dS")
 
-save_plot(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_vaf_by_gene.pdf"),dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_vaf_by_gene.pdf"),dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
 
 ```
 
 ### dndscv - dichotomous heteroplasmy split
 Broadly speaking, the threshold between positive and negative selection is ~20%.  Therefore, to maximise power to detect gene-level effects, run analysis with single cut-off at this threshold. This maximises the power to detect differences in other tissues (such as the non-blood tissues), but also to find any gene-specific differences.
 
-```{r dnds_dichot_heteroplasmy_heatmap}
+```{r dnds_dichot_heteroplasmy_heatmap,message=FALSE,warning=FALSE}
 
 boundaries<-c(0,0.01,0.2,1)
 new_VAF_groups=paste0(100*head(boundaries,-1),"-",100*tail(boundaries,-1),"%")
@@ -1644,13 +1642,13 @@ dnds_heatmap_by_dichotomous_vaf_by_gene<-selcv_res_by_dichotomous_vaf%>%
 
 dnds_heatmap_by_dichotomous_vaf_by_gene
 
-save_plot(filename = paste0(rebuttal_figs_dir,"dnds_heatmap_by_dichotomous_vaf_by_gene.pdf"),dnds_heatmap_by_dichotomous_vaf_by_gene,width=2.2,height=2.5)
+save_plot(filename = paste0(plots_dir,"dnds_heatmap_by_dichotomous_vaf_by_gene.pdf"),dnds_heatmap_by_dichotomous_vaf_by_gene,width=2.2,height=2.5)
 
 ```
 
 ## Re-analysis of Ju et al, cancer data
 
-```{r ju_VAF_distribution,fig.height=2.5,fig.width=2.5}
+```{r ju_VAF_distribution,fig.height=7,fig.width=7}
 ju_dat<-readxl::read_excel(paste0(root_dir,"/data/elife-02935-supp2-v2.xlsx"))
 
 ju_dat_reduced<-ju_dat%>%dplyr::select("sampleID"=Tumour_sampleID,
@@ -1668,11 +1666,11 @@ ju_vaf_distribution<-ju_dat_reduced%>%
   my_markdown_theme+
   labs(x="Variant allele fraction")
 ju_vaf_distribution
-save_plot(filename = paste0(rebuttal_figs_dir,"ju_vaf_distribution.pdf"),ju_vaf_distribution,width=2,height=2.5)
+save_plot(filename = paste0(plots_dir,"ju_vaf_distribution.pdf"),ju_vaf_distribution,width=2,height=2.5)
 ```
 
 
-```{r ju_global_dnds,fig.height=2.5,fig.width=2}
+```{r ju_global_dnds,fig.height=8.8,fig.width=7,message=FALSE,warning=FALSE}
 dndsout<-dndscv(ju_dat_reduced,
        gene_list=all_mtDNA_genes, 
        refdb = mtref_rda_path,
@@ -1723,11 +1721,11 @@ ju_global_dnds_plot<-dndsout$globaldnds%>%
         legend.title=element_blank(),
         legend.position="none")
 ju_global_dnds_plot
-save_plot(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_plot.pdf"),ju_global_dnds_plot,width=2,height=2.5)
+save_plot(filename = paste0(plots_dir,"ju_global_dnds_plot.pdf"),ju_global_dnds_plot,width=2,height=2.5)
 ```
 
 
-```{r ju_dnds_by_gene_heatmap,fig.height=2.5,fig.width=2}
+```{r ju_dnds_by_gene_heatmap,fig.height=8.8,fig.width=7}
 temp<-dndsout$sel_cv%>%
   dplyr::select(gene_name,wmis_cv,wnon_cv,qmis_cv,qtrunc_cv)
 
@@ -1747,12 +1745,12 @@ ju_dnds_by_gene_heatmap<-dplyr::bind_rows(temp%>%dplyr::select(gene_name,"dNdS"=
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(n=11,name = "RdYlGn"),limits=c(0,2))+
   labs(x="",y="",fill="dN/dS")
 ju_dnds_by_gene_heatmap
-save_plot(filename = paste0(rebuttal_figs_dir,"ju_dnds_by_gene_heatmap.pdf"),ju_dnds_by_gene_heatmap,width=2,height=2.5)
+save_plot(filename = paste0(plots_dir,"ju_dnds_by_gene_heatmap.pdf"),ju_dnds_by_gene_heatmap,width=2,height=2.5)
 ```
 
 Analyse by heteroplasmy, as for the normal blood data
 
-```{r ju_group_by_VAF,fig.height=2.5,fig.width=4}
+```{r ju_group_by_VAF,fig.height=4.4,fig.width=7,message=FALSE,warning=FALSE}
 boundaries<-c(0,0.03,0.1,0.2,0.5,1)
 new_VAF_groups=paste0(100*head(boundaries,-1),"-",100*tail(boundaries,-1),"%")
 VAF_groups=data.frame(labels=new_VAF_groups,LL=head(boundaries,-1),UL=tail(boundaries,-1))
@@ -1815,11 +1813,11 @@ ju_global_dnds_missense_by_vaf_plot<-globaldnds_res_by_vaf%>%
 
 ju_global_dnds_missense_by_vaf_plot
 
-save_plot(filename = paste0(rebuttal_figs_dir,"ju_global_dnds_missense_by_vaf_plot.pdf"),ju_global_dnds_missense_by_vaf_plot,width=4,height=2.5)
+save_plot(filename = paste0(plots_dir,"ju_global_dnds_missense_by_vaf_plot.pdf"),ju_global_dnds_missense_by_vaf_plot,width=4,height=2.5)
 ```
 
 
-```{r ju_dnds_by_vaf_by_gene,fig.height=2.5,fig.width=2.5}
+```{r ju_dnds_by_vaf_by_gene,fig.height=7,fig.width=7}
 ### Now at a per gene level
 selcv_res_by_vaf<-Map(dndsout=dndscv_by_dichotomous_vaf_blood,VAF_bin=new_VAF_groups[2:length(new_VAF_groups)],function(dndsout,VAF_bin) {
   temp<-dndsout$sel_cv%>%
@@ -1850,7 +1848,7 @@ ju_dnds_heatmap_by_vaf_by_gene<-selcv_res_by_vaf%>%
 
 ju_dnds_heatmap_by_vaf_by_gene
 
-save_plot(filename = paste0(rebuttal_figs_dir,"ju_dnds_heatmap_by_vaf_by_gene.pdf"),ju_dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
+save_plot(filename = paste0(plots_dir,"ju_dnds_heatmap_by_vaf_by_gene.pdf"),ju_dnds_heatmap_by_vaf_by_gene,width=2.5,height=2.5)
 
 ```
 

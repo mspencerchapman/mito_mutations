@@ -18,7 +18,7 @@ for(package in cran_packages){
 
 #Install & load github packages
 if(!require("dndscv", character.only=T,quietly = T, warn.conflicts = F)){
-  devtools::install_github("im3sanger/dndscv")
+  remotes::install_github("im3sanger/dndscv")
   library("dndscv",character.only=T,quietly = T, warn.conflicts = F)
 }
 ```
@@ -29,7 +29,6 @@ Read in the blood mitochondrial mutation data for the analysis.
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_markdown_theme
 set_markdown_figure_defaults() #larger default figure size for on-screen reading
 plots_dir=notebook_plots_dir("Mitochondrial_drift_analysis")
-figures_dir=notebook_plots_dir("Mitochondrial_drift_analysis") #see save_plots in config.R
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 mito_data_file=paste0(root_dir,"/data/mito_data.Rds")
 ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
@@ -121,7 +120,7 @@ real_mut_distribution_plot+my_markdown_theme+theme(strip.text.x = element_text(s
 
 Normalize mutation numbers by the number of samples included.
 
-```{r fig.width=10,fig.height=5}
+```{r fig.width=8,fig.height=4}
 nsamp_df<-Map(list=mito_data,Exp_ID=names(mito_data),function(list,Exp_ID) {
   data.frame(exp_ID=Exp_ID,n_samp=length(colnames(list$matrices$SW)))
 })%>%dplyr::bind_rows()%>%
@@ -137,10 +136,10 @@ real_mut_distribution_plot_normalized<-left_join(real_muts_dist_df,nsamp_df)%>%
   theme(axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))+
   #facet_grid(rows=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales="free")+
   facet_wrap(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),scales="fixed",dir="v",ncol=6)+
-  labs(x="VAF range",y="Number of N1 mutations detected per sample")
+  labs(x="VAF range",y="Number of N1 mutations\ndetected per sample")
 
 real_mut_distribution_plot_normalized+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 6,angle=90))
-save_plot(filename=paste0(figures_dir,"real_mut_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
+save_plot(filename=paste0(plots_dir,"real_mut_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
 ```
 
 
@@ -219,9 +218,9 @@ gens_record$VAF_group=sapply(1:nrow(gens_record),function(i) {
 })
 ```
 
-Visualize the distribution at a selection of "generations" to get a sense of the evolution of the distribution through time
+Visualize the distribution at a selection of "generations" to get a sense of the evolution of the distribution through time. Note that the colouring of a mutation tells you when in life it was actually acquired. Red mutations were acquired very early in life, whereas blue mutations were acquired late. This demonstrates that while low VAF mutations were invariably acquired recently, high VAF mutations are usually acquired decades ago, but there aren't very many until late in life.
 
-```{r fig.width=7,fig.height=2.5}
+```{r fig.width=8,fig.height=3.5}
 modelled_VAF_dist<-gens_record%>%
   filter(total_gens%in%c(100,200,400,800,1200))%>%
   mutate(total_gens=factor(paste(total_gens,"generations"),levels=paste(c(100,200,400,800,1200),"generations")))%>%
@@ -236,12 +235,12 @@ modelled_VAF_dist<-gens_record%>%
   my_markdown_theme
 
 modelled_VAF_dist+my_markdown_theme+theme(strip.text.x = element_text(size = 12),axis.text.x = element_text(size = 6,angle=90))
-save_plot(filename=paste0(figures_dir,"Modelled_VAF_dist.pdf"),modelled_VAF_dist,width = 6,height=2)
+save_plot(filename=paste0(plots_dir,"Modelled_VAF_dist.pdf"),modelled_VAF_dist,width = 6,height=2)
 ```
 
 How many 'high VAF' (>50%) mutaitons are there depending on the generation?
 
-```{r fig.width=3,fig.height=2.5}
+```{r fig.width=6,fig.height=5}
 gens_record%>%
   filter(VAF_group==">50%")%>%
   #mutate(total_gens=factor(total_gens,levels=seq(10,1500,10)))%>%
@@ -258,7 +257,7 @@ gens_record%>%
 One notable feature is that these simulations suggest that high VAF mutations were acquired early in life.
 Conversely, low VAF mutations were invariably acquired very recently.
 
-```{r fig.width=5,fig.height=4}
+```{r fig.width=7,fig.height=5.6}
 acquisition_time_by_VAF<-gens_record%>%
   mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels))%>%
   filter(total_gens==1250)%>%
@@ -270,11 +269,11 @@ acquisition_time_by_VAF<-gens_record%>%
   labs(x="Time of mutation acquisition\n(WF Generations)",y="Density")
 
 acquisition_time_by_VAF+my_markdown_theme
-save_plot(filename = paste0(figures_dir,"Acquisition_time_by_VAF.pdf"),acquisition_time_by_VAF,width=7,height=2.5)
+save_plot(filename = paste0(plots_dir,"Acquisition_time_by_VAF.pdf"),acquisition_time_by_VAF,width=7,height=2.5)
 ```
 
 Plot same data but as a ridges plot.
-```{r fig.width=5,fig.height=4}
+```{r fig.width=7,fig.height=5.6}
 acquisition_time_by_VAF_ridges<-gens_record%>%
   mutate(VAF_group=factor(VAF_group,levels=VAF_groups$labels))%>%
   filter(total_gens==1250)%>%
@@ -287,13 +286,13 @@ acquisition_time_by_VAF_ridges<-gens_record%>%
   labs(x="Time of mutation acquisition\n(WF Generations)",y="VAF level")
 
 acquisition_time_by_VAF_ridges+my_markdown_theme
-save_plot(filename = paste0(figures_dir,"acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
+save_plot(filename = paste0(plots_dir,"acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
 ```
 ### Animation of the Wright-Fisher model
 
 Can also be informative to visualize the evolving distribution over time as an animation.
 
-```{r fig.width=5,fig.height=4}
+```{r fig.width=7,fig.height=5.6}
 gens_record_summary<-gens_record%>%
   group_by(total_gens,gen,VAF_group)%>%
   summarise(n=n(),.groups = "drop_last")
@@ -314,7 +313,7 @@ drift_with_age_animation<-gens_record_summary%>%
 
 drift_with_age_animation+my_markdown_theme
 anim <- gganimate::animate(drift_with_age_animation,renderer = gifski_renderer())
-save_anim(filename=paste0(rebuttal_figs_dir,"driftwithage.gif"),animation = anim)
+save_anim(filename=paste0(plots_dir,"driftwithage.gif"),animation = anim)
 ```
 
 Plot the colour scale for these figures.
@@ -322,7 +321,7 @@ Plot the colour scale for these figures.
 max_gen=1500
 lut=colorRampPalette(RColorBrewer::brewer.pal(8,"Spectral"))(max_gen)
 scale = (length(lut)-1)
-save_pdf(paste0(rebuttal_figs_dir,"mito_muts_by_gen_scale.pdf"),height=6,width = 3)
+save_pdf(paste0(plots_dir,"mito_muts_by_gen_scale.pdf"),height=6,width = 3)
 plot(c(0,10), c(0,1), type='n', bty='n', xaxt='n', xlab='', yaxt='n', ylab='', main="")
 axis(side=2,pos=1,las=1,at=seq(0,max_gen,200)/scale,labels=seq(0,max_gen,200))
 for (i in 1:(length(lut)-1)) {
@@ -362,15 +361,15 @@ abc_res_df<-lapply(1:nrow(sumstats.data),function(i) {
 ```
 
 
-```{r fig.width=5,fig.height=4}
+```{r fig.width=7,fig.height=5.6}
 abc_res_plot_mut_rate<-abc_res_df%>%
   filter(Age>=0)%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
              ymin=`muts_per_mitochondria_per_generation_2.5%`,
              ymax=`muts_per_mitochondria_per_generation_97.5%`))+
   geom_smooth(method="lm",col="black",linewidth=0.5)+
-  geom_point(alpha=0.75,size=0.5)+
-  geom_errorbar(width=0.3,alpha=0.5)+
+  geom_point(alpha=0.75,size=1.5)+
+  geom_errorbar(width=0.3,alpha=0.5,linewidth=0.7)+
   theme_classic()+
   scale_y_continuous(limits=c(1e-4,8e-4),breaks=seq(2e-4,1e-3,2e-4))+
   labs(x="Individual",y="Mutations per mitochondria\nper generation")+
@@ -378,7 +377,7 @@ abc_res_plot_mut_rate<-abc_res_df%>%
   coord_flip()
 
 abc_res_plot_mut_rate+my_markdown_theme
-save_plot(filename=paste0(figures_dir,"abc_res_plot_mut_rate.pdf"),abc_res_plot_mut_rate,width=1.75,height=2)
+save_plot(filename=paste0(plots_dir,"abc_res_plot_mut_rate.pdf"),abc_res_plot_mut_rate,width=1.75,height=2)
 ```
 
 Now do linear mixed effects modelling using all values of the posterior distribution and using individual as a random effect.
@@ -413,17 +412,22 @@ mtDNA_CN*365/confint(lme.gens_by_age)["Age",]
 ```
 
 Plot these results.
-```{r fig.width=5,fig.height=4}
+```{r fig.width=7,fig.height=5.6}
+#95% CI of the fitted trend - see lmer_confidence_band() for what the band covers
+gens_by_age_band<-lmer_confidence_band(lme.gens_by_age,abc_res_df,predictor="Age")
+
 abc_res_plot_total_generations<-abc_res_df%>%
   dplyr::filter(!exp_ID%in%c("8pcw","18pcw"))%>%
   mutate(exp_ID=factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]))%>%
   ggplot(aes(x=Age,y=total_generations))+
-  geom_point(aes(col=exp_ID),alpha=0.05,size=0.25)+
+  geom_ribbon(data=gens_by_age_band,aes(x=Age,ymin=lower,ymax=upper),
+              inherit.aes=FALSE,fill="grey50",alpha=0.25)+
+  geom_jitter(aes(col=exp_ID),alpha=0.1,size=0.3,width=0.1,height = 0)+
   scale_y_continuous(limits=c(0,1700))+
   geom_abline(slope=lme.gens_by_age@beta[2],intercept = lme.gens_by_age@beta[1],linetype=1)+
   scale_color_manual(values=Individual_cols[-c(1:2)])+
   theme_classic()+
-  guides(colour=guide_legend(override.aes = list(alpha=1)))+
+  guides(colour=guide_legend(override.aes = list(alpha=1,size=1.5)))+
   labs(x="Age",y="Total WF generations\n(Posterior distribution from ABC)",col="")+
   my_markdown_theme+
   theme(legend.box.spacing = unit(0,"mm"),
@@ -433,7 +437,7 @@ abc_res_plot_total_generations<-abc_res_df%>%
         legend.text = element_text(margin = margin(t=0)))
 
 abc_res_plot_total_generations+my_markdown_theme
-save_plot(filename=paste0(figures_dir,"abc_res_plot_total_generations.pdf"),abc_res_plot_total_generations,width=2,height=2)
+save_plot(filename=paste0(plots_dir,"abc_res_plot_total_generations.pdf"),abc_res_plot_total_generations,width=2,height=2)
 ```
 
 ## Now a version of the ABC with only synonymous/ non-coding mutation
@@ -535,11 +539,11 @@ real_syn_mut_distribution_plot_normalized<-left_join(syn_muts_distribution_df,ns
   theme(axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))+
   #facet_grid(rows=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales="free")+
   facet_wrap(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),scales="fixed",dir="v",ncol=6)+
-  labs(x="VAF range",y="Number of mutations not affecting coding sequence detected per sample")
+  labs(x="VAF range",y="Number of mutations not affecting\ncoding sequence detected per sample")
 
 real_syn_mut_distribution_plot_normalized+my_markdown_theme+theme(axis.text.x = element_text(size = 6,angle=90),strip.text.x = element_text(size = 12))
 
-save_plot(filename=paste0(figures_dir,"synonymous_noncoding_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
+save_plot(filename=paste0(plots_dir,"synonymous_noncoding_distribution_plot.pdf"),real_mut_distribution_plot_normalized,width=7,height=2.5)
 ```
 
 Create the matrix of summary statistics for the ABC.
@@ -584,7 +588,7 @@ head(abc_syn_res_df)
 
 The "synonymous/ non-coding" mutation rates look similar but ~half of the rate with the full mutation set (as expected given this is only ~50% of the mutations).
 
-```{r fig.width=5,fig.height=4}
+```{r fig.width=7,fig.height=5.6}
 abc_synres_plot_mut_rate<-abc_syn_res_df%>%
   filter(Age>=0)%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
@@ -601,7 +605,7 @@ abc_synres_plot_mut_rate<-abc_syn_res_df%>%
 
 abc_synres_plot_mut_rate+my_markdown_theme
 
-save_plot(filename=paste0(figures_dir,"abc_synres_plot_mut_rate.pdf"),abc_synres_plot_mut_rate,width=1.75,height=2)
+save_plot(filename=paste0(plots_dir,"abc_synres_plot_mut_rate.pdf"),abc_synres_plot_mut_rate,width=1.75,height=2)
 ```
 
 Now do linear mixed effects modelling using all values of the posterior distribution and using individual as a random effect.
@@ -633,12 +637,17 @@ mtDNA_CN*365/confint(lme.gens_by_age.syn)["Age",]
 
 Plot these results.
 
-```{r fig.width=5,fig.height=4}
+```{r fig.width=7,fig.height=5.6}
+#95% CI of the fitted trend - see lmer_confidence_band() for what the band covers
+gens_by_age_syn_band<-lmer_confidence_band(lme.gens_by_age.syn,abc_syn_res_df,predictor="Age")
+
 abc_synres_plot_total_generations<-abc_syn_res_df%>%
   dplyr::filter(!exp_ID%in%c("8pcw","18pcw"))%>%
   mutate(exp_ID=factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]))%>%
   ggplot(aes(x=Age,y=total_generations))+
-  geom_point(aes(col=exp_ID),alpha=0.05,size=0.25)+
+  geom_ribbon(data=gens_by_age_syn_band,aes(x=Age,ymin=lower,ymax=upper),
+              inherit.aes=FALSE,fill="grey50",alpha=0.25)+
+  geom_jitter(aes(col=exp_ID),alpha=0.1,size=0.3,height=0,width=0.1)+
   scale_y_continuous(limits=c(0,1700))+
   geom_abline(slope=lme.gens_by_age.syn@beta[2],intercept = lme.gens_by_age.syn@beta[1],linetype=1)+
   scale_color_manual(values=Individual_cols[-c(1:2)])+
@@ -659,7 +668,7 @@ abc_synres_plot_total_generations+geom_point(aes(col=exp_ID),alpha=0.1,size=0.5)
         legend.box.margin = margin(c(0,0,0,0)),
         legend.text = element_text(margin = margin(t=0)))
 
-save_plot(filename=paste0(figures_dir,"abc_synres_plot_total_generations.pdf"),abc_synres_plot_total_generations,width=2,height=2)
+save_plot(filename=paste0(plots_dir,"abc_synres_plot_total_generations.pdf"),abc_synres_plot_total_generations,width=2,height=2)
 ```
 
 ### Compare the drift rate estimates between the full mutation set and the synonymous/ non-coding set
@@ -667,7 +676,7 @@ save_plot(filename=paste0(figures_dir,"abc_synres_plot_total_generations.pdf"),a
 This shows that the estimates are very similar with highly overlapping confidence intervals.
 Interestingly, despite being a smaller dataset, the non-coding mutation set has narrower confidence intervals and slightly lower drift parameter estimates - though clearly this is not statistically significant.
 
-```{r fig.width=2.5,fig.height=3}
+```{r fig.width=5,fig.height=6}
 lme.syn.CIs<-mtDNA_CN*365/confint(lme.gens_by_age.syn)["Age",]
 lme.full.CIs<-mtDNA_CN*365/confint(lme.gens_by_age)["Age",]
 

@@ -38,3 +38,11 @@ zenodo_upload/
 # (a few minutes); the published list of correlating mutations is the tracked
 # data/CN_correlation.RDS, which this does not replace.
 data/CN_correlation_pval_df.Rds
+
+# Per-notebook plot output. Written only when save_plots is TRUE in config.R, and
+# regenerable by re-knitting, so it is not tracked. The manuscript panels under
+# plots/Figure_NN/ and plots/Extended_Data_Figure_NN/ ARE tracked.
+plots/notebook_output/
+
+# Default device file R creates when a base plot is drawn with no device open.
+Rplots.pdf

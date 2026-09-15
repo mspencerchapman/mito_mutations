@@ -2795,6 +2795,9 @@ trinucleotide_plot = function (mutations, file_name=NULL, analysis_type, analysi
   #interactive devices record but file devices (pdf, png) do not - so saving with
   #dev.copy() worked in RStudio but wrote a blank page under Rscript.
   if(!is.null(file_name)){
+    #Create the target directory if needed - the notebook plot directories are
+    #made on demand, so the path may not exist yet.
+    dir.create(dirname(file_name), showWarnings=FALSE, recursive=TRUE)
     pdf(file=file_name,width=12,height=5)
     on.exit(dev.off(),add=TRUE)
   }
@@ -5251,3 +5254,31 @@ calculate_cell_frac=function(NV,NR) {
   return(cell_frac)
 }
 
+
+#' Confidence band for the population-level regression line of an lmer fit
+#'
+#' Returns a data frame of fitted values with a 95% confidence interval, for use
+#' with geom_ribbon() alongside the fitted line. The band is fit +/- 1.96 * SE of
+#' the linear predictor, with the SE taken from the fixed-effect covariance
+#' matrix, so it describes uncertainty in the mean trend across groups. The
+#' random intercepts are deliberately excluded: they describe how far individual
+#' groups sit from the trend, not the uncertainty in the trend itself, so this is
+#' a confidence interval for the line and not a prediction interval for new data.
+#'
+#' @param model a merMod fit from lme4::lmer() with a single continuous predictor
+#' @param data the data frame the model was fitted to
+#' @param predictor name of the continuous predictor, as a string
+#' @param n number of points at which to evaluate the band
+#' @return data frame with the predictor, fit, se, lower and upper
+lmer_confidence_band = function(model, data, predictor="Age", n=100) {
+  x <- data[[predictor]]
+  if (is.null(x)) stop("predictor '", predictor, "' not found in data")
+  band <- data.frame(seq(min(x, na.rm=TRUE), max(x, na.rm=TRUE), length.out=n))
+  colnames(band) <- predictor
+  X <- model.matrix(as.formula(paste("~", predictor)), data=band)
+  band$fit <- as.vector(X %*% lme4::fixef(model))
+  band$se <- sqrt(rowSums((X %*% as.matrix(vcov(model))) * X))
+  band$lower <- band$fit - 1.96 * band$se
+  band$upper <- band$fit + 1.96 * band$se
+  return(band)
+}
