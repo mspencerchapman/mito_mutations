@@ -82,12 +82,22 @@ old_individuals=c("KX003","KX004","KX007","KX008")
 #-----------------------------------------------------------------------------------#
 
 library(Seurat)
+#The heatmap below is drawn with ComplexHeatmap, which the package block above
+#does not load.
+library(ComplexHeatmap)
 
 #Define function to get clusters
 seuratSNN <- function(matSVD, resolution = 1, k.param = 10){ 
   set.seed(1)
   rownames(matSVD) <- make.unique(rownames(matSVD))
   obj <- FindNeighbors(matSVD, k.param = k.param, annoy.metric = "cosine")
+  #NB this does not run against current Seurat. FindNeighbors() here yields an SNN
+  #graph in which every colony is a singleton, so FindClusters() fails inside
+  #GroupSingletons(): connectivity is empty, max() returns -Inf and
+  #sample(character(0), 1) errors. Passing group.singletons=FALSE gets past the
+  #error but returns a single "singleton" cluster containing every colony, i.e.
+  #no clustering at all - so the panel cannot be reproduced by forcing it through.
+  #Reproducing this figure needs the Seurat version recorded in SESSIONINFO.md.
   clusters <- FindClusters(object = obj$snn, resolution = resolution)
   return(as.character(clusters[,1]))
 }
@@ -163,7 +173,16 @@ for (i in 1:length(patient.ids)){
   
   # store the df
   df.list[[i]] <- df
-  write.table(df, paste0(output.dir, "/", patient.tmp, "_mtdna_clone_assignment.txt"), col.names = T, row.names = F, quote = F, sep = "\t")
+  #Only write when absent. These clone assignments are tracked input data that
+  #other scripts read back, and this script does not cluster correctly against
+  #current Seurat (see the note in seuratSNN above), so an unguarded write would
+  #replace good assignments with degenerate ones. Delete the file to recompute.
+  clone_assignment_file<-paste0(output.dir, "/", patient.tmp, "_mtdna_clone_assignment.txt")
+  if(!file.exists(clone_assignment_file)) {
+    write.table(df, clone_assignment_file, col.names = T, row.names = F, quote = F, sep = "\t")
+  } else {
+    cat("  clone assignments already exist for", patient.tmp, "- not overwriting\n")
+  }
   
   #-----------------------------------------------------------------------------------#
   ## Create a heatmap -------------------------------
