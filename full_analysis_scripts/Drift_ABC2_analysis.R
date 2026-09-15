@@ -93,7 +93,7 @@ combined_posterior<-data.frame(log_generation_time=as.numeric(names(comb_post)),
   geom_bar(col="black",fill="lightblue",stat="identity")+
   geom_point(size=0.3)+
   scale_x_log10()+
-  geom_line(size=0.25)+
+  geom_line(linewidth=0.25)+
   theme_bw()+
   labs(x="Generation time (days)",y="Posterior distribution")+
   my_theme

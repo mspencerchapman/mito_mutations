@@ -217,7 +217,7 @@ CN_correlation_plot_20<-df_tidy_full%>%
   mutate(mut_ref=gsub("MT_","",mut_ref))%>%
   ggplot(aes(x=vaf, y=1/bedtools_mtDNA_genomes,col=exp_ID))+
   geom_point(alpha=0.25,size=0.2)+
-  geom_smooth(aes(x=vaf,y=1/bedtools_mtDNA_genomes),col="black",size=0.5,method="lm",inherit.aes = F)+
+  geom_smooth(aes(x=vaf,y=1/bedtools_mtDNA_genomes),col="black",linewidth=0.5,method="lm",inherit.aes = F)+
   facet_wrap(~mut_ref,ncol = 10)+
   scale_color_manual(values=Individual_cols)+
   scale_x_log10()+

@@ -282,7 +282,7 @@ sum_of_vaf_plot_log_by_celltype<-sum_of_vaf_df%>%
   theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),strip.text.x = element_text(size=6))+
   facet_grid(cols=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales = "free",space="free")+
   scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
-  geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",size=0.5)+
+  geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",linewidth=0.5)+
   geom_text(aes(x=0,y=median_pos,label=paste0("tilde(x) == ",round(median,3))),size=2,nudge_x=+115,nudge_y=+0.5,data=sum_of_vaf_summary%>%mutate(median_pos=ifelse(median==0,0.001,median)),parse=T)+
   labs(x="Sample",y="Mutation burden\n(sum of VAF)",col="Cell type")+
   guides(color=guide_legend(override.aes = list(size=0.4,alpha=1)))+

@@ -224,7 +224,7 @@ mito_sigs_plot<-t(cbind(exposures,excluded_mat))%>%
   mutate(abs_muts=Exposure*nmuts)%>%
   mutate(Signature=factor(Signature,levels=c(rownames(exposures)[nrow(exposures):3],"N0","N1")))%>%
   ggplot(aes(x=VAF_range,y=abs_muts,fill=Signature))+
-  geom_bar(stat="identity",position="stack",col="black",size=0.25)+
+  geom_bar(stat="identity",position="stack",col="black",linewidth=0.25)+
   theme_bw()+
   scale_fill_brewer(palette="Paired")+
   my_theme+
@@ -339,7 +339,7 @@ mito_sigs_plot_SP<-t(cbind(exposures_SP,excluded_mat))%>%
   mutate(abs_muts=Exposure*nmuts)%>%
   mutate(Signature=factor(Signature,levels=c(rownames(exposures_SP)[nrow(exposures_SP):3],"N1","N0")))%>%
   ggplot(aes(x=VAF_range,y=abs_muts,fill=Signature))+
-  geom_bar(stat="identity",position="stack",col="black",size=0.25)+
+  geom_bar(stat="identity",position="stack",col="black",linewidth=0.25)+
   theme_bw()+
   scale_fill_brewer(palette="Paired")+
   my_theme+

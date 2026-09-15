@@ -295,7 +295,7 @@ comb_plot<-Map(model=list(model1=model1_res,model2=model2_res,model3=model4_res,
 })%>%dplyr::bind_rows()%>%
   mutate(vaf_level=factor(paste0(100*vaf_level,"%"),levels=paste0(100*vafs_for_testing,"%")),res=100*res)%>%
   ggplot(aes(x=res,fill = stat))+
-  geom_density(alpha=0.25,size=0.2)+
+  geom_density(alpha=0.25,linewidth=0.2)+
   geom_vline(aes(xintercept=vaf),linetype=2,linewidth=0.5,data = data.frame(vaf_level=factor(paste0(100*vafs_for_testing,"%"),levels=paste0(100*vafs_for_testing,"%")),vaf=100*vafs_for_testing))+
   facet_grid(rows=vars(vaf_level),cols=vars(model))+
   theme_classic()+

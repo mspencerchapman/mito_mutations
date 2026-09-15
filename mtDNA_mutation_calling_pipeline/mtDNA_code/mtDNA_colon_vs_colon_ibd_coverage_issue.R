@@ -9,8 +9,8 @@ colon_coverage$pileup_index <- 1:nrow(colon_coverage)
 
 ggplot(colon_coverage) +
   geom_point(aes(x = pileup_index, y = pileup_mtDNA_genomes, color = Tissue)) +
-  geom_segment(aes(x = 1, xend = length(which(Tissue == "colon")), y = median(pileup_mtDNA_genomes[which(Tissue == "colon")]), yend = median(pileup_mtDNA_genomes[which(Tissue == "colon")])), size = 1) +
-  geom_segment(aes(x = length(which(Tissue == "colon")) + 1, xend = nrow(colon_coverage), y = median(pileup_mtDNA_genomes[which(Tissue == "colon_ibd")]), yend = median(pileup_mtDNA_genomes[which(Tissue == "colon_ibd")])), size = 1) +
+  geom_segment(aes(x = 1, xend = length(which(Tissue == "colon")), y = median(pileup_mtDNA_genomes[which(Tissue == "colon")]), yend = median(pileup_mtDNA_genomes[which(Tissue == "colon")])), linewidth = 1) +
+  geom_segment(aes(x = length(which(Tissue == "colon")) + 1, xend = nrow(colon_coverage), y = median(pileup_mtDNA_genomes[which(Tissue == "colon_ibd")]), yend = median(pileup_mtDNA_genomes[which(Tissue == "colon_ibd")])), linewidth = 1) +
   theme_bw()
 ggsave("Analysis/bedtools_plots/colon_vs_colon_ibd_pileup_mtDNA_genomes.pdf", width = 10, height = 10)
 
@@ -19,8 +19,8 @@ colon_coverage$bedtools_index <- 1:nrow(colon_coverage)
 
 ggplot(colon_coverage) +
   geom_point(aes(x = bedtools_index, y = bedtools_mtDNA_genomes, color = Tissue)) +
-  geom_segment(aes(x = 1, xend = length(which(Tissue == "colon")), y = median(bedtools_mtDNA_genomes[which(Tissue == "colon")]), yend = median(bedtools_mtDNA_genomes[which(Tissue == "colon")])), size = 1) +
-  geom_segment(aes(x = length(which(Tissue == "colon")) + 1, xend = nrow(colon_coverage), y = median(bedtools_mtDNA_genomes[which(Tissue == "colon_ibd")]), yend = median(bedtools_mtDNA_genomes[which(Tissue == "colon_ibd")])), size = 1) +
+  geom_segment(aes(x = 1, xend = length(which(Tissue == "colon")), y = median(bedtools_mtDNA_genomes[which(Tissue == "colon")]), yend = median(bedtools_mtDNA_genomes[which(Tissue == "colon")])), linewidth = 1) +
+  geom_segment(aes(x = length(which(Tissue == "colon")) + 1, xend = nrow(colon_coverage), y = median(bedtools_mtDNA_genomes[which(Tissue == "colon_ibd")]), yend = median(bedtools_mtDNA_genomes[which(Tissue == "colon_ibd")])), linewidth = 1) +
   theme_bw()
 ggsave("Analysis/bedtools_plots/colon_vs_colon_ibd_bedtools_mtDNA_genomes.pdf", width = 10, height = 10)
 
@@ -31,6 +31,6 @@ pcawg_coverage$index <- 1:nrow(pcawg_coverage)
 
 ggplot(pcawg_coverage) +
   geom_point(aes(x = index, y = mt_copy_number)) +
-  geom_segment(aes(x = 1, xend = nrow(pcawg_coverage), y = median(pcawg_coverage$mt_copy_number), yend = median(pcawg_coverage$mt_copy_number)), size = 1) +
+  geom_segment(aes(x = 1, xend = nrow(pcawg_coverage), y = median(pcawg_coverage$mt_copy_number), yend = median(pcawg_coverage$mt_copy_number)), linewidth = 1) +
   scale_y_continuous(limits = c(0,3500)) +
   theme_bw()

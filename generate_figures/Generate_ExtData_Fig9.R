@@ -185,7 +185,7 @@ MRCA.prop.correlation<-expanded_clades_df%>%
        col="Mean\nheteroplasmy",
        size="Clade size\n(clonal fraction)")+
   theme_bw()+
-  geom_smooth(col="black",size=0.6,method="lm")+
+  geom_smooth(col="black",linewidth=0.6,method="lm")+
   my_theme
 summary(lm(max_pos_prop~MRCA_time,data=expanded_clades_df))
 ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_09/ExtDataFig9b.MRCA_prop_correlation_plot.pdf"),MRCA.prop.correlation,width=4,height=2.5)

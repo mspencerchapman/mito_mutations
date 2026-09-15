@@ -806,7 +806,7 @@ real_muts_dist_df<-t(cbind(exposures,excluded_mat))%>%
 
 real_mut_distribution_plot<-real_muts_dist_df%>%
   ggplot(aes(x=VAF_range,y=abs_muts))+
-  geom_bar(stat="identity",fill="#FDBF6F",col="black",size=0.25)+
+  geom_bar(stat="identity",fill="#FDBF6F",col="black",linewidth=0.25)+
   geom_line(aes(group=exp_ID))+
   theme_bw()+
   my_theme+
@@ -824,7 +824,7 @@ nsamp_df<-Map(list=mito_data,Exp_ID=names(mito_data),function(list,Exp_ID) {
 real_mut_distribution_plot_normalized<-left_join(real_muts_dist_df,nsamp_df)%>%
   mutate(muts_per_samp=abs_muts/n_samp)%>%
   ggplot(aes(x=VAF_range,y=muts_per_samp))+
-  geom_bar(stat="identity",fill="#FDBF6F",col="black",size=0.25)+
+  geom_bar(stat="identity",fill="#FDBF6F",col="black",linewidth=0.25)+
   geom_line(aes(group=exp_ID))+
   theme_bw()+
   my_theme+
@@ -1000,7 +1000,7 @@ abc_res_plot_mut_rate<-abc_res_df%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
              ymin=`muts_per_mitochondria_per_generation_2.5%`,
              ymax=`muts_per_mitochondria_per_generation_97.5%`))+
-  geom_smooth(method="lm",col="black",size=0.5)+
+  geom_smooth(method="lm",col="black",linewidth=0.5)+
   geom_point(alpha=0.75,size=0.5)+
   geom_errorbar(width=0.3,alpha=0.5)+
   theme_classic()+

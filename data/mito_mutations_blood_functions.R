@@ -2902,8 +2902,8 @@ mitochondrial_extracted_signature_plot = function (components,mtDNA_trinuc_freq_
     mutate(substitution=substr(Context,1,3),context=substr(Context,5,7))
   
   p<-ggplot(data=dat,aes(x=context,fill=substitution))+
-    geom_bar(data=dat%>%filter(type=="Heavy"),aes(y=freq),stat="identity",col="black",size=0.1)+
-    geom_bar(data=dat%>%filter(type=="Light"),aes(y=-freq),stat="identity",col="black",size=0.1)+
+    geom_bar(data=dat%>%filter(type=="Heavy"),aes(y=freq),stat="identity",col="black",linewidth=0.1)+
+    geom_bar(data=dat%>%filter(type=="Light"),aes(y=-freq),stat="identity",col="black",linewidth=0.1)+
     facet_grid(Signature~substitution,scales="free_y")+
     scale_fill_manual(values=MutationalPatterns:::COLORS6)+
     theme_bw()+

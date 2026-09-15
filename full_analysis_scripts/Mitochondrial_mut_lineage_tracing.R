@@ -675,7 +675,7 @@ expanded_clades_cluster_assignments$prop<-sapply(1:nrow(expanded_clades_cluster_
 n_clones=1+max(expanded_clades_cluster_assignments$cluster_id)
 expansion.assignment.proportions.plot<-expanded_clades_cluster_assignments%>%
   ggplot(aes(x=factor(node,levels=expanded_clades_df%>%arrange(n_samples)%>%mutate(nodes=paste(exp_ID,nodes,sep="_"))%>%pull(nodes)),y=prop,fill=factor(cluster_id,levels=0:(n_clones-1))))+
-  geom_bar(stat="identity",position="stack",col="black",size=0.05,width = 0.7)+
+  geom_bar(stat="identity",position="stack",col="black",linewidth=0.05,width = 0.7)+
   scale_fill_manual(values = cluster_cols[1:n_clones],drop=F)+
   facet_grid(cols=vars(factor(exp_ID,levels=c("KX004","KX003","KX007","KX008"))),scales="free",space = "free")+
   theme_bw()+
@@ -706,7 +706,7 @@ dplyr::bind_rows(Map(list=mito_data,exp_ID=names(mito_data),f=function(list,exp_
 singleton.assignment.plot<-dplyr::bind_rows(Map(list=mito_data,exp_ID=names(mito_data),f=function(list,exp_ID) cbind(list$clusters,exp_ID)))%>%
   dplyr::filter(sample_id%in%unlist(singleton_samples))%>%
   ggplot(aes(x=factor(exp_ID,levels=c("KX004","KX003","KX007","KX008")),y=1,fill=factor(cluster_id,levels=0:(n_clones-1))))+
-  geom_bar(stat="identity",col="black",size=0.1,position="stack")+
+  geom_bar(stat="identity",col="black",linewidth=0.1,position="stack")+
   scale_fill_manual(values = cluster_cols,drop=F)+
   theme_bw()+
   labs(fill="Clone\nassignments",

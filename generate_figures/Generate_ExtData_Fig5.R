@@ -288,14 +288,14 @@ global_dnds_by_vaf_plot<-globaldnds_res_by_vaf%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
          VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
   labs(y = "Mitochondrial genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
   scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = 17, name = "Mutation type") + 
-  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   theme_classic()+
   my_theme+
   #facet_wrap(~tissue,nrow=1)+
@@ -310,14 +310,14 @@ global_dnds_bytype_by_vaf_plot<-globaldnds_res_by_vaf%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
          VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.5), size = 0.5, color="darkgrey") +
+  geom_linerange(position= position_dodge2(width=0.5), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.5), size = 1.5) +
   labs(y = "Mitochondrial genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
   scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
-  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   theme_classic()+
   my_theme+
   facet_grid(cols=vars(name))+
@@ -332,14 +332,14 @@ global_dnds_missense_by_vaf_plot<-globaldnds_res_by_vaf%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
          VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]))%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
   labs(y = "Mitochondrial genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
   scale_color_manual(values = mut_type_cols, name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
-  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   theme_classic()+
   my_theme+
   #facet_wrap(~tissue,nrow=1)+

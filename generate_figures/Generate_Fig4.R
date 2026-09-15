@@ -352,7 +352,7 @@ abc_res_plot_mut_rate<-abc_res_df%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
              ymin=`muts_per_mitochondria_per_generation_2.5%`,
              ymax=`muts_per_mitochondria_per_generation_97.5%`))+
-  geom_smooth(method="lm",col="black",size=0.5)+
+  geom_smooth(method="lm",col="black",linewidth=0.5)+
   geom_point(alpha=0.75,size=0.5)+
   geom_errorbar(width=0.3,alpha=0.5)+
   theme_classic()+

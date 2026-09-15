@@ -392,14 +392,14 @@ tissue_dnds_plot<-global.dnds.complete%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh),
          tissue=factor(tissue,levels=tissue_order))%>%
   ggplot(aes(x=name, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
   labs(y = "Genome-wide dN/dS", x = "Tissue") +
   theme_classic() + 
   ylim(c(0,max_dnds_value))+
   scale_color_manual(values = mycolors[3:4], name="Mutation type") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
-  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   dnds_theme+
   theme(axis.text.x=element_blank(),axis.title.x=element_blank(),axis.ticks.x = element_blank())+
   facet_wrap(~tissue,nrow=1)
@@ -532,7 +532,7 @@ blood_dnds_by_vaf<-vaf.cat.global.dnds.complete%>%
          tissues=factor(tissues,levels=blood_tissues))%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh))%>%
   ggplot(aes(x=vaf_cat, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.75), size = 0.3, color="darkgrey",linetype=1) +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.3, color="darkgrey",linetype=1) +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
   labs(y = "Genome-wide dN/dS", x = "Variant allele frequency") +
   theme_classic() + 
@@ -540,7 +540,7 @@ blood_dnds_by_vaf<-vaf.cat.global.dnds.complete%>%
   ylim(0, max_dnds_value) +
   scale_color_manual(values = mycolors[3:4], name = "") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "") + 
-  geom_hline(yintercept=1, linetype=2, col = 'darkgrey', size = 0.5) +
+  geom_hline(yintercept=1, linetype=2, col = 'darkgrey', linewidth = 0.5) +
   coord_flip()+
   dnds_theme
 
@@ -554,7 +554,7 @@ nonblood_dnds_by_vaf<-vaf.cat.global.dnds.complete%>%
          tissues=factor(tissues,levels=nonblood_tissues))%>%
   mutate(cihigh=ifelse(cihigh>max_dnds_value,max_dnds_value,cihigh))%>%
   ggplot(aes(x=vaf_cat, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.75), size = 0.3, color="darkgrey",linetype=1) +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.3, color="darkgrey",linetype=1) +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
   labs(y = "Genome-wide dN/dS", x = "Variant allele frequency") +
   theme_classic() + 
@@ -562,7 +562,7 @@ nonblood_dnds_by_vaf<-vaf.cat.global.dnds.complete%>%
   ylim(0, max_dnds_value) +
   scale_color_manual(values = mycolors[3:4], name = "") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "") + 
-  geom_hline(yintercept=1, linetype=2, col = 'darkgrey', size = 0.5) +
+  geom_hline(yintercept=1, linetype=2, col = 'darkgrey', linewidth = 0.5) +
   coord_flip()+
   dnds_theme
 
@@ -572,7 +572,7 @@ ggsave(plot = nonblood_dnds_by_vaf, filename = paste0(plots_dir,"nonblood_dnds_b
 subset.vaf.cat.global.dnds.complete <- vaf.cat.global.dnds.complete[vaf.cat.global.dnds.complete$name != "Truncating",]
 
 ggplot(subset.vaf.cat.global.dnds.complete, aes(x=vaf_cat, y = mle, ymin = cilow, ymax = cihigh, color = vaf_cat, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
   labs(y = "Genome-wide dN/dS", x = "Variant allele frequency") +
   theme_classic() + 
@@ -580,7 +580,7 @@ ggplot(subset.vaf.cat.global.dnds.complete, aes(x=vaf_cat, y = mle, ymin = cilow
   scale_color_manual(values = mycolors) +
   ylim(0, 3) +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Mutation type") + 
-  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', size = 0.5) +
+  geom_hline(yintercept=1, linetype='dashed', col = 'darkgrey', linewidth = 0.5) +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
                                     size = 0.75),

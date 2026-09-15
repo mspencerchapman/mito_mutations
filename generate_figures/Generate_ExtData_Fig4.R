@@ -36,6 +36,10 @@ ed4_dir=paste0(plots_dir,"Extended_Data_Figure_04/")
 #-----------------------------------------------------------------------------------#
 
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R")) #supplies get_expanded_clade_nodes, getTips
+
+#Seed at the top, not just before the bootstrap further down: the geom_jitter
+#panels above it are stochastic too, so a later seed leaves them irreproducible.
+set.seed(42)
 library(treemut)
 
 mito_data<-readRDS(paste0(root_dir,"/data/mito_data.Rds"))

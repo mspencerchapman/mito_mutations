@@ -1180,7 +1180,7 @@ plot_list=lapply(all_cohorts,function(this_dataset) {
       facet_grid(cols=vars(factor(exp_ID,levels=ref_df%>%arrange(Age)%>%filter(Cohort==this_dataset&ID%in%sum_of_vaf_summary$exp_ID)%>%pull(ID))),scales = "free",space="free",drop = T)+
       scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
       geom_hline(aes(yintercept=mean),linetype=2,data=sum_of_vaf_summary%>%mutate(mean=ifelse(mean==0,0.001,mean)),col="red",linewidth=0.5)+
-      #geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",size=0.5)+
+      #geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",linewidth=0.5)+
       #geom_text(aes(x=0,y=mean_pos,label=paste0("bar(x) == ",round(mean,2))),size=2,nudge_x=+5,nudge_y=+0.5,data=sum_of_vaf_summary%>%mutate(mean_pos=ifelse(mean==0,0.001,mean)),parse=T)+
       #geom_text(aes(x=0,y=median_pos,label=paste0("tilde(x) == ",round(median,3))),size=2,nudge_x=+115,nudge_y=+0.5,data=sum_of_vaf_summary%>%mutate(median_pos=ifelse(median==0,0.001,median)),parse=T)+
       labs(x="Sample",y="Mutation burden\n(sum of VAF)")+
@@ -1198,7 +1198,7 @@ plot_list=lapply(all_cohorts,function(this_dataset) {
       facet_grid(cols=vars(factor(exp_ID,levels=ref_df%>%arrange(Age)%>%filter(Cohort==this_dataset&ID%in%sum_of_vaf_summary$exp_ID)%>%pull(ID))),scales = "free",space="free",drop = T)+
       scale_y_log10(breaks=c(0.005,0.01,0.03,0.06,0.12,0.25,0.5,1,2,4,8))+
       geom_hline(aes(yintercept=mean),linetype=2,data=sum_of_vaf_summary%>%mutate(mean=ifelse(mean==0,0.001,mean)),col="red",linewidth=0.5)+
-      #geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",size=0.5)+
+      #geom_hline(aes(yintercept=median),linetype=2,data=sum_of_vaf_summary%>%mutate(median=ifelse(median==0,0.001,median)),col="red",linewidth=0.5)+
       geom_text(aes(x=0,y=mean_pos,label=paste0("bar(x) == ",round(mean,2))),size=2,nudge_x=+5,nudge_y=+0.5,data=sum_of_vaf_summary%>%mutate(mean_pos=ifelse(mean==0,0.001,mean)),parse=T)+
       #geom_text(aes(x=0,y=median_pos,label=paste0("tilde(x) == ",round(median,3))),size=2,nudge_x=+115,nudge_y=+0.5,data=sum_of_vaf_summary%>%mutate(median_pos=ifelse(median==0,0.001,median)),parse=T)+
       labs(x="Sample",y="Mutation burden\n(sum of VAF)")+
@@ -2498,7 +2498,7 @@ MPN_global_dnds_by_mut_status_plot<-global_dnds_by_mut_status%>%
          VAF_group=factor(VAF_group,levels=VAF_groups$labels[2:length(boundaries)]),
          mut_status=rename_mut_status_vec[mut_status])%>%
   ggplot(aes(x=VAF_group, y = mle, ymin = cilow, ymax = cihigh, color = name, shape = name)) +
-  geom_linerange(position= position_dodge2(width=0.75), size = 0.5, color="darkgrey") +
+  geom_linerange(position= position_dodge2(width=0.75), linewidth = 0.5, color="darkgrey") +
   geom_point(position=position_dodge2(width=0.75), size = 1.5) +
   labs(y = "Genome-wide dN/dS", x = "Variant allele fraction") +
   theme_classic() + 
