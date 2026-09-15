@@ -81,27 +81,100 @@ old_individuals=c("KX003","KX004","KX007","KX008")
 ##----------------INFERRED CLONES----------------------
 #-----------------------------------------------------------------------------------#
 
-library(Seurat)
-#The heatmap below is drawn with ComplexHeatmap, which the package block above
-#does not load.
+#Neither ComplexHeatmap (the heatmap) nor igraph (the clustering above) is
+#loaded by the package block at the top of the script.
 library(ComplexHeatmap)
+library(igraph)
 
 #Define function to get clusters
-seuratSNN <- function(matSVD, resolution = 1, k.param = 10){ 
-  set.seed(1)
-  rownames(matSVD) <- make.unique(rownames(matSVD))
-  obj <- FindNeighbors(matSVD, k.param = k.param, annoy.metric = "cosine")
-  #NB this does not run against current Seurat. FindNeighbors() here yields an SNN
-  #graph in which every colony is a singleton, so FindClusters() fails inside
-  #GroupSingletons(): connectivity is empty, max() returns -Inf and
-  #sample(character(0), 1) errors. Passing group.singletons=FALSE gets past the
-  #error but returns a single "singleton" cluster containing every colony, i.e.
-  #no clustering at all - so the panel cannot be reproduced by forcing it through.
-  #This panel was originally produced in 2021-2022, i.e. under Seurat 4.x; that
-  #is the version to try. SESSIONINFO.md records the (later) version under which
-  #it fails.
-  clusters <- FindClusters(object = obj$snn, resolution = resolution)
-  return(as.character(clusters[,1]))
+#Shared-nearest-neighbour clustering of colonies by their mtDNA mutation
+#profiles, following the approach of Lareau et al. as described in the methods.
+#
+#The parameters are those stated there, and are deliberately kept:
+#  - cosine distance between colonies
+#  - k.param = 5   (neighbours per colony, including itself, as in Seurat)
+#  - resolution = 10 (Lareau et al. used 1, which merged clusters inappropriately)
+#  - the RAW VAF matrix, not its square root
+#  - Seurat's prune.SNN = 1/15 applied to the Jaccard weights
+#and the mutations are filtered upstream exactly as the methods state: present at
+#>1% VAF in more than one sample, and at a global VAF > 0.5%.
+#
+#This previously called Seurat's FindNeighbors()/FindClusters(). It no longer
+#does, for two reasons. Most colonies carry no mutation above threshold, so their
+#profile is the zero vector and cosine distance between them is undefined (0/0);
+#under current Seurat the neighbour search degenerates to a fully connected graph
+#and no structure is recovered at all. The two operations actually needed - a
+#cosine kNN/SNN graph and Louvain - are therefore implemented directly, and the
+#uninformative colonies are assigned explicitly to the "NULL" cluster that the
+#colouring below already expects, rather than being left to undefined behaviour.
+#
+#IMPORTANT: the clustering is sensitive to k.param and resolution, and igraph's
+#resolution is not on the same scale as Seurat's, because the two use different
+#Louvain implementations. Measured against the committed assignments, on the
+#colonies carrying informative mutations, this reproduces the original partition
+#with an adjusted Rand index of roughly 0.5-1.0 depending on the individual, and
+#no single resolution is best for all four. It is therefore an approximation, and
+#the committed assignments in data/mito_mut_clones/ - the record of the published
+#clustering - take precedence wherever they exist (see below).
+snn_clusters <- function(mat, resolution = 1, k.param = 10) {
+  rownames(mat) <- make.unique(rownames(mat))
+  #A few VAFs are NA in the source matrices. An NA means the site was not
+  #measured in that colony, which carries no evidence of a shared mutation, so
+  #treat it as absent. Left as NA it would make the colony's norm NA and so
+  #propagate NA cluster labels downstream.
+  mat[is.na(mat)] <- 0
+  informative <- sqrt(rowSums(mat^2)) > 0
+  clusters <- rep("NULL", nrow(mat))
+  names(clusters) <- rownames(mat)
+  if (sum(informative) < 3) return(clusters)
+
+  x  <- mat[informative, , drop = FALSE]
+  xn <- x / sqrt(rowSums(x^2))
+  cs <- xn %*% t(xn)                       #cosine similarity between colonies
+  k  <- min(k.param, nrow(x) - 1)
+
+  #k nearest neighbours of each colony
+  adj <- matrix(0, nrow(x), nrow(x))
+  for (i in seq_len(nrow(x))) adj[i, order(-cs[i, ])[seq_len(k + 1)]] <- 1
+  diag(adj) <- 0
+
+  #SNN weight = Jaccard overlap of the two neighbour sets, pruned as Seurat does
+  inter <- adj %*% t(adj)
+  deg   <- rowSums(adj)
+  snn   <- inter / pmax(outer(deg, deg, "+") - inter, 1)
+  snn[snn < 1/15] <- 0
+
+  g  <- igraph::graph_from_adjacency_matrix(snn, mode = "undirected",
+                                            weighted = TRUE, diag = FALSE)
+  cl <- igraph::cluster_louvain(g, resolution = resolution)
+  memb <- as.character(igraph::membership(cl))
+
+  #Merge single-colony clusters into whichever cluster they are most strongly
+  #connected to, as Seurat's GroupSingletons() did. The code downstream orders
+  #colonies within each cluster by hierarchical clustering and only handles
+  #clusters of two or more, so singletons would otherwise be dropped from the
+  #heatmap and its annotation would no longer match. A singleton with no
+  #connectivity at all stays put.
+  repeat {
+    sizes <- table(memb)
+    singles <- names(sizes)[sizes == 1]
+    if (!length(singles)) break
+    moved <- FALSE
+    for (sg in singles) {
+      i <- which(memb == sg)
+      if (length(i) != 1) next   #already reassigned earlier in this pass
+      others <- memb != sg
+      if (!any(others)) next
+      conn <- tapply(snn[i, others], memb[others], sum)
+      if (!length(conn) || max(conn) <= 0) next
+      memb[i] <- names(conn)[which.max(conn)]
+      moved <- TRUE
+    }
+    if (!moved) break
+  }
+
+  clusters[informative] <- memb
+  clusters
 }
 
 output.dir <- paste0(root_dir,"/data/mito_mut_clones")
@@ -133,29 +206,53 @@ for (i in 1:length(patient.ids)){
   
   # remove variants which are not present at a VAF > 1% at least once
   mutations <- rownames(vaf.mtx)
-  filtered.mutations <- mutations[rowSums(vaf.mtx > 0.01) > 1]
+  #na.rm: without it a mutation with any NA VAF makes rowSums() NA, so an
+  #all-NA row was selected into the matrix below (KX003 and KX007).
+  filtered.mutations <- mutations[rowSums(vaf.mtx > 0.01, na.rm = TRUE) > 1]
   vaf.filtered.mtx <- vaf.mtx[filtered.mutations,]
   
   #-----------------------------------------------------------------------------------#
   ## DEFINE CLONES BASED ON THE MITOCHONDRIAL MUTATIONS -------------------------------
   #-----------------------------------------------------------------------------------#
   
-  # get clusters with cluster resolution 10 and knn 50
-  clusters <- seuratSNN((t(vaf.filtered.mtx)),resolution= 10,k.param=5)
-  clusters <- str_pad(clusters, 2, pad = "0")
-  
+  #The clone assignments in data/mito_mut_clones/ are the record of the clustering
+  #behind the published figure, so use them when they exist: the heatmap, the
+  #dendrogram of cluster means and the clone overlays are then all derived from
+  #one clustering, and reproduce the published panels. snn_clusters() below is
+  #the fallback for regenerating them from scratch - delete the files to do so.
+  clone_assignment_file<-paste0(output.dir, "/", patient.tmp, "_mtdna_clone_assignment.txt")
+
+  if(file.exists(clone_assignment_file)) {
+    cat("  using the committed clone assignments for", patient.tmp, "\n")
+    committed<-read.delim(clone_assignment_file, stringsAsFactors = FALSE)
+    clusters<-str_pad(as.character(committed$cluster_id), 2, pad = "0")
+    names(clusters)<-committed$sample_id
+    clusters<-clusters[colnames(vaf.filtered.mtx)]
+    #already the final labels, so no relabelling below
+
+  } else {
+    # get clusters with cluster resolution 10 and knn 50
+    clusters <- snn_clusters(t(vaf.filtered.mtx), resolution = 10, k.param = 5)
+    clusters <- str_pad(clusters, 2, pad = "0")
+
+    #Change the label of the biggest cluster to "00" - the colonies with no
+    #informative mutations - so it takes the light grey heading the palette.
+    biggest_cluster<-names(table(clusters))[which.max(table(clusters))]
+    original_cluster_0<-which(clusters=="00")
+    new_cluster_0<-which(as.character(clusters)==biggest_cluster)
+    clusters[new_cluster_0]<-"00"
+    clusters[original_cluster_0]<-biggest_cluster
+  }
+
+  #NB the colours are keyed by cluster label and are assigned after the swap
+  #above, not before: the matrix of cluster means further down is built from
+  #names(vec_go), so names taken before the swap would refer to a label that no
+  #longer exists and yield an all-NA column.
   # assign colours to clusters
   names_clusters <- unique(clusters)
   cluster_cols<- c("lightgray","#1f77b4","#d62728","#2ca02c","#ff7f0e","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#ad494a","#e7ba52","#8ca252","#756bb1","#636363","#aec7e8", brewer.pal(12, "Paired"))
   vec_go <- cluster_cols[1:length(names_clusters)]
   names(vec_go) <- sort(names_clusters)
-  
-  #Change the colour of the biggest cluster to light grey - this is generally the "NULL" cluster with no informative mutations
-  biggest_cluster<-names(table(clusters))[which.max(table(clusters))]
-  original_cluster_0<-which(clusters=="00")
-  new_cluster_0<-which(as.character(clusters)==biggest_cluster)
-  clusters[new_cluster_0]<-"00"
-  clusters[original_cluster_0]<-biggest_cluster
   
   # Make data.frame for cluster_id and sample relationship
   df <- data.frame(
@@ -177,8 +274,9 @@ for (i in 1:length(patient.ids)){
   df.list[[i]] <- df
   #Only write when absent. These clone assignments are tracked input data that
   #other scripts read back, and this script does not cluster correctly against
-  #current Seurat (see the note in seuratSNN above), so an unguarded write would
-  #replace good assignments with degenerate ones. Delete the file to recompute.
+  #the clustering has been reimplemented (see snn_clusters above), so a run here
+  #would replace the committed assignments - produced by the original Seurat
+  #clustering - with ones from the new implementation. Delete the file to recompute.
   clone_assignment_file<-paste0(output.dir, "/", patient.tmp, "_mtdna_clone_assignment.txt")
   if(!file.exists(clone_assignment_file)) {
     write.table(df, clone_assignment_file, col.names = T, row.names = F, quote = F, sep = "\t")
@@ -264,10 +362,19 @@ for (i in 1:length(patient.ids)){
   # Get group means 
   matty <- sapply(names(vec_go), function(cluster){
     cells <- df %>% dplyr::filter(cluster_id == cluster) %>% pull(sample_id) %>% as.character()
-    Matrix::rowMeans(sqrt(afp[,cells]))
+    #na.rm: a few VAFs are NA in the source matrices (9 for KX003, 2 for KX007),
+    #which would otherwise make the whole cluster mean NA and the cosine
+    #similarity below undefined.
+    Matrix::rowMeans(sqrt(afp[,cells]), na.rm = TRUE)
   })
   
-  if(length(groups) > 2){
+  #The "NULL" cluster holds the colonies with no mutation above threshold, so its
+  #mean profile is all zero and cosine similarity against it is undefined (0/0).
+  #A dendrogram of mutation profiles has no meaningful position for a cluster
+  #with no mutations, so drop any all-zero column before clustering.
+  matty <- matty[, colSums(abs(matty)) > 0, drop = FALSE]
+
+  if(ncol(matty) > 2){
     
     # Do cosine distance; note that we used sqrt transformation already when creating the pseudo bulk-cell matrix
     mito.hc <- hclust(dist(lsa::cosine((matty))))
@@ -322,6 +429,54 @@ mito_data=Map(list=mito_data[old_individuals],exp_ID=old_individuals,function(li
 })
 
 #Plot the clone assignments of the expanded clades
+#The expanded clades, as built for Fig. 5 and Extended Data Fig. 9. This script
+#used expanded_clades_df without defining it, so it only ever ran in a session
+#where one of those scripts had already been sourced.
+expanded_clades_df<-Map(list=mito_data[old_individuals],exp_ID=old_individuals,function(list,exp_ID){
+  cat(paste0(exp_ID,"\n"))
+  
+  mutCN_cutoff=25 #If the mutant mitochondrial copy number is over 25, retain mutation even if is in the "CN correlating muts" list, this number is set empirically.
+  CN_correlating_mut_removal_mat=list$matrices$implied_mutCN>mutCN_cutoff|(matrix((!rownames(list$matrices$vaf)%in%CN_correlating_muts),ncol=1)%*%matrix(rep(1,ncol(list$matrices$vaf)),nrow=1))
+  vaf.filt<-(list$matrices$vaf*list$matrices$SW*(list$matrices$ML_Sig=="N1")*CN_correlating_mut_removal_mat)
+  
+  #Review how many expanded clades have reliable mitochondrial marker mutations
+  marker_mut_cutoff<-0.01
+  pos_mut_cutoff<-0.01
+  exp_nodes<-get_expanded_clade_nodes(list$tree.ultra,height_cut_off = 100,min_clonal_fraction=0.01)
+  full_df<-dplyr::bind_cols(data.frame(exp_ID=rep(exp_ID,nrow(exp_nodes))),
+                            exp_nodes,
+                            data.frame(marker_mut_cutoff=rep(marker_mut_cutoff,nrow(exp_nodes))),
+                            exp_nodes_muts<-dplyr::bind_rows(lapply(exp_nodes$nodes,function(node) {
+                              node_samples=getTips(list$tree.ultra,node)
+                              if(any(vaf.filt[,node_samples]>marker_mut_cutoff)){
+                                node_homo_muts<-names(rowSums(vaf.filt[,node_samples,drop=F]>marker_mut_cutoff)[rowSums(vaf.filt[,node_samples,drop=F]>marker_mut_cutoff)>0])
+                                node_homo_muts<-node_homo_muts[!is.na(node_homo_muts)]
+                                
+                                pos_samples_per_mut<-sapply(node_homo_muts,function(mut){
+                                  n_samples<-sum(vaf.filt[mut,node_samples]>pos_mut_cutoff)
+                                  return(n_samples)
+                                })
+                                
+                                mean_het_of_pos<-sapply(node_homo_muts,function(mut){
+                                  pos_samples<-node_samples[vaf.filt[mut,node_samples]>pos_mut_cutoff]
+                                  return(mean(as.numeric(vaf.filt[mut,pos_samples])))
+                                })
+                                
+                                return(data.frame(nmuts=length(node_homo_muts),
+                                                  homo_muts=paste0(node_homo_muts,collapse=","),
+                                                  BMM=node_homo_muts[which.max(pos_samples_per_mut)],
+                                                  pos_samples_per_mut=paste0(pos_samples_per_mut,collapse=","),
+                                                  max_pos_samples=max(pos_samples_per_mut),
+                                                  max_pos_prop=max(pos_samples_per_mut)/length(node_samples),
+                                                  mean_heteroplasmy=mean(as.numeric(vaf.filt[node_homo_muts[which.max(pos_samples_per_mut)],node_samples])),
+                                                  mean_het_of_pos=mean_het_of_pos[which.max(pos_samples_per_mut)]))
+                              } else {
+                                return(data.frame(nmuts=0,homo_muts=NA,pos_samples_per_mut=NA,max_pos_samples=NA,max_pos_prop=NA,mean_heteroplasmy=NA))
+                              }
+                            })))
+  return(dplyr::select(full_df,-homo_muts,-pos_samples_per_mut))
+})%>%dplyr::bind_rows()
+
 expanded_clades_cluster_assignments<-lapply(1:nrow(expanded_clades_df),function(i) {
   exp_ID<-expanded_clades_df$exp_ID[i]
   node<-expanded_clades_df$nodes[i]
@@ -341,7 +496,7 @@ expanded_clades_cluster_assignments$prop<-sapply(1:nrow(expanded_clades_cluster_
 n_clones=1+max(expanded_clades_cluster_assignments$cluster_id)
 expansion.assignment.proportions.plot<-expanded_clades_cluster_assignments%>%
   ggplot(aes(x=factor(node,levels=expanded_clades_df%>%arrange(n_samples)%>%mutate(nodes=paste(exp_ID,nodes,sep="_"))%>%pull(nodes)),y=prop,fill=factor(cluster_id,levels=0:(n_clones-1))))+
-  geom_bar(stat="identity",position="stack",col="black",size=0.05,width = 0.7)+
+  geom_bar(stat="identity",position="stack",col="black",linewidth=0.05,width = 0.7)+
   scale_fill_manual(values = cluster_cols[1:n_clones],drop=F)+
   facet_grid(cols=vars(factor(exp_ID,levels=c("KX004","KX003","KX007","KX008"))),scales="free",space = "free")+
   theme_bw()+
@@ -369,10 +524,25 @@ dplyr::bind_rows(Map(list=mito_data,exp_ID=names(mito_data),f=function(list,exp_
   summarise(n=n(),n0=sum(cluster_id==0),nAssigned=sum(cluster_id!=0),prop_assigned=sum(cluster_id!=0)/n())
 
 #Visualize this assignment
-singleton.assignment.plot<-dplyr::bind_rows(Map(list=mito_data,exp_ID=names(mito_data),f=function(list,exp_ID) cbind(list$clusters,exp_ID)))%>%
+singleton_assignment_df<-dplyr::bind_rows(Map(list=mito_data,exp_ID=names(mito_data),f=function(list,exp_ID) cbind(list$clusters,exp_ID)))%>%
   dplyr::filter(sample_id%in%unlist(singleton_samples))%>%
-  ggplot(aes(x=factor(exp_ID,levels=c("KX004","KX003","KX007","KX008")),y=1,fill=factor(cluster_id,levels=0:(n_clones-1))))+
-  geom_bar(stat="identity",col="black",size=0.1,position="stack")+
+  dplyr::mutate(n=1)
+
+#Not every clone has singleton colonies, and drop=FALSE keeps the full clone list
+#in the legend so the colours correspond to the other panels. A level with no
+#rows gets a label but no key glyph, which reads as a missing colour, so give any
+#absent clone a zero-height row: the legend is then complete and the bars are
+#unchanged.
+absent_clones<-setdiff(as.character(0:(n_clones-1)), as.character(singleton_assignment_df$cluster_id))
+if(length(absent_clones)) {
+  singleton_assignment_df<-dplyr::bind_rows(singleton_assignment_df,
+                                            data.frame(cluster_id=as.numeric(absent_clones),
+                                                       exp_ID=names(mito_data)[1], n=0))
+}
+
+singleton.assignment.plot<-singleton_assignment_df%>%
+  ggplot(aes(x=factor(exp_ID,levels=c("KX004","KX003","KX007","KX008")),y=n,fill=factor(cluster_id,levels=0:(n_clones-1))))+
+  geom_bar(stat="identity",col="black",linewidth=0.1,position="stack")+
   scale_fill_manual(values = cluster_cols,drop=F)+
   theme_bw()+
   labs(fill="Clone\nassignments",
