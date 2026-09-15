@@ -97,7 +97,9 @@ seuratSNN <- function(matSVD, resolution = 1, k.param = 10){
   #sample(character(0), 1) errors. Passing group.singletons=FALSE gets past the
   #error but returns a single "singleton" cluster containing every colony, i.e.
   #no clustering at all - so the panel cannot be reproduced by forcing it through.
-  #Reproducing this figure needs the Seurat version recorded in SESSIONINFO.md.
+  #This panel was originally produced in 2021-2022, i.e. under Seurat 4.x; that
+  #is the version to try. SESSIONINFO.md records the (later) version under which
+  #it fails.
   clusters <- FindClusters(object = obj$snn, resolution = resolution)
   return(as.character(clusters[,1]))
 }
