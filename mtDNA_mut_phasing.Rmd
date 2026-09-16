@@ -18,6 +18,10 @@ set_markdown_figure_defaults() #larger default figure size for on-screen reading
 # This notebook uses base-R tree plotting plus a few tidyverse helpers; load them
 # explicitly so it knits from a clean R session, not just an interactive one.
 load_packages(cran = c("dplyr", "stringr", "readxl", "ape", "phangorn"))
+
+#Genotype trees are built and saved for every donor, but only these are drawn
+#inline: the notebook would otherwise carry one full-page tree per donor.
+example_trees_to_display<-c("KX003","PD5163")
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
 #Set the key file paths using the root dir
@@ -317,10 +321,14 @@ temp=lapply(all_cohorts_plus_CML,function(cohort) {
     tree<-build_mito_haplotype_tree(muts=muts_ancestral,vaf_mat=vaf.filt,phasing_mat=mat)
     write.tree(tree,file=tree_file_path)
     
-    #plot the genotype phylogeny
-    plot(tree,show.node.label=T,cex=0.3)
+    #Show the genotype phylogeny inline for a couple of donors only. Every tree is
+    #written to file below; rendering all of them in the notebook would add over a
+    #hundred full-page plots to the html for no extra insight.
+    if(exp_ID %in% example_trees_to_display) {
+      plot(tree,show.node.label=T,cex=0.3)
+    }
     
-    #Now save it for later scrutiny
+    #Now save it for later scrutiny - every donor, regardless of the above.
     #scale=FALSE: these are base-R tree plots written as analysis output, not
     #notebook figures, so they keep their intended 4 x 15 inch page.
     save_pdf(tree_pdf_path,height=15,width=4,scale=FALSE)
