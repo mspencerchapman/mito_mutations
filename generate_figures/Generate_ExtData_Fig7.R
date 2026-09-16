@@ -133,10 +133,15 @@ ggsave(filename = paste0(ed7_dir,"ExtDataFig7a.acquisition_time_by_VAF_ridges.pd
 ## These need the blood mutation data and the nuclear driver annotation, which is
 ## attached below from data/blood_adult/annot_files_filtered/.
 ##
-## Both panels use all eight adult donors, mito_data[3:10] (the archived script
-## used mito_data[5:8], an arbitrary four of them; with only four donors just two
-## driver-carrying clades are found, which makes panel b far noisier than the
-## submitted version).
+## Both panels use the four older individuals, mito_data[5:8] - KX003, KX004,
+## KX007 and KX008 - the same set as old_individuals in Fig. 5 and Extended Data
+## Figs. 8 and 9, so the distributions are comparable across those figures.
+##
+## The spread comes from resampling which colony is taken from each clade: the
+## draw sits inside the bootstrap loop, so all 100 iterations use a different
+## colony per clade. That uses more of the data than one fixed draw would, while
+## keeping one colony per clade so that cells from the same clone are not counted
+## as independent observations.
 #-----------------------------------------------------------------------------------#
 
 mito_data<-readRDS(paste0(root_dir,"/data/mito_data.Rds"))
@@ -223,7 +228,7 @@ df_tidy$VAF_group=sapply(df_tidy$vaf,function(vaf) {
 })
 
 ## 3. Make VAF distribution matrices for each individual: each row is a sample, and each column is a VAF group, each value is number of mutations
-muts_per_VAF_per_sample_mat<-Map(exp_ID=names(mito_data)[3:10],list=mito_data[3:10],function(exp_ID,list) {
+muts_per_VAF_per_sample_mat<-Map(exp_ID=names(mito_data)[5:8],list=mito_data[5:8],function(exp_ID,list) {
   cat(exp_ID)
   exp_ID_list<-lapply(list$tree$tip.label,function(SampleID) {
     
@@ -241,7 +246,7 @@ muts_per_VAF_per_sample_mat<-Map(exp_ID=names(mito_data)[3:10],list=mito_data[3:
 muts_per_VAF_per_sample_mat_combined<-Reduce(rbind,muts_per_VAF_per_sample_mat)
 
 
-mut_nodes_list<-Map(list=mito_data[3:10],exp_ID=names(mito_data)[3:10],function(list,exp_ID) {
+mut_nodes_list<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
   cat(exp_ID,sep="\n")
   #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
   #Some of the clades will be singletons
@@ -259,7 +264,7 @@ mut_nodes_list<-Map(list=mito_data[3:10],exp_ID=names(mito_data)[3:10],function(
 nboot=100
 all_boot_res<-lapply(1:nboot,function(i) {
   cat(i,sep="\n")
-  mut_vs_wt_list<-Map(list=mito_data[3:10],exp_ID=names(mito_data)[3:10],function(list,exp_ID) {
+  mut_vs_wt_list<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
     cat(exp_ID,sep="\n")
     #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
     #Some of the clades will be singletons
@@ -324,7 +329,7 @@ ggsave(filename = paste0(ed7_dir,"ExtDataFig7b.VAF_dist_mut_vs_wt.pdf"),VAF_dist
 nboot=100
 all_boot_res_clone_vs_singleton<-lapply(1:nboot,function(i) {
   cat(i,sep="\n")
-  mut_vs_wt_list<-Map(list=mito_data[3:10],exp_ID=names(mito_data)[3:10],function(list,exp_ID) {
+  mut_vs_wt_list<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
     cat(exp_ID,sep="\n")
     #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
     #Some of the clades will be singletons
@@ -406,7 +411,7 @@ coding_region <- 577:16023
 d_loop_region <- c(1:576,16024:16569)
 
 #Set the basic plotting theme for ggplot2
-#my_markdown_theme is defined in config.R
+#my_theme is defined in config.R
 
 
 #Read in the mitochondrial copy number data
@@ -659,7 +664,7 @@ blood_vs_lymph_VAF_distribution<-blood_lymph_common_data%>%
   scale_fill_manual(values=tissue_cols)+
   facet_grid(exp_ID~dataset)+
   theme_classic()+
-  my_markdown_theme+
+  my_theme+
   theme(axis.text.x=element_text(angle=90),strip.text.y=element_text(angle=0),legend.position="none")+
   labs(x="Heteroplasmy level",y="mtDNA mutations per cell")
 
@@ -706,7 +711,7 @@ HSC_vs_lymph_mean_homo_burden<-blood_vs_lymph_homo_muts_dat%>%
   scale_x_continuous(limits=c(20,90))+
   labs(x="Age",y="Mean homoplasmic mutations per cell",col="")+
   theme_classic()+
-  my_markdown_theme
+  my_theme
 
 HSC_vs_lymph_mean_homo_burden
 
@@ -772,7 +777,7 @@ data_vs_regression<-n_near_homoplasmic_per_sample%>%
   scale_color_manual(values = tissue_cols)+
   labs(x="Age",y="Mean homoplasmic mutations per cell",col="")+
   theme_classic()+
-  my_markdown_theme
+  my_theme
 
 data_vs_regression
 
@@ -799,7 +804,7 @@ homo_muts_glm_coefficients<-summary(glmer.res)$coefficients%>%
   geom_errorbar(width = 0.3)+
   geom_vline(xintercept = 0,linetype=2)+
   theme_classic()+
-  my_markdown_theme+
+  my_theme+
   theme(axis.title.y=element_blank(),legend.position = "none")+
   labs(x="Tissue drift coefficient\n(relative to normal blood)")
 
@@ -868,7 +873,7 @@ data_vs_regression_lymph_subdivided<-n_homoplasmic_lymph_type%>%
   scale_color_manual(values = cell_type_cols)+
   labs(x="Age",y="Mean homoplasmic mutations per cell",col="")+
   theme_classic()+
-  my_markdown_theme
+  my_theme
 data_vs_regression_lymph_subdivided
 
 ggsave(filename = paste0(ed7_dir,"ExtDataFig7g.data_vs_regression_lymph_subdivided.pdf"),data_vs_regression_lymph_subdivided,width=3.5,height=2.5)
@@ -895,7 +900,7 @@ blood_vs_lymph_subdivided_homo_muts_glm_coefficients<-summary(glmer.res_blood_vs
   geom_errorbar(width = 0.3)+
   geom_vline(xintercept = 0,linetype=2)+
   theme_classic()+
-  my_markdown_theme+
+  my_theme+
   theme(axis.title.y=element_blank(),legend.position = "none")+
   labs(x="Tissue drift coefficient\n(relative to normal HSPCs)")
 
