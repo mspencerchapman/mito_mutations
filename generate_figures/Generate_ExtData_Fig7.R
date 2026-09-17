@@ -23,7 +23,8 @@ source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 #plots_dir, rebuttal_figs_dir and my_theme all come from config.R
 
 load_packages(cran = c("dplyr","tidyr","ggplot2","stringr","readxl","forcats",
-                       "ape","phangorn","lme4","lmerTest","ggridges","RColorBrewer","patchwork"))
+                       "ape","phangorn","lme4","lmerTest","ggridges","RColorBrewer","patchwork"),
+              github = c(treemut = "nangalialab/treemut"))  #assign_to_tree, for the driver annotation
 
 ed7_dir <- paste0(plots_dir,"Extended_Data_Figure_07/")
 dir.create(ed7_dir, showWarnings = FALSE, recursive = TRUE)
@@ -171,12 +172,40 @@ mito_cn$exp_ID<-factor(mito_cn$exp_ID,levels=ref_df$Sample[order(ref_df$Age)]) #
 mito_cn<-left_join(mito_cn,phenotype_data_EM,relationship="many-to-many")
 exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_567_A_C","MT_574_A_C","MT_16181_A_C","MT_16182_A_C","MT_16183_A_C","MT_16189_T_C")
 
-#Attach the nuclear driver annotation, which panel b splits on. nDNA_mats is not
-#part of the deposited mito_data.Rds, so it is read from the annotation files.
+#Attach the nuclear driver annotation, which panel b splits on. Reading the
+#annotation file is not enough: the node column stored in it does not refer to
+#this tree, so the mutations must be reassigned with treemut::assign_to_tree()
+#and the node column recomputed - exactly as add_driver_info() does in
+#mtDNA_mutations_blood.Rmd. Without that the join below matches almost nothing
+#and hardly any clade is called driver-mutant.
 mito_data<-Map(list=mito_data,exp_ID=names(mito_data),function(list,exp_ID) {
   annot_muts_file<-paste0(root_dir,"/data/blood_adult/annot_files_filtered/annotated_muts_filt_",exp_ID,".Rds")
-  if(file.exists(annot_muts_file)) list$nDNA_mats<-readRDS(annot_muts_file)
-  return(list)
+  if(file.exists(annot_muts_file)) {
+    cat(paste("Importing annotated mutations dataframe for",exp_ID),sep="\n")
+    list$nDNA_mats<-readRDS(annot_muts_file)
+    
+    if(nrow(list$nDNA_mats$mat)==0) {
+      stop(return(list))
+    }
+    
+    tree_samples<-list$tree.ultra$tip.label[-which(list$tree.ultra$tip.label=="Ancestral")]
+    
+    if(any(!tree_samples%in%colnames(list$nDNA_mats$NV))) {
+      cat("Dropping samples not found in the count matrix.")
+      drop_tips<-tree_samples[!tree_samples%in%colnames(list$nDNA_mats$NV)]
+      list$tree.ultra<-drop.tip(list$tree.ultra,tip = drop_tips)
+      list$tree<-drop.tip(list$tree,tip = drop_tips)
+      tree_samples<-tree_samples[tree_samples%in%colnames(list$nDNA_mats$NV)]
+    }
+    
+    mtr<-as.matrix(cbind(list$nDNA_mats$NV[,tree_samples,drop=F],matrix(0,ncol = 1,nrow = nrow(list$nDNA_mats$NV),dimnames = list(rownames(list$nDNA_mats$NV),"Ancestral"))))
+    dep<-as.matrix(cbind(list$nDNA_mats$NR[,tree_samples,drop=F],matrix(10,ncol = 1,nrow = nrow(list$nDNA_mats$NR),dimnames = list(rownames(list$nDNA_mats$NV),"Ancestral"))))
+    res<-treemut::assign_to_tree(tree=list$tree.ultra,mtr=mtr,dep=dep)
+    list$nDNA_mats$mat$node<-res$tree$edge[res$summary$edge_ml,2]
+    return(list)
+  } else {
+    return(list)
+  }
 })
 
 ## Generate tidy data frame of samples, mutations and vafs-------------------------------
@@ -261,30 +290,27 @@ mut_nodes_list<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(li
 
 ## 3. Make a list of samples with/ without driver mutations----
 # Each cell from a clone is a non-independent 
+
+#The clades and their driver status do not change between bootstrap
+#iterations, so compute them once per donor here. Only the draw of which
+#colony represents each clade belongs inside the loop - that is what the
+#bootstrap varies.
+clade_nodes_b<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
+  ec_df<-get_expanded_clade_nodes(list$tree.ultra,height_cut_off = 100,min_clonal_fraction = 0,min_samples=1)%>%
+    left_join(list$nDNA_mats$mat%>%dplyr::select(node,mut_ref,Gene,CDS,Protein),by=c("nodes"="node"))%>%
+    mutate(exp_ID=exp_ID,.before=1)
+  genes_of_interest=c("TET2","DNMT3A","ASXL1")
+  mut_nodes<-ec_df%>%filter(Gene%in%genes_of_interest)%>%pull(nodes)%>%unique()
+  wt_nodes<-ec_df$nodes[!ec_df$nodes%in%mut_nodes]
+  list(mut_nodes=mut_nodes, wt_nodes=wt_nodes, tree=list$tree.ultra)
+})
+
 nboot=100
 all_boot_res<-lapply(1:nboot,function(i) {
-  cat(i,sep="\n")
-  mut_vs_wt_list<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
-    cat(exp_ID,sep="\n")
-    #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
-    #Some of the clades will be singletons
-    ec_df<-get_expanded_clade_nodes(list$tree.ultra,height_cut_off = 100,min_clonal_fraction = 0,min_samples=1)%>%
-      left_join(list$nDNA_mats$mat%>%dplyr::select(node,mut_ref,Gene,CDS,Protein),by=c("nodes"="node"))%>%
-      mutate(exp_ID=exp_ID,.before=1)
-    
-    genes_of_interest=c("TET2","DNMT3A","ASXL1")
-    mut_nodes<-ec_df%>%filter(Gene%in%genes_of_interest)%>%pull(nodes)%>%unique()
-    wt_nodes<-ec_df$nodes[!ec_df$nodes%in%mut_nodes]
-    
-    # mut_nodes<-ec_df%>%filter(n_samples>1)%>%pull(nodes)
-    # wt_nodes<-ec_df%>%filter(n_samples==1)%>%pull(nodes)
-    
-    mut_samples<-unlist(lapply(mut_nodes,function(node) sample(x=getTips(list$tree.ultra,node=node),size=1)))
-    wt_samples<-unlist(lapply(wt_nodes,function(node) sample(x=getTips(list$tree.ultra,node=node),size=1)))
-    
-    return(list(mut=mut_samples,wt=wt_samples))
+  mut_vs_wt_list<-lapply(clade_nodes_b,function(cn) {
+    list(mut=unlist(lapply(cn$mut_nodes,function(node) sample(x=getTips(cn$tree,node=node),size=1))),
+         wt =unlist(lapply(cn$wt_nodes, function(node) sample(x=getTips(cn$tree,node=node),size=1))))
   })
-  
   all_mut<-unlist(lapply(mut_vs_wt_list,function(x) x$mut))
   all_wt<-unlist(lapply(mut_vs_wt_list,function(x) x$wt))
   
@@ -313,7 +339,11 @@ VAF_dist_mut_vs_wt<-as.matrix(all_boot_res)%>%
   filter(VAF_group%in%VAF_groups$labels[4:11])%>%
   ggplot(aes(y=`50%`,ymin=`2.5%`,ymax=`97.5%`,x=VAF_group,fill=status))+
   geom_bar(stat="identity",position="dodge",alpha=0.5)+
-  scale_y_continuous(limits=c(0,1))+
+  #Only 28 clades carry a driver mutation, and one colony represents each, so
+  #the upper confidence limits of the mutated bars reach beyond 1. A fixed
+  #limit of c(0,1) drops those bars and truncates their intervals silently,
+  #so let the upper limit follow the data.
+  scale_y_continuous(limits=c(0,NA))+
   #facet_grid(~status)+
   geom_point(position= position_dodge2(width=0.75),size=0.75)+
   geom_linerange(position= position_dodge2(width=0.75), linewidth=0.5,color="gray50") +
@@ -326,30 +356,27 @@ ggsave(filename = paste0(ed7_dir,"ExtDataFig7b.VAF_dist_mut_vs_wt.pdf"),VAF_dist
 
 
 #Repeat analysis but dividing by singleton vs member of clonal expansion
+
+#The clades and their driver status do not change between bootstrap
+#iterations, so compute them once per donor here. Only the draw of which
+#colony represents each clade belongs inside the loop - that is what the
+#bootstrap varies.
+clade_nodes_c<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
+  ec_df<-get_expanded_clade_nodes(list$tree.ultra,height_cut_off = 100,min_clonal_fraction = 0,min_samples=1)%>%
+    left_join(list$nDNA_mats$mat%>%dplyr::select(node,mut_ref,Gene,CDS,Protein),by=c("nodes"="node"))%>%
+    mutate(exp_ID=exp_ID,.before=1)
+  genes_of_interest=c("TET2","DNMT3A","ASXL1")
+  mut_nodes<-ec_df%>%filter(n_samples>1)%>%pull(nodes)
+  wt_nodes<-ec_df%>%filter(n_samples==1)%>%pull(nodes)
+  list(mut_nodes=mut_nodes, wt_nodes=wt_nodes, tree=list$tree.ultra)
+})
+
 nboot=100
 all_boot_res_clone_vs_singleton<-lapply(1:nboot,function(i) {
-  cat(i,sep="\n")
-  mut_vs_wt_list<-Map(list=mito_data[5:8],exp_ID=names(mito_data)[5:8],function(list,exp_ID) {
-    cat(exp_ID,sep="\n")
-    #Using the 'get_expanded_clade_nodes' function to effectively cut across the tree at 100 mutations of molecular time
-    #Some of the clades will be singletons
-    ec_df<-get_expanded_clade_nodes(list$tree.ultra,height_cut_off = 100,min_clonal_fraction = 0,min_samples=1)%>%
-      left_join(list$nDNA_mats$mat%>%dplyr::select(node,mut_ref,Gene,CDS,Protein),by=c("nodes"="node"))%>%
-      mutate(exp_ID=exp_ID,.before=1)
-    
-    # genes_of_interest=c("TET2","DNMT3A","ASXL1")
-    # mut_nodes<-ec_df%>%filter(Gene%in%genes_of_interest)%>%pull(nodes)%>%unique()
-    # wt_nodes<-ec_df$nodes[!ec_df$nodes%in%mut_nodes]
-    
-    mut_nodes<-ec_df%>%filter(n_samples>1)%>%pull(nodes)
-    wt_nodes<-ec_df%>%filter(n_samples==1)%>%pull(nodes)
-    
-    mut_samples<-unlist(lapply(mut_nodes,function(node) sample(x=getTips(list$tree.ultra,node=node),size=1)))
-    wt_samples<-unlist(lapply(wt_nodes,function(node) sample(x=getTips(list$tree.ultra,node=node),size=1)))
-    
-    return(list(mut=mut_samples,wt=wt_samples))
+  mut_vs_wt_list<-lapply(clade_nodes_c,function(cn) {
+    list(mut=unlist(lapply(cn$mut_nodes,function(node) sample(x=getTips(cn$tree,node=node),size=1))),
+         wt =unlist(lapply(cn$wt_nodes, function(node) sample(x=getTips(cn$tree,node=node),size=1))))
   })
-  
   all_mut<-unlist(lapply(mut_vs_wt_list,function(x) x$mut))
   all_wt<-unlist(lapply(mut_vs_wt_list,function(x) x$wt))
   
@@ -567,6 +594,12 @@ all_df_tidy<-lapply(all_df_tidy,function(df_tidy) {
   })
   return(df_tidy)
 })
+
+#Panels d-i thin each expanded clade down to one randomly chosen colony (the
+#sample() calls below), so they depend on the state of the random number
+#generator. Re-seed here rather than relying on the seed set for panel a, so
+#that these panels are unaffected by any change to the code above them.
+set.seed(42)
 
 #Iterate across samples/ VAF groups to get numbers of mutations per sample/ VAF group
 VAF_distribution_mats<-Map(dataset_mito_data=all_mito_datasets[all_cohorts],df_tidy=all_df_tidy[all_cohorts],function(dataset_mito_data,df_tidy) {
