@@ -1287,7 +1287,7 @@ get_phasing_list=function(samples,Chrom,Pos,project,tree=NULL,output_dir,ref_sam
             new_bam_path=paste0("new_bams/",bam_sample,".sample.dupmarked.bam")
             if(!file.exists(new_bam_path)) {
               print(paste("Importing bam file for",bam_sample,"and replacing header"))
-              bam_path=paste0("/nfs/cancer_ref01/nst_links/live/",project,"/",bam_sample,"/",bam_sample,".sample.dupmarked.bam")
+              bam_path=paste0("/software/SGP/nst_links/live/",project,"/",bam_sample,"/",bam_sample,".sample.dupmarked.bam")
               command=paste("julia header_edit.jl",bam_path,"offending_string.txt")
               system(command)
             }
@@ -1360,7 +1360,7 @@ get_base_counts_list=function(samples,Chrom,Pos,project,tree=NULL,output_dir,ref
             new_bam_path=paste0("new_bams/",bam_sample,".sample.dupmarked.bam")
             if(!file.exists(new_bam_path)) {
               print(paste("Importing bam file for",bam_sample,"and replacing header"))
-              bam_path=paste0("/nfs/cancer_ref01/nst_links/live/",project,"/",bam_sample,"/",bam_sample,".sample.dupmarked.bam")
+              bam_path=paste0("/software/SGP/nst_links/live/",project,"/",bam_sample,"/",bam_sample,".sample.dupmarked.bam")
               command=paste("julia header_edit.jl",bam_path,"offending_string.txt")
               system(command)
             }
@@ -2098,7 +2098,7 @@ get_ASCAT_minor_allele_cn=function(Chrom,Pos,sample,project){
   } else {
     sample_project<-project
   }
-  file = paste0("/nfs/cancer_ref01/nst_links/live/", sample_project, "/", sample, "/", sample, ".ascat_ngs.summary.csv")
+  file = paste0("/software/SGP/nst_links/live/", sample_project, "/", sample, "/", sample, ".ascat_ngs.summary.csv")
   cn=get_cn(file)
   if(!is.null(cn)) {
     minor_allele_cn=cn$minor[cn$chr==Chrom & cn$start<Pos & cn$end>Pos]

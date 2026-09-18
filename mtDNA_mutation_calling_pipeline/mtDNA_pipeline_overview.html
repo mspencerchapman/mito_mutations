@@ -382,7 +382,7 @@ the given projects it will need to be edited manually)</p>
 IFS=&#39;,&#39; read -r -a PROJECT_ARRAY &lt;&lt;&lt; &quot;$ALL_PROJECT_NUMBERS&quot;
 
 for PROJECT_NUMBER in &quot;${PROJECT_ARRAY[@]}&quot;; do
-    PROJECT_SAMPLES=$(ls /nfs/cancer_ref01/nst_links/live/${PROJECT_NUMBER})
+    PROJECT_SAMPLES=$(ls /software/SGP/nst_links/live/${PROJECT_NUMBER})
     for SAMPLE in $PROJECT_SAMPLES; do
       echo -e &quot;${PROJECT_NUMBER}\t$SAMPLE&quot;
     done

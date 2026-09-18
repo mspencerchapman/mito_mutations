@@ -27,7 +27,7 @@ There should not be any column names. This can be generated manually, otherwise 
 IFS=',' read -r -a PROJECT_ARRAY <<< "$ALL_PROJECT_NUMBERS"
 
 for PROJECT_NUMBER in "${PROJECT_ARRAY[@]}"; do
-    PROJECT_SAMPLES=$(ls /nfs/cancer_ref01/nst_links/live/${PROJECT_NUMBER})
+    PROJECT_SAMPLES=$(ls /software/SGP/nst_links/live/${PROJECT_NUMBER})
     for SAMPLE in $PROJECT_SAMPLES; do
       echo -e "${PROJECT_NUMBER}\t$SAMPLE"
     done

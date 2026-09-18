@@ -94,7 +94,7 @@ bamfilesF <- vector();
 baifilesF <- vector();
 pathsF    <- vector();
 for(pid in unique(sample_table$pid)) {
-	fullfiles        <- list.files(path = paste("/nfs/cancer_ref01/nst_links/live/",pid,"/",sep=""), pattern = "\\.bam$", recursive = TRUE, full.names = TRUE)
+	fullfiles        <- list.files(path = paste("/software/SGP/nst_links/live/",pid,"/",sep=""), pattern = "\\.bam$", recursive = TRUE, full.names = TRUE)
 	fullfiles        <- grep("pindel",fullfiles,invert=T,value=T)
 	fullfiles        <- grep("brm",   fullfiles,invert=T,value=T)
 	files            <- sapply(strsplit(fullfiles, split="\\/"), tail, 1) 
@@ -103,7 +103,7 @@ for(pid in unique(sample_table$pid)) {
 	names(fullfiles) <- samples
 	bamfilesF        <- c(bamfilesF, files    [which(samples %in% sample_table$sampleID)])
 	pathsF           <- c(pathsF,    fullfiles[which(samples %in% sample_table$sampleID)])
-	fullfiles        <- list.files(path = paste("/nfs/cancer_ref01/nst_links/live/",pid,"/",sep=""), pattern = "\\.bai$", recursive = TRUE, full.names = TRUE)
+	fullfiles        <- list.files(path = paste("/software/SGP/nst_links/live/",pid,"/",sep=""), pattern = "\\.bai$", recursive = TRUE, full.names = TRUE)
 	fullfiles        <- grep("pindel",fullfiles,invert=T,value=T)
 	fullfiles        <- grep("brm",   fullfiles,invert=T,value=T)
 	files            <- sapply(strsplit(fullfiles, split="\\/"), tail, 1) 
