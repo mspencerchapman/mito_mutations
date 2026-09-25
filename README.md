@@ -104,17 +104,17 @@ This is **not** needed for the demo below.
 
 ## Demo
 
-Extended Data Fig. 12 is built entirely from data tracked in this repository, so
+Supplementary Fig. 7 is built entirely from data tracked in this repository, so
 it runs immediately after installation with no data download.
 
 ```bash
-Rscript generate_figures/Generate_ExtData_Fig12.R
+Rscript generate_figures/Generate_Supplementary_Figs.R
 ```
 
-**Expected output.** Eight PDF panels in `plots/Extended_Data_Figure_12/`,
-named `*_rejection.pdf`: the posterior distributions of the mtDNA drift
+**Expected output.** Eight PDF panels in `plots/Supplementary_Figures/`,
+named `SuppFig7*_rejection.pdf`: the posterior distributions of the mtDNA drift
 parameter for each cohort (normal, MPN, MPN-non-coding, CML), under both the
-sequential and individual ABC. These are the panels of Extended Data Fig. 12 in
+sequential and individual ABC. These are the panels of Supplementary Fig. 7 in
 the manuscript, and the copies already committed in that directory are the
 reference - a fresh run reproduces them exactly (the only byte-level difference
 is the creation date that PDFs embed). The same directory also holds the
@@ -159,7 +159,7 @@ longer - a few minutes each, and up to ~50 minutes for `mtDNA_mut_phasing.Rmd`.
 Scripts whose output is stochastic set a fixed seed, so repeated runs reproduce
 the committed panels.
 
-One known exception: `Generate_ExtData_Fig10.R` does not reproduce under the
+One known exception: `Generate_ExtData_Fig9.R` does not reproduce under the
 Seurat version recorded in [`SESSIONINFO.md`](SESSIONINFO.md) (5.5.1).
 `FindNeighbors()` returns an SNN graph in which every colony is a singleton, so
 `FindClusters()` fails inside `GroupSingletons()` (`sample.int`: "invalid first
@@ -237,12 +237,16 @@ ordering below matters only if you are rebuilding from scratch.
                                            # ABC drift inference, one run per
                                            # cohort; writes posterior tables
 5. Rscript generate_figures/Generate_Fig1.R    ... Generate_Fig6.R
-   Rscript generate_figures/Generate_ExtData_Fig1.R ... Generate_ExtData_Fig12.R
+   Rscript generate_figures/Generate_ExtData_Fig1.R ... Generate_ExtData_Fig9.R
+   Rscript generate_figures/Generate_Supplementary_Figs.R
+   Rscript generate_figures/Generate_SuppFig4.R
 ```
 
 There is one script per manuscript figure: `Generate_Fig1.R` to
-`Generate_Fig6.R`, and `Generate_ExtData_Fig1.R` to `Generate_ExtData_Fig12.R`
-except `Fig11` - Extended Data Fig. 11 is a flow-sorting schematic with no code.
+`Generate_Fig6.R`, and `Generate_ExtData_Fig1.R` to `Generate_ExtData_Fig9.R`.
+Figures that sit in the Supplementary Information are produced by
+`Generate_Supplementary_Figs.R` (Supplementary Figs. 5 and 7) and
+`Generate_SuppFig4.R` (Supplementary Fig. 4a-b).
 
 Only step 5 is needed to reproduce the figures from the deposited data. Steps 3
 and 4 regenerate their own inputs and take considerably longer - the ABC is
@@ -251,7 +255,7 @@ roughly 35 minutes per cohort.
 Two figure scripts depend on ABC output that is already included in the
 repository (`data/Drift_ABC_clonal_expansions/`), so step 4 is only necessary if
 you want to re-run the inference itself: `Generate_Fig6.R` (panel e) and
-`Generate_ExtData_Fig12.R`.
+`Generate_Supplementary_Figs.R` (Supplementary Fig. 7).
 
 ---
 

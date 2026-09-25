@@ -101,7 +101,7 @@ cohort_config<-list(
                     muts_file="abc_muts_MPN_nocoding.csv",
                     out_subdir="Drift_ABC_clonal_expansions/Drift_ABC_MPN_nocoding_sequential",
                     out_subdir_individual="Drift_ABC_clonal_expansions/Drift_ABC_MPN_nocoding_individual"),
-  #CML. Mutation set and order recovered from Extended Data Fig. 12d (the ridge
+  #CML. Mutation set and order recovered from Supplementary Fig. 7d (the ridge
   #plot is drawn bottom-to-top in the order the sequential ABC was run).
   #NB the tree is taken from mito_data[[exp_ID]]$tree.ultra rather than from
   #CML_ultratrees.RDS: that file is nested as list(ultratrees=, moleculartimetrees=)

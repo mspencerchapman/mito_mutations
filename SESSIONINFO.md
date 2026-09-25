@@ -5,7 +5,7 @@ recorded with `sessionInfo()` / `packageVersion()`. The original analysis was
 developed under R 4.1 on Linux; it was re-run under the versions below.
 
 Extended Data Fig. 10 does NOT reproduce under the Seurat version recorded below
-(5.5.1) - see the note in generate_figures/Generate_ExtData_Fig10.R. That panel
+(5.5.1) - see the note in generate_figures/Generate_ExtData_Fig9.R. That panel
 was originally produced in 2021-2022, i.e. under Seurat 4.x (4.0 was released in
 January 2021, 4.1 in early 2022; Seurat 5 reached CRAN in late 2023). The exact
 patch version was not recorded. Seurat 4.x does not build under R 4.6, so that

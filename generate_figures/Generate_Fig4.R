@@ -42,7 +42,7 @@ ref_file=paste0(root_dir,"/data/Samples_metadata_ref.csv")
 
 
 #Create the figure output directories if they do not already exist
-for(d in c("Extended_Data_Figure_07")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
+for(d in c("Extended_Data_Figure_06")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 for(d in c("Figure_04")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recursive=TRUE)
 
 #Read in the mitochondrial copy number data
@@ -245,7 +245,7 @@ modelled_VAF_dist<-gens_record%>%
 ggsave(filename=paste0(plots_dir,"Figure_04/Fig4b.Modelled_VAF_dist.pdf"),width = 6,height=2)
 
 #-----------------------------------------------------------------------------------#
-### Generate EXTENDED DATA FIG. 7A ---------
+### Generate EXTENDED DATA FIG. 6A ---------
 #-----------------------------------------------------------------------------------#
 
 #One notable feature is that these simulations suggest that high VAF mutations were acquired early in life
@@ -261,7 +261,7 @@ acquisition_time_by_VAF_ridges<-gens_record%>%
   my_theme+
   labs(x="Time of mutation acquisition\n(WF Generations)",y="VAF level")
 
-ggsave(filename = paste0(plots_dir,"Extended_Data_Figure_07/ExtDataFig7a.acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
+ggsave(filename = paste0(plots_dir,"Extended_Data_Figure_06/ExtDataFig6a.acquisition_time_by_VAF_ridges.pdf"),acquisition_time_by_VAF_ridges,width=3.3,height=2.5)
 
 #-----------------------------------------------------------------------------------#
 ### Generate animation of evolving VAF distribution ---------

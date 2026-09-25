@@ -20,7 +20,7 @@
 #
 # NB these are diagnostic views for use while iterating on the ABC. The
 # manuscript versions of the same distributions are produced by
-# generate_figures/Generate_ExtData_Fig12.R (Extended Data Fig. 12) and
+# generate_figures/Generate_Supplementary_Figs.R (Supplementary Fig. 7) and
 # generate_figures/Generate_Fig6.R (Fig. 6e).
 #-------------------------------------------------------------------------------
 
