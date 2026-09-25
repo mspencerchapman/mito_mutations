@@ -46,3 +46,6 @@ plots/notebook_output/
 
 # Default device file R creates when a base plot is drawn with no device open.
 Rplots.pdf
+
+# Excel lock files
+~$*
