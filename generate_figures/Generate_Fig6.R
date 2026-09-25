@@ -287,9 +287,15 @@ for(ex in marker_mut_examples) {
 # summary for that setting. The prior is drawn once and shown as the reference row.
 #-----------------------------------------------------------------------------------#
 
-abc_dirs<-c(normal=paste0(root_dir,"/data/Drift_ABC_clonal_expansions/Drift_ABC_normal_sequential/"),
-            MPN   =paste0(root_dir,"/data/Drift_ABC_clonal_expansions/Drift_ABC_MPN_sequential/"),
-            CML   =paste0(root_dir,"/data/Drift_ABC_clonal_expansions/Drift_ABC_CML_sequential/"))
+#Rejection posteriors, matching the Methods ("using the 'abc' R package, using
+#the 'rejection' method"), Fig. 4 and Supplementary Fig. 6. The neuralnet
+#(regression-adjusted) runs are in the directories without the suffix; set
+#abc_method to "neuralnet" to build the panel from those instead.
+abc_method<-"rejection"
+sfx<-if(abc_method=="rejection") "_rejection" else ""
+abc_dirs<-c(normal=paste0(root_dir,"/data/Drift_ABC_clonal_expansions/Drift_ABC_normal_sequential",sfx,"/"),
+            MPN   =paste0(root_dir,"/data/Drift_ABC_clonal_expansions/Drift_ABC_MPN_sequential",sfx,"/"),
+            CML   =paste0(root_dir,"/data/Drift_ABC_clonal_expansions/Drift_ABC_CML_sequential",sfx,"/"))
 
 #Only include settings whose sequential ABC has been run
 abc_dirs<-abc_dirs[sapply(abc_dirs,function(d) dir.exists(paste0(d,"output")))]
@@ -311,7 +317,11 @@ normal_disease_comparison_ridges_plot<-drift_rate_comparison%>%
   mutate(setting=factor(setting,levels=c("prior",names(abc_dirs))))%>%
   ggplot(aes(x=generation_time,y=setting,fill=setting))+
   ggridges::geom_density_ridges(linewidth=0.3)+
-  scale_fill_brewer(palette = "RdPu")+
+  #One colour for all three data posteriors: a graded palette would imply an
+  #ordering or relationship between the cohorts that does not exist. The prior
+  #is kept grey so it reads as the reference rather than a fourth cohort.
+  scale_fill_manual(values=c(prior="grey80",
+                             stats::setNames(rep("#8856a7",length(abc_dirs)),names(abc_dirs))))+
   scale_x_log10(breaks=c(0.1,1,10,100),labels=c(0.1,1,10,100))+
   theme_classic()+
   my_theme+
