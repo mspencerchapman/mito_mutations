@@ -723,6 +723,8 @@ mito_data<-Map(list=mito_data,exp_ID=names(mito_data),function(list,exp_ID) {
   }
 })
 
+
+
 #2. Generate a similar 'sum of vaf' dataframe, but now incorporating driver information----
 sov_comparison_df<-Map(list=mito_data[3:10],exp_ID=names(mito_data)[3:10],function(list,exp_ID) {
   cat(exp_ID,sep="\n")
