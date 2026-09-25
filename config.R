@@ -75,8 +75,8 @@ markdown_plot_scale <- 2
 if (requireNamespace("ggplot2", quietly = TRUE)) {
   library(ggplot2)
   my_theme <- theme(text = element_text(family = "Helvetica"),
-                    axis.text = element_text(size = 5),
-                    axis.title = element_text(size = 7),
+                    axis.text = element_text(size = 6),
+                    axis.title = element_text(size = 8),
                     legend.text = element_text(size = 5),
                     legend.title = element_text(size = 7),
                     strip.text = element_text(size = 7),
