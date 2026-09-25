@@ -1,0 +1,33 @@
+Dataset,VAF range,No. of mutations,No. of donors,dN/dS estimate,Lower confidence interval,Upper confidence interval
+Bronchial epithelium,3-10%,189,16,1.035,0.696,1.539
+Bronchial epithelium,10-20%,111,14,1.124,0.674,1.875
+Bronchial epithelium,20-50%,104,14,0.787,0.481,1.287
+Bronchial epithelium,50-100%,130,13,0.942,0.603,1.471
+Colon,3-10%,139,9,0.763,0.493,1.182
+Colon,10-20%,49,7,1.263,0.543,2.938
+Colon,20-50%,45,8,1.007,0.426,2.381
+Colon,50-100%,36,8,1.127,0.415,3.063
+IBD-affected Colon,3-10%,207,40,1.247,0.829,1.875
+IBD-affected Colon,10-20%,81,33,1.364,0.71,2.619
+IBD-affected Colon,20-50%,76,33,0.896,0.483,1.661
+IBD-affected Colon,50-100%,52,26,0.716,0.368,1.394
+MUTYH-mutant Colon,3-10%,65,5,0.849,0.434,1.662
+MUTYH-mutant Colon,10-20%,26,5,1.965,0.55,7.021
+MUTYH-mutant Colon,20-50%,20,5,0.811,0.246,2.668
+MUTYH-mutant Colon,50-100%,19,4,1.74,0.46,6.582
+Endometrium,3-10%,90,25,1.115,0.621,2.003
+Endometrium,10-20%,44,21,0.989,0.451,2.168
+Endometrium,20-50%,41,20,0.608,0.274,1.345
+Endometrium,50-100%,84,23,0.66,0.382,1.141
+MPN,3-10%,348,10,1.395,1.023,1.902
+MPN,10-20%,181,10,1.448,0.935,2.242
+MPN,20-50%,167,10,1.257,0.816,1.935
+MPN,50-100%,67,10,1.144,0.595,2.198
+Lymphoid,3-10%,74,6,1.213,0.623,2.361
+Lymphoid,10-20%,49,6,2.812,0.944,8.376
+Lymphoid,20-50%,58,6,2.043,0.817,5.107
+Lymphoid,50-100%,112,5,1.078,0.654,1.778
+Normal blood,3-10%,1259,12,1.272,1.088,1.487
+Normal blood,10-20%,648,12,1.076,0.873,1.326
+Normal blood,20-50%,720,10,0.885,0.73,1.072
+Normal blood,50-100%,568,8,0.763,0.622,0.937

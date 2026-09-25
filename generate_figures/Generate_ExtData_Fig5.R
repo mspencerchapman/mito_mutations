@@ -724,6 +724,28 @@ global_dnds_by_tissue_and_vaf_plot<-globaldnds_res_by_tissue_and_vaf%>%
 
 ggsave(filename = paste0(plots_dir,"Extended_Data_Figure_05/ExtDataFig5e.global_dnds_by_tissue_and_vaf.pdf"),global_dnds_by_tissue_and_vaf_plot,width=7,height=2)
 
+#Supplementary Table 6: the per-estimate mutation and donor counts behind the 32
+#dN/dS estimates in this panel, which are too many to give in the legend.
+vaf_labels_5e<-new_VAF_groups[2:length(new_VAF_groups)]
+supp_table6<-dplyr::bind_rows(lapply(all_cohorts,function(tis)
+  dplyr::bind_rows(lapply(seq_along(vaf_labels_5e),function(i){
+    d<-dndscv_by_tissue_and_vaf[[tis]][[i]]
+    am<-d$annotmuts
+    g<-globaldnds_res_by_tissue_and_vaf%>%
+      dplyr::filter(tissue==tis,VAF_group==vaf_labels_5e[i],name=="Overall")
+    data.frame(Dataset=name_conversion_vec[tis],
+               `VAF range`=vaf_labels_5e[i],
+               `No. of mutations`=nrow(am),
+               `No. of donors`=dplyr::n_distinct(am$sampleID),
+               `dN/dS estimate`=round(g$mle,3),
+               `Lower confidence interval`=round(g$cilow,3),
+               `Upper confidence interval`=round(g$cihigh,3),
+               check.names=FALSE)
+  }))))
+supp_table6$Dataset<-gsub("\n"," ",supp_table6$Dataset)
+readr::write_csv(supp_table6,paste0(root_dir,"/tables/Supplementary_table6.csv"))
+cat("Supplementary Table 6 written:",nrow(supp_table6),"estimates\n")
+
 
 #-----------------------------------------------------------------------------------#
 ## Combine the epithelial tissues (colon, endometrium, bronchial epithelium) for

@@ -93,8 +93,18 @@ sample_summary_info<-lapply(all_cohorts,function(dataset) {
 cat("Samples:",nrow(sample_summary_info),"across",length(unique(sample_summary_info$dataset)),"cohorts\n")
 
 #Copy number joined to cohort/tissue, restricted to samples in the analysis
+#The blood samples are labelled blood_emily / blood_foetal in mito_cn, not
+#"blood", so translate$al_ref does not match them and they were being dropped
+#here: the model then fitted seven tissues with Lymphoid as the reference, and
+#the panel below mislabelled that reference as "Normal blood". blood_emily_hiseq
+#is deliberately excluded - those 77 rows are re-sequenced duplicates of samples
+#already present in blood_emily, and including them double-counts. With the two
+#labels below the blood cohort totals 4,049 samples, matching the shearwater
+#matrices and the phylogeny tips.
+blood_tissue_labels<-c("blood_emily","blood_foetal")
+
 mito_cn_by_tissue<-mito_cn%>%
-  filter(Tissue%in%translate$al_ref)%>%
+  filter(Tissue%in%c(translate$al_ref,blood_tissue_labels))%>%
   right_join(sample_summary_info,by=c("Sample"="SampleID"))%>%
   mutate(Tissue=factor(name_conversion_vec[dataset],levels=name_conversion_vec))%>%
   filter(!is.na(bedtools_mtDNA_genomes))%>%
@@ -143,7 +153,9 @@ tissue_lmer_exp_coefs_plot<-as.data.frame(summary(mito_cn.lmer)$coefficients)%>%
          lowerCI=ifelse(grepl("Tissue",Tissue),lowerCI+intercept_value,lowerCI),
          upperCI=ifelse(grepl("Tissue",Tissue),upperCI+intercept_value,upperCI))%>%
   filter(Tissue!="Age")%>%
-  mutate(Tissue=ifelse(Tissue=="(Intercept)","Normal blood",gsub("Tissue","",Tissue)))%>%
+  #Take the reference level from the data rather than hard-coding it, so the
+  #intercept cannot be mislabelled if the tissues present ever change again.
+  mutate(Tissue=ifelse(Tissue=="(Intercept)",levels(droplevels(mito_cn_lmer_df$Tissue))[1],gsub("Tissue","",Tissue)))%>%
   mutate(Tissue=factor(Tissue,levels=name_conversion_vec))%>%
   filter(!is.na(Tissue))%>%
   mutate_at(c("Estimate","lowerCI","upperCI"),function(x) {exp(x)})%>% #back to absolute copy number
@@ -158,6 +170,32 @@ tissue_lmer_exp_coefs_plot<-as.data.frame(summary(mito_cn.lmer)$coefficients)%>%
   theme(legend.position="none")
 
 ggsave(filename=paste0(ed2_dir,"ExtDataFig2b.tissue_lmer_exp_coefs_plot.pdf"),tissue_lmer_exp_coefs_plot,width=3,height=2)
+
+#Supplementary Table 2: the same estimates in tabular form, with the sample and
+#donor counts behind each, on both the log and the absolute copy number scale.
+supp_table2<-as.data.frame(summary(mito_cn.lmer)$coefficients)%>%
+  tibble::rownames_to_column(var="term")%>%
+  left_join(as.data.frame(lmer.CIs)%>%tibble::rownames_to_column(var="term"),by="term")%>%
+  dplyr::select(term,Estimate,lo=`2.5 %`,hi=`97.5 %`)%>%
+  filter(term=="(Intercept)"|grepl("^Tissue",term))%>%
+  mutate(across(c(Estimate,lo,hi),~ifelse(grepl("^Tissue",term),.+intercept_value,.)),
+         Tissue=ifelse(term=="(Intercept)",levels(droplevels(mito_cn_lmer_df$Tissue))[1],
+                       sub("^Tissue","",term)))%>%
+  left_join(mito_cn_lmer_df%>%group_by(Tissue)%>%
+              dplyr::summarise(n_donors=dplyr::n_distinct(exp_ID),n_samples=dplyr::n(),.groups="drop")%>%
+              mutate(Tissue=as.character(Tissue)),by="Tissue")%>%
+  transmute(Tissue=gsub("\n"," ",Tissue),
+            `No. of donors`=n_donors,
+            `No. of samples`=n_samples,
+            `Estimate of mean ln(CN)`=round(Estimate,4),
+            `lowerCI of mean ln(CN)`=round(lo,4),
+            `upperCI of mean ln(CN)`=round(hi,4),
+            `Estimate of absolute mean CN`=round(exp(Estimate),1),
+            `lowerCI of absolute mean CN`=round(exp(lo),1),
+            `upperCI of absolute mean CN`=round(exp(hi),1))%>%
+  arrange(desc(`Estimate of absolute mean CN`))
+readr::write_csv(supp_table2,paste0(root_dir,"/tables/Supplementary_table2.csv"))
+cat("Supplementary Table 2 written:",nrow(supp_table2),"tissues\n")
 
 #-----------------------------------------------------------------------------------#
 # Fig ED2c | Median copy number per individual against age
