@@ -1278,9 +1278,34 @@ lmer2<-lmerTest::lmer(mean~Age:dataset+(1|exp_ID),data=all_sum_of_vaf_summary_df
 #MODEL 3: lmer with full set of Age*dataset terms
 lmer3<-lmerTest::lmer(mean~Age*dataset+(1|exp_ID),data=all_sum_of_vaf_summary_df)
 
-#Compare MODELS using the AIC
-AIC(lmer.null,lmer1,lmer2, lmer3)
-diff(AIC(lmer.null,lmer1,lmer2, lmer3)$AIC)
+#Compare MODELS using the AIC.
+#These models differ in their FIXED effects, so they must be compared on
+#maximum likelihood fits: a REML likelihood depends on the fixed-effects design
+#matrix and is not comparable across different fixed-effects structures (this is
+#why anova() on lmer objects silently refits with ML). The REML fits above are
+#kept for estimation, where REML gives less biased variance components.
+ml <- function(f) lme4::lmer(f, data=all_sum_of_vaf_summary_df, REML=FALSE)
+lmer.null.ml <- ml(mean~1+(1|exp_ID))
+lmer1.ml     <- ml(mean~Age+(1|exp_ID))
+lmer2.ml     <- ml(mean~Age:dataset+(1|exp_ID))
+lmer3.ml     <- ml(mean~Age*dataset+(1|exp_ID))
+AIC(lmer.null.ml,lmer1.ml,lmer2.ml,lmer3.ml)
+
+#Shared intercept with dataset-specific slopes vs full Age*dataset
+AIC(lmer3.ml)-AIC(lmer2.ml)
+#Dataset-specific slopes vs age alone, with a likelihood ratio test
+AIC(lmer1.ml)-AIC(lmer2.ml)
+anova(lmer1.ml,lmer2.ml)
+
+#The preference for dataset-specific slopes is driven entirely by endometrium,
+#whose rate is roughly double that of the other tissues. With endometrium
+#excluded the age-only model is marginally preferred and the LRT is not
+#significant, i.e. the remaining tissues accumulate at a consistent rate.
+d_noLM <- droplevels(subset(all_sum_of_vaf_summary_df, dataset!="LM"))
+a_noLM <- lme4::lmer(mean~Age+(1|exp_ID),         data=d_noLM, REML=FALSE)
+b_noLM <- lme4::lmer(mean~Age:dataset+(1|exp_ID), data=d_noLM, REML=FALSE)
+AIC(a_noLM)-AIC(b_noLM)
+anova(a_noLM,b_noLM)
 ```
 
 Now categorise by tissue type, not just dataset as some studies actually include the same tissues. Could this be masking the tissue effect?
@@ -1299,8 +1324,11 @@ all_sum_of_vaf_summary_df$tissue_cat<-ifelse(grepl("Colon",all_sum_of_vaf_summar
 lmer2.tissue_cat<-lmerTest::lmer(mean~Age:tissue_cat+(1|exp_ID),data=all_sum_of_vaf_summary_df)
 lmer3.tissue_cat<-lmerTest::lmer(mean~Age*tissue_cat+(1|exp_ID),data=all_sum_of_vaf_summary_df)
 
-AIC(lmer.null,lmer1,lmer2.tissue_cat, lmer3.tissue_cat)
-diff(AIC(lmer.null,lmer1,lmer2.tissue_cat, lmer3.tissue_cat)$AIC)
+#As above, compared on maximum likelihood fits
+lmer2.tissue_cat.ml <- ml(mean~Age:tissue_cat+(1|exp_ID))
+lmer3.tissue_cat.ml <- ml(mean~Age*tissue_cat+(1|exp_ID))
+AIC(lmer.null.ml,lmer1.ml,lmer2.tissue_cat.ml,lmer3.tissue_cat.ml)
+AIC(lmer1.ml)-AIC(lmer2.tissue_cat.ml)
 ```
 
 Plot the results of the model with tissue-specific age coefficients.
