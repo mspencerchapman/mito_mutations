@@ -175,19 +175,58 @@ expanded_clades_df<-Map(list=mito_data[old_individuals],exp_ID=old_individuals,f
 #-----------------------------------------------------------------------------------#
 
 #Show correlation of lineage marker with the time of the most recent common ancestor of the clone (MRCA)
+#The response is a proportion of samples within each clade, so a binomial-type link is appropriate.
+#Use a quasibinomial glm, which accounts for the overdispersion of the data, weighted by clade size
+#(n_samples) so that larger clades - where the proportion is better estimated - carry more weight.
+m<-glm(max_pos_prop~MRCA_time,
+       family=quasibinomial(link="logit"),
+       weights = n_samples,
+       data=expanded_clades_df)
+
+summary(m)
+m$deviance/m$df.residual
+
+#Calculate the null model, to compare how much additional deviance is explained by the MRCA time
+m_null <- glm(max_pos_prop ~ 1,
+              family = quasibinomial(link = "logit"),
+              weights = n_samples,
+              data = expanded_clades_df)
+
+# McFadden's using deviances rather than log-likelihoods
+# avoids the likelihood problem with quasibinomial
+1 - (m$deviance / m_null$deviance)
+
+# Generate prediction dataframe for visualization
+pred_df <- data.frame(
+  MRCA_time = seq(min(expanded_clades_df$MRCA_time),
+                  max(expanded_clades_df$MRCA_time),
+                  length.out = 200)
+)
+
+# Get predictions with confidence intervals - built on the link scale and then
+# back-transformed with plogis, so that the interval stays within [0,1]
+pred_link <- predict(m, newdata = pred_df, type = "link", se.fit = TRUE)
+pred_df$fit   <- plogis(pred_link$fit)
+pred_df$lower <- plogis(pred_link$fit - 1.96 * pred_link$se.fit)
+pred_df$upper <- plogis(pred_link$fit + 1.96 * pred_link$se.fit)
+
 MRCA.prop.correlation<-expanded_clades_df%>%
   ggplot(aes(x=MRCA_time,y=max_pos_prop,col=mean_heteroplasmy))+
   geom_point(aes(size=clonal_fraction),alpha=0.75)+
   scale_x_continuous(limits=c(0,NA))+
   scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(11,"Spectral")))+
+  geom_ribbon(data = pred_df,
+              aes(x = MRCA_time, ymin = lower, ymax = upper),
+              alpha = 0.2,inherit.aes = F) +
+  geom_line(data = pred_df,
+            aes(x = MRCA_time, y = fit),inherit.aes = F) +
   labs(x="Molecular time of clade's MRCA",
        y="Proportion of clade\nwith best lineage marker ",
        col="Mean\nheteroplasmy",
        size="Clade size\n(clonal fraction)")+
   theme_bw()+
-  geom_smooth(col="black",linewidth=0.6,method="lm")+
   my_theme
-summary(lm(max_pos_prop~MRCA_time,data=expanded_clades_df))
+
 ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_09/ExtDataFig9b.MRCA_prop_correlation_plot.pdf"),MRCA.prop.correlation,width=4,height=2.5)
 #-----------------------------------------------------------------------------------#
 #----PULL OUT THE SHARED MUTATIONS - embed as an additional object within the mito_data list-----
