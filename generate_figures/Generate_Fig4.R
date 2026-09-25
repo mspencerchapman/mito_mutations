@@ -325,6 +325,17 @@ all_sumstats=readRDS(file=paste0(root_dir,"/data/Drift_ABC_VAF_distribution/VAF_
 
 new_VAF_groups=c("<0.1%","0.1-0.2%","0.2-0.4%","0.4-0.8%","0.8-1.6%","1.6-3.1%","3.1-6.2%","6.2-12.5%","12.5-25%","25-50%",">50%")
 
+#A VAF bin containing no mutations means zero mutations in that bin, but
+#pivot_wider() in the simulation script simply omits the column, so bind_rows()
+#filled it with NA. abc() then returns an NA distance for that simulation, which
+#can never be among the closest - so those simulations are silently unreachable.
+#The NAs are concentrated at low generation counts (98.7% of simulations under
+#100 generations have at least one), which is exactly the region the youngest
+#individuals need, so the reference table was effectively truncated from below.
+#Restoring the zeros returns 234 usable simulations under 100 generations (was 3).
+all_sumstats[,new_VAF_groups]<-lapply(all_sumstats[,new_VAF_groups],
+                                      function(x) ifelse(is.na(x),0,x))
+
 #Exclude the lowest VAF categories from abc that may be unreliably captured by sequencing
 VAF_categories_to_include_in_ABC=new_VAF_groups[3:11]
 
@@ -337,7 +348,7 @@ abc_res_df<-lapply(1:nrow(sumstats.data),function(i) {
            tol = 0.02,
            transf = c("log","log"),
            method = "neuralnet")
-  stats=apply(res$adj.values,2,quantile,c(0.025,0.5,0.975))
+  stats=apply(res$unadj.values,2,quantile,c(0.025,0.5,0.975))
   stats=as.data.frame(stats)%>%tibble::rownames_to_column(var="quantile")%>%pivot_wider(names_from = "quantile",values_from=c("muts_per_mitochondria_per_generation","total_generations"))
   return(cbind(data.frame(exp_ID=Exp_ID),stats))
 })%>%dplyr::bind_rows()%>%
@@ -348,20 +359,27 @@ abc_res_df<-lapply(1:nrow(sumstats.data),function(i) {
 #-----------------------------------------------------------------------------------#
 
 abc_res_plot_mut_rate<-abc_res_df%>%
-  filter(Age>=0)%>%
+  #Exclude only the foetal samples. The cord bloods are retained: once the
+  #empty VAF bins are restored to zero above, the reference table resolves the
+  #low generation counts they need, and their posteriors are no longer pinned
+  #against the reachable floor.
+  filter(!exp_ID%in%c("8pcw","18pcw"))%>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age),y=`muts_per_mitochondria_per_generation_50%`,
              ymin=`muts_per_mitochondria_per_generation_2.5%`,
              ymax=`muts_per_mitochondria_per_generation_97.5%`))+
-  geom_smooth(method="lm",col="black",linewidth=0.5)+
   geom_point(alpha=0.75,size=0.5)+
   geom_errorbar(width=0.3,alpha=0.5)+
   theme_classic()+
-  scale_y_continuous(limits=c(1e-4,8e-4),breaks=seq(2e-4,1e-3,2e-4))+
-  labs(x="Individual",y="Mutations per mitochondria\nper generation")+
+  scale_y_continuous(limits=c(1e-4,7e-4))+
+  labs(x="Individual",y="Mutations per\nmtDNA genome\nper generation")+
   my_theme+
+  #coord_flip() swaps the panels but not the theme elements: axis.title.x still
+  #refers to the bottom axis (the rate), axis.title.y to the donor axis. Blank
+  #the latter, keeping labs(x=) set so no default expression can leak through.
+  theme(axis.title.y = element_blank())+
   coord_flip()
 
-ggsave(filename=paste0(plots_dir,"Figure_04/Fig4e.abc_res_plot_mut_rate.pdf"),abc_res_plot_mut_rate,width=1.75,height=2)
+ggsave(filename=paste0(plots_dir,"Figure_04/Fig4e.abc_res_plot_mut_rate.pdf"),abc_res_plot_mut_rate,width=1.4,height=2)
 
 #-----------------------------------------------------------------------------------#
 ### Generate FIG. 4C ---------
@@ -377,9 +395,18 @@ abc_res_df<-lapply(1:nrow(sumstats.data),function(i) {
            transf = c("log","log"),
            method = "neuralnet")
   
-  return(as.data.frame(res$adj.values)%>%mutate(exp_ID=Exp_ID$exp_ID))
+  #Use the unadjusted (rejection) posterior, as in panel e. The neural-network
+  #regression adjustment produced implausibly narrow posteriors for some
+  #individuals (e.g. KX003) and extrapolated below the range of the reference
+  #table for the cord bloods, so the rejection posterior is the more
+  #conservative choice and matches the published Methods.
+  return(as.data.frame(res$unadj.values)%>%mutate(exp_ID=Exp_ID$exp_ID))
 })%>%dplyr::bind_rows()%>%
   left_join(ref_df%>%dplyr::select(Sample,Age),by=c("exp_ID"="Sample"))%>%
+  #Exclude the foetal samples only. The cord bloods are retained: with the empty
+  #VAF bins restored to zero above, the reference table resolves the low
+  #generation counts they require, and they anchor the regression at age 0,
+  #which roughly halves the width of the interval on the fitted drift rate.
   dplyr::filter(!exp_ID%in%c("8pcw","18pcw"))
 
 #Perform the LMER
@@ -426,24 +453,113 @@ drift_parameter_upperCI=drift_parameter_CI[1]
 population_size_estimate_1=740
 population_size_estimate_2=population_size_estimate_1/5
 xrange=seq(50,10000,10)
-text_size=2.5
+#Annotation text is sized in mm, so it does not shrink with the panel. This
+#panel is saved at 2x2in to match 4c (it was 3x3in), so the sizes and anchors
+#below are scaled to suit: the day labels are left-aligned off the y-axis
+#rather than centred on x=60, and the rotated "Pop. size" labels are anchored
+#at their top (hjust=1) so they hang downwards inside the panel.
+text_size=1.6
 
 pop_vs_gentime_schematic<-data.frame(x=xrange,y=drift_parameter_ml/xrange,ymin=drift_parameter_lowerCI/xrange,ymax=drift_parameter_upperCI/xrange)%>%
   ggplot(aes(x=x,y=y,ymin=ymin,ymax=ymax))+
   geom_line()+
-  annotate(geom="text",label="Combinations consistent with drift rate",x=800,y=30,col="black",angle=317,size=text_size+0.5)+
+  annotate(geom="text",label="Combinations consistent\nwith drift rate",x=3300,y=9.5,col="black",angle=317,size=text_size,lineheight=0.9)+
   geom_ribbon(alpha=0.2)+
   geom_path(data=data.frame(x=c(0,population_size_estimate_1,population_size_estimate_1),y=c(drift_parameter_ml/population_size_estimate_1,drift_parameter_ml/population_size_estimate_1,0)),aes(x=x,y=y),col="red",linetype=2,inherit.aes = F)+
-  annotate(geom="text",label="Pop. size = mtDNA CN",x=population_size_estimate_1+100,y=5,col="red",angle=270,size=text_size)+
-  annotate(geom="text",label=paste0(round(drift_parameter_ml/population_size_estimate_1)," days"),x=60,y=(drift_parameter_ml/population_size_estimate_1)+5,col="red",size=text_size)+
+  annotate(geom="text",label="Pop. size = mtDNA CN",x=population_size_estimate_1+130,y=13,col="red",angle=270,hjust=1,size=text_size)+
+  annotate(geom="text",label=paste0(round(drift_parameter_ml/population_size_estimate_1)," days"),x=52,y=(drift_parameter_ml/population_size_estimate_1)*1.25,col="red",hjust=0,size=text_size)+
   geom_path(data=data.frame(x=c(0,population_size_estimate_2,population_size_estimate_2),y=c(drift_parameter_ml/population_size_estimate_2,drift_parameter_ml/population_size_estimate_2,0)),aes(x=x,y=y),col="blue",linetype=2,inherit.aes = F)+
-  annotate(geom="text",label="Pop. size = # of mitochondria",x=population_size_estimate_2+20,y=5,col="blue",angle=270,size=text_size)+
-  annotate(geom="text",label=paste0(round(drift_parameter_ml/population_size_estimate_2)," days"),x=60,y=(drift_parameter_ml/population_size_estimate_2)+30,col="blue",size=text_size)+
+  annotate(geom="text",label="Pop. size = # of mitochondria",x=population_size_estimate_2+26,y=13,col="blue",angle=270,hjust=1,size=text_size)+
+  annotate(geom="text",label=paste0(round(drift_parameter_ml/population_size_estimate_2)," days"),x=52,y=(drift_parameter_ml/population_size_estimate_2)*1.25,col="blue",hjust=0,size=text_size)+
   scale_x_log10()+
   scale_y_log10()+
   theme_bw()+
   my_theme+
   labs(x="Effective mitochondrial\npopulation size",y="Generation time (days)")
 
-ggsave(filename = paste0(plots_dir,"Figure_04/Fig4d.pop_vs_gentime_schematic.pdf"),pop_vs_gentime_schematic,width=3,height=3)
+ggsave(filename = paste0(plots_dir,"Figure_04/Fig4d.pop_vs_gentime_schematic.pdf"),pop_vs_gentime_schematic,width=2,height=2)
 
+
+#-----------------------------------------------------------------------------------#
+### Generate FIG. 4F ---------
+#-----------------------------------------------------------------------------------#
+# Drift during embryogenesis, inferred from the heteroplasmic oocyte mutations
+# in the 8 pcw foetus. The per-mutation simulations were run in
+# full_analysis_scripts/Heteroplasmic_oocyte_mutation_analysis.R and saved to
+# data/Drift_ABC_foetal; this section re-runs only the inference from them.
+#
+# NB this is a single joint ABC: the summary statistics of all six mutations are
+# concatenated into one target vector, fitted against one shared generation-time
+# parameter. It is not a product of per-mutation posteriors - the per-mutation
+# abc.nn.file.*.RDS outputs are only a check for outliers.
+# full_analysis_scripts/Drift_ABC2_analysis.R does combine them by multiplying
+# binned posteriors, but that script is orphaned: it reads from a directory that
+# does not exist (data/Drift_ABC2) and log10()s a column that is already
+# log_generation_time. It is superseded by this section.
+
+het_oocyte_muts<-readRDS(paste0(root_dir,"/data/het_oocyte_muts.Rds"))
+foetal_muts<-het_oocyte_muts[["8pcw"]]
+
+#Use the rejection posterior, as in panels c and e. The originally reported
+#value came from the neural-network regression-adjusted posterior, which gives a
+#roughly five-fold narrower interval here - the same over-tightening seen in
+#panel e - so the rejection posterior is the more conservative choice.
+foetal_posterior_type<-"unadj.values"
+
+#Observed summary statistics per mutation - the ABC target, recomputed from the
+#VAF matrix exactly as in the source script.
+foetal_sumstat_fun<-function(v) c(mean(v),min(v),max(v),
+                                  quantile(v,0.05),quantile(v,0.5),quantile(v,0.95),sd(v))
+foetal_tips<-mito_data$`8pcw`$tree$tip.label
+all_targets<-lapply(foetal_muts,function(mut)
+  foetal_sumstat_fun(as.numeric(mito_data$`8pcw`$matrices$vaf[mut,foetal_tips])))
+
+all_params_and_sumstats<-lapply(foetal_muts,function(mut)
+  readRDS(paste0(root_dir,"/data/Drift_ABC_foetal/params_and_sumstats_",mut,".RDS")))
+
+#Each mutation contributes its own block of summary statistics; the generation
+#time parameter is shared, so the simulations are matched across mutations.
+all_sumstats_mat<-Reduce(cbind,Map(list=all_params_and_sumstats,mut=foetal_muts,
+  f=function(list,mut) {
+    colnames(list$sumstats)<-paste(mut,colnames(list$sumstats),sep="_")
+    list$sumstats
+  }))
+all_params<-all_params_and_sumstats[[1]]$params[,"log_generation_time",drop=FALSE]
+all_targets_vec<-Reduce(c,all_targets)
+
+abc.comb.nn<-abc::abc(target=all_targets_vec,param=all_params,sumstat=all_sumstats_mat,
+                      tol=0.1,transf=c("none"),method="neuralnet")
+
+foetal_gentime_posterior<-10^quantile(abc.comb.nn[[foetal_posterior_type]],c(0.025,0.5,0.975))
+
+#Population size is fixed within these simulations, so the drift parameter -
+#population size x generation time - is directly comparable with panel d.
+foetal_pop_size<-unique(all_params_and_sumstats[[1]]$params[,"population_size"])
+stopifnot(length(foetal_pop_size)==1)
+foetal_drift_parameter<-foetal_pop_size*foetal_gentime_posterior
+
+cat("\nFig 4f - embryonic drift (",foetal_posterior_type,", ",length(foetal_muts),
+    " oocyte mutations, population size ",foetal_pop_size,")\n",sep="")
+cat("  generation time: ",signif(foetal_gentime_posterior[2],3)," days (95% PI ",
+    signif(foetal_gentime_posterior[1],3),"-",signif(foetal_gentime_posterior[3],3),")\n",sep="")
+cat("  drift parameter: ",signif(foetal_drift_parameter[2],3)," mitochondria days (95% PI ",
+    signif(foetal_drift_parameter[1],3),"-",signif(foetal_drift_parameter[3],3),")\n",sep="")
+cat("  fold faster than the adult estimate: ",
+    signif(drift_parameter_ml/foetal_drift_parameter[2],3),"x\n",sep="")
+
+foetal_gentime_posterior_plot<-data.frame(type="posterior",log_gen_time=abc.comb.nn[[foetal_posterior_type]])%>%
+  rbind(data.frame(type="prior",log_gen_time=as.numeric(all_params)))%>%
+  mutate(gen_time=10^log_gen_time)%>%
+  ggplot(aes(x=gen_time,col=type))+
+  stat_density(geom="line",position="identity")+
+  labs(x="WF generation time (days)",y="Density",col="")+
+  theme_bw()+
+  scale_x_log10(limits=c(0.1,500))+
+  #Headroom above the posterior peak so the summary values can be printed at the
+  #top without overlapping the curve. coord_cartesian() rather than a scale
+  #limit, so the density is never censored if the peak grows.
+  coord_cartesian(ylim=c(0,3))+
+  my_theme+
+  theme(legend.position="top",legend.box.spacing=unit(0,"mm"))
+
+ggsave(filename = paste0(plots_dir,"Figure_04/Fig4f.foetal_gentime_posterior.pdf"),foetal_gentime_posterior_plot,width=1.75,height=2)

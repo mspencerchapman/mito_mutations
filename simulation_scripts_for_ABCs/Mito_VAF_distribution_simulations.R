@@ -95,9 +95,19 @@ all_sumstats=lapply(1:nsim,function(k) {
     dplyr::select(-n)%>%
     tidyr::pivot_wider(names_from="VAF_group",values_from="muts_per_cell")%>%
     mutate(muts_per_mitochondria_per_generation=muts_per_mitochondria_per_generation,.before=total_generations)
-  
-  return(sumstats)
+
+  #pivot_wider() drops any VAF bin that contains no mutations, so bind_rows()
+  #below would fill it with NA. The correct value is 0 (no mutations in that
+  #bin). Left as NA, abc() returns an NA distance and the simulation can never
+  #be selected - which silently removes almost every low-generation simulation
+  #from the reference table. Add the missing bins explicitly as zero.
+  missing_bins<-setdiff(VAF_groups$labels,names(sumstats))
+  if(length(missing_bins)>0) sumstats[,missing_bins]<-0
+
+  return(sumstats[,c("muts_per_mitochondria_per_generation","total_generations",VAF_groups$labels)])
 })%>%dplyr::bind_rows()
 
 #Save the output for doing the ABC
-saveRDS(all_sumstats,file = "VAF_distribution_ABC_simulation_sumstats_",ids::random_id(),".Rds")
+#saveRDS() takes (object, file, ascii, version, ...), so passing the id and the
+#extension positionally sent them to `ascii` and `version` and the call errored.
+saveRDS(all_sumstats,file = paste0("VAF_distribution_ABC_simulation_sumstats_",ids::random_id(),".Rds"))
