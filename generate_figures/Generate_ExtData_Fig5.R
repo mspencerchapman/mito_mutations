@@ -801,17 +801,28 @@ find_ks_coords <- function(vals1, vals2) {
 }
 
 
+#Report three decimal places throughout above 0.001. Rounding to two turned
+#p = 0.0549 into "p = 0.05", which reads as sitting exactly on the threshold
+#when the comparison is in fact not significant.
 fmt_p <- function(p) {
-  ifelse(p < 0.001, "p < 0.001",
-         ifelse(p < 0.01,  paste0("p = ", round(p, 3)),
-                paste0("p = ", round(p, 2))))
+  ifelse(p < 0.001, "p < 0.001", paste0("p = ", round(p, 3)))
 }
+
+#Label the annotation with the test statistic as well as the p-value, so the
+#dashed segment is self-explanatory.
+fmt_ks <- function(ks) paste0("D = ", round(as.numeric(ks$statistic), 2), "\n", fmt_p(ks$p.value))
 
 coords_non <- find_ks_coords(syn_vals, nons_vals)
 coords_mis <- find_ks_coords(syn_vals, mis_vals)
 
 
+#The tissue filter matters here and did not in Fig. 2a: there
+#complete.annotated.mutation.table holds blood only, whereas in this script it
+#spans all nine cohorts. Without it the curves were drawn from every tissue
+#(5,435 missense across 133 donors) while the annotated Kolmogorov-Smirnov
+#p-values came from the epithelial subset alone (1,312 missense, 101 donors).
 mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
+  filter(tissue %in% epithelial_datasets) %>%
   filter(impact != "Non-Coding" & impact != "Stop_loss") %>%
   ggplot(aes(y = vaf, col = impact)) +
   stat_ecdf(geom = "step", linewidth = 0.8) +
@@ -824,7 +835,7 @@ mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
            x = mean(c(coords_mis$xmin, coords_mis$xmax)),
            y = coords_mis$y,
            vjust = -0.5, size = 2,
-           label = paste0("Syn vs Mis\n", fmt_p(ks_syn_mis$p.value))) +
+           label = paste0("Syn vs Mis\n", fmt_ks(ks_syn_mis))) +
   # Syn vs Nonsense segment
   annotate("segment",
            x = coords_non$xmin, xend = coords_non$xmax,
@@ -834,7 +845,7 @@ mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
            x = mean(c(coords_non$xmin, coords_non$xmax)),
            y = coords_non$y,
            vjust = -0.5, size = 2,
-           label = paste0("Syn vs Nons\n", fmt_p(ks_syn_non$p.value)))+
+           label = paste0("Syn vs Nons\n", fmt_ks(ks_syn_non)))+
   scale_y_continuous(limits = c(0.01, 1),
                      labels = scales::percent_format(accuracy = 1),
                      name = "Variant Allele Fraction (VAF)") +
@@ -844,6 +855,7 @@ mutation_type_ecdf_plot<-complete.annotated.mutation.table %>%
   scale_color_manual(values = mut_type_cols) +
   my_theme +
   theme(panel.grid.minor = element_blank(),
+        legend.text = element_text(size = 6),
         legend.position = c(0.3, 0.8)) +
   labs(col = "Mutation type")
 
@@ -867,11 +879,19 @@ cutoff_names=c("<20%",">20%")
 
 
 dndsout.epithelial<-lapply(cutoffs,function(cutoffs) {
+  #Count each mutation once per DONOR, not once per sample. Crypts, glands and
+  #organoids from one donor are not independent observations of the same
+  #variant: before this change one mutation was counted 43 times from a single
+  #donor, and the >20% bin carried 1,207 rows for 959 independent donor-mutation
+  #events. That inflated precision, and unevenly across impact classes (nonsense
+  #1.47x against synonymous 1.24x at >20%), so it biased the ratio as well as
+  #its interval. Passing patientID as sampleID matches panels b, d and e and
+  #Fig. 2b/d/f, where the donor is already the unit.
   combined_nonblood_for_dnds<-complete.annotated.mutation.table%>%
     dplyr::filter(tissue%in%epithelial_datasets & vaf>=cutoffs[1] & vaf<cutoffs[2])%>%
     separate("mut_ref", c("chr", "pos", "ref", "mut"), "_")%>%
     mutate(pos=as.numeric(pos))%>%
-    dplyr::select(sampleID,chr,pos,ref,mut)%>%
+    dplyr::select("sampleID"=patientID,chr,pos,ref,mut)%>%
     dplyr::filter(!duplicated(.))%>%
     arrange(sampleID,pos)
   
