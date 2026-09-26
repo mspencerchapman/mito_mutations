@@ -15,7 +15,7 @@
 #   Supp Fig 8   VAF line plots across tissues (Note 8)   - not yet scripted
 #   Supp Fig 9   lineage-tracing heatmaps (Note 9)        - not yet scripted
 #   Supp Fig 10  foetal liver flow sorting (Note 10)      - gating strategy, not code-generated
-#   Supp Fig 13  cord blood/adult flow sorting (Note 10)  - gating strategy, not code-generated
+#   Supp Fig 11  cord blood/adult flow sorting (Note 10)  - gating strategy, not code-generated
 #   Supp Fig 12  mature cell phenotyping (Note 11)        - gating strategy, not code-generated
 #   Supp Fig 13  individual & sequential ABCs (Note 12)   - THIS SCRIPT (was Extended Data Fig. 12)
 #
