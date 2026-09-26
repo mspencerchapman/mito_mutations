@@ -20,8 +20,18 @@ cran_packages <- c(
   "ape","phangorn","phylobase","phylosignal",
   # modelling / inference
   "lme4","lmerTest","abc","VGAM","lsa",
+  # phylogenetics (cont.)
+  "phytools",
+  # single-cell clustering, used for the mtDNA clone inference
+  "Seurat",
+  # modelling diagnostics
+  "car","performance",
+  # plotting extras
+  "ggrepel","ggh4x","autoimage","igraph",
+  # used only by the mtDNA_mutation_calling_pipeline/ scripts
+  "circlize",
   # utilities
-  "optparse",
+  "optparse","here","rmarkdown","tidyverse",
   "pheatmap","ids","devtools","remotes","BiocManager"
 )
 
@@ -29,7 +39,9 @@ bioc_packages <- c(
   "deepSNV",         # shearwater mutation calling
   "ComplexHeatmap",
   "MutationalPatterns",  # mutational signature utilities and palettes
-  "Rsamtools"            # scanFa(), used to read trinucleotide context from genomeFile
+  "Rsamtools",           # scanFa(), used to read trinucleotide context from genomeFile
+  "GenomicRanges",       # GRanges(), for the trinucleotide context lookup
+  "rtracklayer"          # used by the shearwater calling pipeline
 )
 
 # Not on CRAN/Bioconductor - installed from GitHub.
