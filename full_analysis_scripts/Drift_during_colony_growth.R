@@ -4,13 +4,18 @@
 #3. During each cell division, the mtDNA copy number doubles, with new mtDNA molecules being randomly made from the original mtDNA population according to a binomial distribution.
 #4. The mtDNA molecules are then randomly partitioned between the two daughter cells
 
-# setwd("/lustre/scratch126/casm/team154pc/ms56/Mitochondria_study/colony_drift_simulation")
-# save_dir<-"model_data/"
-# plots_dir<-"plots"
+# Supplementary Fig. 2 | Modelling drift during in vitro clonal expansion
+# (Supplementary Note 2). Panels a and b are written to
+# plots/Supplementary_Figures/.
+#
+# The simulations are cached in data/colony_drift_simulations/ and are re-used
+# if present, so the script is quick to re-run; delete those files to redo them.
 
-setwd("~/R_work/mito_mutations_blood/")
-save_dir<-"data/colony_drift_simulations/"
-plots_dir<-"plots/additional_plots/"
+source(here::here("config.R"))   #root_dir, plots_dir, my_theme
+save_dir<-paste0(root_dir,"/data/colony_drift_simulations/")
+supp_dir<-paste0(plots_dir,"Supplementary_Figures/")
+dir.create(save_dir,showWarnings=FALSE,recursive=TRUE)
+dir.create(supp_dir,showWarnings=FALSE,recursive=TRUE)
 CORES=5
 
 library(dplyr)
@@ -23,17 +28,7 @@ ngen=12 #(clone will grow to 2^12 cells ~4,100)
 nsim=200
 vafs_for_testing<-c(0.05,0.2,0.5,0.8,0.95)
 
-#Set the basic plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
+#my_theme comes from config.R, so that this figure matches the rest of the paper
 
 #############################
 # Record the actual individual cell heteroplasmy levels
@@ -306,7 +301,8 @@ comb_plot<-Map(model=list(model1=model1_res,model2=model2_res,model3=model4_res,
         legend.text=element_text(size=8))+
   labs(x="Mutant mtDNA heteroplasmy (%)",y="Density",fill="")
 
-ggsave(filename=paste0(plots_dir,"colony_drift_plots.pdf"),plot = comb_plot,width = 7,height=4)
+ggsave(filename=paste0(supp_dir,"SuppFig2a.colony_drift_distributions.pdf"),plot = comb_plot,width = 7,height=4)
+cat("Supp Fig 2a: written\n")
 
 
 model_summary_table<-Map(model=list(model1=model1_res,model2=model2_res,model3=model4_res,model4=model3_res),name=paste("Model",1:4),function(model,name) {
@@ -335,7 +331,9 @@ model_summary_plot<-model_summary_table%>%
 model_summary_table%>%filter(initial_cell_vaf==0.5)
 model_summary_table%>%filter(initial_cell_vaf==0.05)
 
-ggsave(filename=paste0(plots_dir,"model_summary_plot.pdf"),plot = model_summary_plot,width = 7,height=2.7)
+ggsave(filename=paste0(supp_dir,"SuppFig2b.mean_colony_heteroplasmy.pdf"),plot = model_summary_plot,width = 7,height=2.7)
+cat("Supp Fig 2b: written\n")
+cat("\nSupplementary Fig. 2 written to",supp_dir,"\n")
 
 
 ####RECORDING ONLY THE 95% CONFIDENCE INTERVALS
