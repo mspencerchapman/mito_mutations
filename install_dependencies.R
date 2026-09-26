@@ -21,7 +21,8 @@ cran_packages <- c(
   # modelling / inference
   "lme4","lmerTest","abc","VGAM","lsa",
   # utilities
-  "optparse","ids","devtools","remotes","BiocManager"
+  "optparse",
+  "pheatmap","ids","devtools","remotes","BiocManager"
 )
 
 bioc_packages <- c(

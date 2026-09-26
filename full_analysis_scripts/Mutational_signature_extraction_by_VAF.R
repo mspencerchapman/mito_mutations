@@ -7,6 +7,7 @@ library(gridExtra)
 library(phylosignal)
 library(GenomicRanges)
 library(Rsamtools)
+library(pheatmap)   #used bare at the cosine-similarity heatmap; not attached before
 options(stringsAsFactors = F)
 
 #Set these file paths before running the script
@@ -133,8 +134,20 @@ key_table=data.frame(Sample=rownames(mutation_profiles_mat))%>%
   dplyr::mutate(Patient=stringr::str_split(Sample,pattern = "_",simplify=T)[,1])%>%
   dplyr::select(Patient,Sample)
 
-write.table(mutation_profiles_mat,paste0(root_dir,"/data/mutational_signatures/trinuc_mut_mat.txt"))
-write.table(key_table,paste0(root_dir,"/data/mutational_signatures/key_table.txt"))
+#These are the inputs that were sent to the HDP and SigProfiler extractions.
+#They are committed, and the extraction outputs read back in below
+#(exposures.csv, components.csv, CH192_S7_NMF_Activities.txt) correspond to
+#exactly these files. Re-running PART 1 today reproduces them to within 34 of
+#25,110 mutations (0.14%, spread over 24 sets at +1-3 each) because mito_data
+#has moved slightly since the extractions were run; the donor IDs have also
+#lost a space ("8 pcw" -> "8pcw"). Overwriting would therefore desync the
+#inputs from the committed outputs for no practical gain, so the writes are
+#off by default. Set this to TRUE only when re-running the extractions.
+rewrite_extraction_inputs<-FALSE
+if(rewrite_extraction_inputs) {
+  write.table(mutation_profiles_mat,paste0(root_dir,"/data/mutational_signatures/trinuc_mut_mat.txt"))
+  write.table(key_table,paste0(root_dir,"/data/mutational_signatures/key_table.txt"))
+}
 
 ##NOW PERFORM SIGNATURE EXTRACTION USING HDP - THIS IS DONE IN THE COMMAND LINE SO THAT CAN BE DONE IN PARALLEL
 
@@ -208,6 +221,7 @@ mut_numbers=data.frame(SampleID=rownames(mutation_profiles_mat),nmuts=rowSums(mu
 
 #Fill in the bins with too low mutation numbers - assume all are N1, as these are high VAF mutations
 excluded_cats<-rownames(mutation_profiles_mat)[!rownames(mutation_profiles_mat)%in%colnames(exposures)]
+hdp_fitted_sets<-colnames(exposures) #the sets HDP actually fitted; kept for panel d, as excluded_cats is reused by the SigProfiler block below
 all_N1=c(0,1,rep(0,nrow(exposures)-2))
 excluded_mat<-matrix(rep(all_N1,times=length(excluded_cats)),nrow=length(all_N1),dimnames = list(rownames(exposures),excluded_cats))
 
@@ -293,7 +307,13 @@ sig.post.probs_SP<-lapply(1:nrow(mutations),function(i) {
   
 })%>%bind_rows()
 
-mutations_SP<-bind_cols(mutations,sig.post.probs_SP)
+#`mutations` already carries the HDP posterior columns (N0-N6 and ML_Sig) added
+#at the end of PART 2a. Binding the SigProfiler columns straight onto it makes
+#every one of those names collide, and current dplyr resolves the collision by
+#uniquifying both copies (ML_Sig...17, ML_Sig...25), so the bare ML_Sig selected
+#below no longer exists and the script stops here. Drop the HDP columns first.
+mutations_SP<-bind_cols(mutations%>%dplyr::select(-dplyr::any_of(c(rownames(components),"ML_Sig"))),
+                        sig.post.probs_SP)
 sig_ref_SP<-mutations_SP%>%
   tidyr::separate(donor,into=c("exp_ID","lower_VAF","upper_VAF"),sep="_",remove=F)%>%
   mutate_at(c("lower_VAF","upper_VAF"),as.numeric)%>%
@@ -350,7 +370,17 @@ mito_sigs_plot_SP<-t(cbind(exposures_SP,excluded_mat))%>%
 ggsave(filename = paste0(root_dir,"/plots/additional_plots/SigProfiler_contributions_by_VAF_bin.pdf"),plot = mito_sigs_plot_SP,width=7,height=3.5)
 
 #Compare the numbers of 'real' mutations in each bin between SigProfiler & HDP
-muts_per_bin_per_sample_SP<-t(cbind(exposures_SP,excluded_mat))%>%
+#SigProfiler reports ABSOLUTE mutation counts per signature, whereas HDP
+#reports proportions; its column sums equal nmuts exactly. Convert to
+#proportions so that the shared `Exposure*nmuts` step below is correct for
+#both. excluded_mat is not cbind-ed here: it exists because the HDP extraction
+#omits 26 mutation sets, whereas SigProfiler covers all 126, and it would in
+#any case place the mass on N1, which is HDP's genuine signature rather than
+#SigProfiler's (N0). Without this, panel d of Supplementary Fig. 3 multiplies
+#counts by nmuts a second time and gives R2 = 0.42 instead of 0.95.
+exposures_SP_prop<-sweep(exposures_SP,2,colSums(exposures_SP),"/")
+
+muts_per_bin_per_sample_SP<-t(exposures_SP_prop)%>%
   as.data.frame()%>%
   tibble::rownames_to_column(var="SampleID")%>%
   left_join(mut_numbers)%>%
@@ -362,9 +392,17 @@ muts_per_bin_per_sample_SP<-t(cbind(exposures_SP,excluded_mat))%>%
   gather(-VAF_range,-exp_ID,-nmuts,key="Signature",value="Exposure")%>%
   mutate(abs_muts=Exposure*nmuts)
 
+#Compare the two extractions only on the 110 mutation sets that HDP actually
+#fitted. The remaining 16 fall below HDP's mutation-number threshold and are
+#filled in above as 100% N1 by assumption (excluded_mat), so pairing them with
+#SigProfiler's real estimate would compare a fabricated value with an estimate.
+hdp_fitted_key<-sapply(stringr::str_split(hdp_fitted_sets,pattern="_"),function(vec)
+  paste(vec[1],new_VAF_groups[paste(vec[2],vec[3],sep="_")]))
+
 HDP_Sigprofiler_correlation<-bind_rows(muts_per_bin_per_sample_SP%>%filter(Signature=="N0" &!is.na(nmuts))%>%mutate(Extraction="SigProfiler"),
           muts_per_bin_per_sample%>%filter(Signature=="N1")%>%mutate(Extraction="HDP"))%>%
   pivot_wider(id_cols=c("exp_ID","VAF_range"),names_from = "Extraction",values_from = "abs_muts")%>%
+  filter(paste(exp_ID,VAF_range)%in%hdp_fitted_key)%>%
   ggplot(aes(x=SigProfiler,y=HDP))+
   geom_point(size=0.3)+
   geom_smooth(method="lm",linetype=2,col="blue",linewidth=0.5)+
