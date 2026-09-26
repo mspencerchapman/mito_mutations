@@ -1,8 +1,8 @@
 #-----------------------------------------------------------------------------------#
 # Generate_SuppFig4.R
 #
-# Supplementary Fig. 4a-b | Heteroplasmic oocyte mutations (Supplementary Note 6).
-# Panels c-e of that figure come from Heteroplasmic_oocyte_mutation_analysis.R.
+# Supplementary Fig. 4a, b, e | Heteroplasmic oocyte mutations (Supplementary Note 6).
+# Panels c, d and f are not built here - see the notes further down.
 #
 #   a  Proportion of individuals inferred to carry at least one heteroplasmic
 #      oocyte mutation above the heteroplasmy threshold on the x-axis. Because
@@ -12,6 +12,8 @@
 #      inferred at >1% heteroplasmy.
 #   c  Distribution of heteroplasmic oocyte mutations across functional
 #      categories - NOT built here, see the note at the foot of this script.
+#   e  Phylogenies of four example individuals with a heatmap of their inferred
+#      heteroplasmic oocyte mutations beneath.
 #
 # Panel code follows mtDNA_mutations_comparator_tissues.Rmd, chunk
 # heteroplasmic_oocyte_mutations.
@@ -192,5 +194,64 @@ cat("Supp Fig 4b: written\n")
 # notebook rather than a cached object, so it is not lifted here.
 #-----------------------------------------------------------------------------------#
 
-cat("\nSupplementary Fig. 4 panels a and b written to",supp_dir,"\n")
-cat("Panels c-e not generated - see the note above and the script header.\n")
+#-----------------------------------------------------------------------------------#
+# PANEL e | Phylogenies with a heatmap of the heteroplasmic oocyte mutations
+#
+# Four example individuals. The cross-tissue notebook writes an equivalent plot
+# for every donor as <exp_ID>_shared_muts.pdf, but showing ALL shared mutations;
+# the published panel shows only the inferred heteroplasmic oocyte mutations, so
+# it was previously subset by hand. Restricting the heatmap here makes the panel
+# reproducible from the repository.
+#-----------------------------------------------------------------------------------#
+
+panel_e_donors<-data.frame(
+  exp_ID =c("PD44890","PD44887","PD41857","PD5182"),
+  dataset=c("PR","PR","LM","NW"),
+  tissue =c("MUTYH-mutant colorectal crypts","MUTYH-mutant colorectal crypts",
+            "endometrial glands","MPN blood colonies"))
+
+#Matches the shared-mutation heatmaps in the cross-tissue notebook
+lowest_VAF_to_show<-0.03
+col_scheme<-c("white",colorRampPalette(RColorBrewer::brewer.pal(9,"YlOrRd")[2:9])(100))
+names(col_scheme)<-seq(0,1,0.01)
+
+for(i in 1:nrow(panel_e_donors)) {
+  this_id<-panel_e_donors$exp_ID[i]
+  list<-readRDS(paste0(root_dir,"/data/nonblood/mito_mutation_data_",
+                       panel_e_donors$dataset[i],".RDS"))[[this_id]]
+
+  #The oocyte mutations inferred for this donor, highest heteroplasmy first
+  plot_muts<-all_het_oocyte_mut_df%>%filter(exp_ID==this_id)%>%
+    arrange(desc(ml_vaf))%>%pull(mut_ref)
+  plot_muts<-plot_muts[plot_muts%in%rownames(list$matrices$vaf)]
+  if(!length(plot_muts)) {cat("Supp Fig 4e:",this_id,"- no oocyte mutations - skipped\n"); next}
+
+  #Drop samples absent from the shearwater table (excluded for contamination)
+  tree<-ape::keep.tip(list$tree,
+          list$tree$tip.label[list$tree$tip.label%in%list$sample_shearwater_calls$sampleID])
+  tree$coords<-NULL
+  vaf.mtx<-(list$matrices$vaf*list$matrices$SW)[plot_muts,tree$tip.label,drop=FALSE]
+
+  hm<-matrix(0,nrow=length(plot_muts),ncol=length(tree$tip.label),
+             dimnames=list(plot_muts,tree$tip.label))
+  for(j in seq_along(plot_muts)) {
+    v<-vaf.mtx[plot_muts[j],]
+    v[v<lowest_VAF_to_show]<-0
+    hm[j,]<-col_scheme[as.character(round(v,digits=2))]
+  }
+
+  #Plain pdf(), not save_pdf(): the latter is gated by the notebooks' save_plots
+  #flag and rescales the canvas, which shrinks base-R text. Figure scripts write
+  #unconditionally at the stated size.
+  grDevices::pdf(file=paste0(supp_dir,"SuppFig4e.",this_id,"_oocyte_muts.pdf"),width=7,height=2.6)
+  tree<-plot_tree(tree=tree,cex.label=0,plot_axis=TRUE,vspace.reserve=1.1,
+                  title=paste0(this_id," (",panel_e_donors$tissue[i],", n = ",
+                               length(tree$tip.label)," samples)"))
+  add_mito_mut_heatmap(tree=tree,heatmap=hm,border="gray",
+                       heatmap_bar_height=0.1,cex.label=0.25)
+  dev.off()
+  cat("Supp Fig 4e:",this_id,"-",length(plot_muts),"oocyte mutation(s) written\n")
+}
+
+cat("\nSupplementary Fig. 4 panels a, b and e written to",supp_dir,"\n")
+cat("Panels c, d and f not generated - see the note above and the script header.\n")
