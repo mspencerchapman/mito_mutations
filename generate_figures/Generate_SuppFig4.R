@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------#
-# Generate_ExtData_Fig6.R
+# Generate_SuppFig4.R
 #
 # Supplementary Fig. 4a-b | Heteroplasmic oocyte mutations (Supplementary Note 6).
 # Panels c-e of that figure come from Heteroplasmic_oocyte_mutation_analysis.R.
@@ -90,7 +90,7 @@ all_het_oocyte_mut_df<-dplyr::bind_rows(lapply(all_cohorts,function(dataset) {
     keep<-MRCA_mol_times<threshold_molecular_time
     high_vaf_het_oocyte_muts<-het_oocyte_muts[keep]
     if(length(high_vaf_het_oocyte_muts)==0) return(NULL)
-    ho_vaf_mat<-ho_vaf_mat[keep,drop=FALSE]
+    ho_vaf_mat<-ho_vaf_mat[keep,,drop=FALSE]
 
     #Estimate the oocyte VAF from one sample per independent post-developmental
     #clade, so that a single expanded clone cannot dominate the average
@@ -135,7 +135,7 @@ cat("Heteroplasmic oocyte mutations:",nrow(all_het_oocyte_mut_df),
 cat("Individuals assessed:",nrow(individuals_assessed),"\n")
 
 #-----------------------------------------------------------------------------------#
-# Fig ED6a | Proportion of individuals with an oocyte mutation above a threshold
+# Supp Fig 4a | Proportion of individuals with an oocyte mutation above a threshold
 #-----------------------------------------------------------------------------------#
 
 thresholds<-seq(0.005,0.9,0.005)
@@ -154,10 +154,10 @@ prop_of_samples_with_ho_mut<-data.frame(threshold=thresholds,n=n_samples_with_ho
        y="Proportion of individuals with\n at least one heteroplasmic oocyte\nmutation above threshold")
 
 ggsave(filename=paste0(supp_dir,"SuppFig4a.prop_of_samples_with_ho_mut.pdf"),prop_of_samples_with_ho_mut,width=2.5,height=2)
-cat("ED6a: written\n")
+cat("Supp Fig 4a: written\n")
 
 #-----------------------------------------------------------------------------------#
-# Fig ED6b | Number of oocyte mutations per individual at >1% heteroplasmy
+# Supp Fig 4b | Number of oocyte mutations per individual at >1% heteroplasmy
 #
 # Individuals with none still count, hence the right_join onto the full assessed
 # list followed by filling in zero.
@@ -179,7 +179,7 @@ n_of_het_oocyte_muts_plot<-all_het_oocyte_mut_df%>%
   labs(x="Number of heteroplasmic oocyte mutations\nwith VAF inferred >1%",y="Number of individuals")
 
 ggsave(filename=paste0(supp_dir,"SuppFig4b.n_of_het_oocyte_muts_plot.pdf"),n_of_het_oocyte_muts_plot,width=2,height=1.8)
-cat("ED6b: written\n")
+cat("Supp Fig 4b: written\n")
 
 #-----------------------------------------------------------------------------------#
 # PANEL c | not generated here
@@ -192,5 +192,5 @@ cat("ED6b: written\n")
 # notebook rather than a cached object, so it is not lifted here.
 #-----------------------------------------------------------------------------------#
 
-cat("\nExtended Data Fig. 6 panels a and b written to",ed6_dir,"\n")
-cat("Panel c not generated - see note in this script.\n")
+cat("\nSupplementary Fig. 4 panels a and b written to",supp_dir,"\n")
+cat("Panels c-e not generated - see the note above and the script header.\n")

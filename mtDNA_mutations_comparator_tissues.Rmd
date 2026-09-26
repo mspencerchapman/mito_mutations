@@ -497,7 +497,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     par(mfrow=c(1,1))
     save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_shared_muts.pdf"),width = 7,height=4)
     list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
-    add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
+    add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
     dev.off()
   })
   
@@ -557,7 +557,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     par(mfrow=c(1,1))
     save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_raw_shared_muts.pdf"),width = 7,height=4)
     list[[tree_to_show]]=plot_tree(tree = list[[tree_to_show]],cex.label = 0,cex.axis=0.5,plot_axis=T,vspace.reserve = 1.1,title=paste0(exp_ID," (",Age," years old) : Shared mutations (VAF>",100*lowest_VAF_to_show,"%)"))
-    add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
+    add_mito_mut_heatmap(tree=list[[tree_to_show]],heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.1,cex.label = 0.25)
     dev.off()
   })
   
@@ -599,7 +599,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     par(mfrow=c(1,1))
     save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_all_muts_filt.pdf"),width = 7,height=8)
     list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 4,title=paste0(exp_ID," (",Age," years old) : All mutations (VAF>",100*lowest_VAF_to_show,"%)"))
-    add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
+    add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
     dev.off()
   })
   
@@ -638,7 +638,7 @@ temp=Map(dataset_mito_data=all_mito_datasets[all_cohorts_plus_CML_no_lymph],data
     par(mfrow=c(1,1))
     save_pdf(file = paste0(dataset_plots_dir,exp_ID,"_germline_muts.pdf"),width = 7,height=8)
     list$tree=plot_tree(tree = list$tree,cex.label = 0,plot_axis=T,vspace.reserve = 4,title=paste0(exp_ID," (",Age," years old) : germline mutations (VAF>",100*lowest_VAF_to_show,"%)"))
-    add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
+    add_mito_mut_heatmap(tree=list$tree,heatmap=hm[plot_muts.clustered$order,,drop=F],border="gray",heatmap_bar_height=0.01,cex.label = 0.25)
     dev.off()
   })
   

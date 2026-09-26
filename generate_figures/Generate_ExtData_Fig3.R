@@ -119,7 +119,7 @@ if(nrow(components)>4) {
 
 #N1 is the genuine signature
 pdf(paste0(ed3_dir,"ExtDataFig3a.genuine_signature_N1.pdf"),width=7,height=sig_panel_height(1))
-print(colour_signature_strips(mitochondrial_extracted_signature_plot(components["N1",drop=FALSE]),"N1"))
+print(colour_signature_strips(mitochondrial_extracted_signature_plot(components["N1",,drop=FALSE]),"N1"))
 dev.off()
 cat("ED3a: written\n")
 
