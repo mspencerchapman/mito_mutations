@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------#
-# Generate_ExtData_Fig9.R
+# Generate_ExtData_Fig8.R
 #
 # Extended Data Fig. 8 - clonal marking of expanded clades by mtDNA mutations.
 #

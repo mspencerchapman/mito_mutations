@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------#
-# Generate_ExtData_Fig7.R
+# Generate_ExtData_Fig6.R
 #
 # Extended Data Fig. 6 - Mitochondrial mutation drift across tissues.
 #

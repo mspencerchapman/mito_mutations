@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------#
-# Generate_ExtData_Fig8.R
+# Generate_ExtData_Fig7.R
 #
 # Extended Data Fig. 7 - mtDNA mutation heatmaps on the phylogenies of the older
 # individuals, for mutations with and without significant phylogenetic signal.
