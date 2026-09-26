@@ -167,7 +167,7 @@ mito_sigs_plot<-t(cbind(exposures,excluded_mat))%>%
   theme_bw()+
   scale_fill_brewer(palette="Paired")+
   my_theme+
-  theme(axis.text.x=element_text(size=5,angle=90),
+  theme(axis.text.x=element_text(size=6,angle=90),
         strip.text.x=element_text(size=7,margin=unit(c(1,0,1,0),"mm")))+
   facet_wrap(~exp_ID,ncol=6)+
   labs(x="VAF range",y="Number of mutations assigned")

@@ -125,7 +125,7 @@ real_mut_distribution_plot<-real_muts_dist_df%>%
   geom_line(aes(group=exp_ID))+
   theme_bw()+
   my_theme+
-  theme(axis.text.x = element_text(size=5,angle=90),strip.text.x = element_text(size=6))+
+  theme(axis.text.x = element_text(size=6,angle=90),strip.text.x = element_text(size=6))+
   #facet_grid(rows=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales="free")+
   facet_wrap(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),scales="fixed",dir="v",ncol=6)+
   labs(x="VAF range",y="Number of N1 mutations detected")
@@ -147,7 +147,7 @@ real_mut_distribution_plot_normalized<-left_join(real_muts_dist_df,nsamp_df)%>%
   geom_line(aes(group=exp_ID))+
   theme_bw()+
   my_theme+
-  theme(axis.text.x = element_text(size=5,angle=90),strip.text.x = element_text(size=6))+
+  theme(axis.text.x = element_text(size=6,angle=90),strip.text.x = element_text(size=6))+
   #facet_grid(rows=vars(factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)])),scales="free")+
   facet_wrap(~factor(exp_ID,levels=ref_df$Sample[order(ref_df$Age)]),scales="fixed",dir="v",ncol=6)+
   labs(x="VAF range",y="Number of N1 mutations detected per sample")
@@ -237,7 +237,7 @@ modelled_VAF_dist<-gens_record%>%
   geom_bar(stat="count")+
   facet_wrap(~total_gens,ncol=5)+
   theme_bw()+
-  theme(legend.position = "none",axis.text.x = element_text(size=5,angle=90),strip.text.x = element_text(size=6))+
+  theme(legend.position = "none",axis.text.x = element_text(size=6,angle=90),strip.text.x = element_text(size=6))+
   scale_fill_manual(values = colorRampPalette(RColorBrewer::brewer.pal(8,"Spectral"))(1200))+
   labs(x="VAF group",y="Count")+
   my_theme

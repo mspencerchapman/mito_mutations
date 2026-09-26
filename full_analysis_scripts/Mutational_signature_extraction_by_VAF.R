@@ -15,17 +15,8 @@ options(stringsAsFactors = F)
 source(here::here("config.R")) #sets root_dir, genomeFile, project paths and my_theme
 source(paste0(root_dir,"/data/mito_mutations_blood_functions.R"))
 
-#Set the plotting theme for ggplot2
-my_theme<-theme(text = element_text(family="Helvetica"),
-                axis.text = element_text(size = 5),
-                axis.title = element_text(size=7),
-                legend.text = element_text(size=5),
-                legend.title = element_text(size=7),
-                strip.text = element_text(size=7),
-                legend.spacing = unit(1,"mm"),
-                legend.key.size= unit(5,"mm"))+
-  theme(legend.key.height=unit(3,"mm"),
-        legend.title = element_text(size=8))
+#my_theme comes from config.R, so Supplementary Fig. 3 matches the rest of the
+#paper and meets the 6 pt minimum text size.
 
 #Set the key file paths using the root dir
 tree_file_paths = list.files(paste0(root_dir,"/data/tree_files"),pattern=".tree",full.names = T)
@@ -242,7 +233,7 @@ mito_sigs_plot<-t(cbind(exposures,excluded_mat))%>%
   theme_bw()+
   scale_fill_brewer(palette="Paired")+
   my_theme+
-  theme(axis.text.x = element_text(size=5,angle=90),strip.text.x = element_text(size=7,margin = unit(c(1,0,1,0),"mm")))+
+  theme(axis.text.x = element_text(size=6,angle=90),strip.text.x = element_text(size=7,margin = unit(c(1,0,1,0),"mm")))+
   facet_wrap(~exp_ID,ncol=6)+
   labs(x="VAF range",y="Number of mutations assigned")
 
@@ -363,7 +354,7 @@ mito_sigs_plot_SP<-t(cbind(exposures_SP,excluded_mat))%>%
   theme_bw()+
   scale_fill_brewer(palette="Paired")+
   my_theme+
-  theme(axis.text.x = element_text(size=5,angle=90),strip.text.x = element_text(size=7,margin = unit(c(1,0,1,0),"mm")))+
+  theme(axis.text.x = element_text(size=6,angle=90),strip.text.x = element_text(size=7,margin = unit(c(1,0,1,0),"mm")))+
   facet_wrap(~exp_ID,ncol=6)+
   labs(x="VAF range",y="Number of mutations assigned")
 

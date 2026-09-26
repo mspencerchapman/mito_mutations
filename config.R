@@ -77,7 +77,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   my_theme <- theme(text = element_text(family = "Helvetica"),
                     axis.text = element_text(size = 6),
                     axis.title = element_text(size = 8),
-                    legend.text = element_text(size = 5),
+                    legend.text = element_text(size = 6),
                     legend.title = element_text(size = 7),
                     strip.text = element_text(size = 7),
                     legend.spacing = unit(1, "mm"),

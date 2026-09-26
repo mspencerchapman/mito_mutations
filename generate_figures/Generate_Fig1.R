@@ -330,7 +330,7 @@ mean_sum_of_vaf_by_age<-sum_of_vaf_summary%>%
   labs(col="Individual",y="Mean mutation burden (sum of VAF)")+
   geom_smooth(aes(x=Age,y=mean),col="black",linewidth=0.5,method="lm",inherit.aes = F)+
   my_theme+
-  theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size=7),legend.text=element_text(size=5))
+  theme(legend.key.height = unit(3,"mm"),legend.title=element_text(size=7),legend.text=element_text(size=6))
 ggsave(filename=paste0(plots_dir,"Figure_01/Fig1d.mean_sum_of_vaf_by_age.pdf"),plot=mean_sum_of_vaf_by_age,height=2,width=3)
 
 lm.mean_mutburden_by_age=lm(mean~Age,data=sum_of_vaf_summary%>%

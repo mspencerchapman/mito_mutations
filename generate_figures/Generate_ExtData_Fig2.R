@@ -404,7 +404,7 @@ if(length(top20)) {
     scale_y_log10()+
     theme_bw()+
     my_theme+
-    theme(strip.text.x=element_text(size=5,margin=unit(c(1,0,1,0),"mm")),
+    theme(strip.text.x=element_text(size=6,margin=unit(c(1,0,1,0),"mm")),
           axis.text.x=element_text(angle=90),
           legend.key.height=unit(3,"mm"))+
     labs(x="Mutation VAF",y="1/mtDNA genomes",col="Individual")+
