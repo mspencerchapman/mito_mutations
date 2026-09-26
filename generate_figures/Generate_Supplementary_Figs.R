@@ -5,14 +5,21 @@
 # Extended Data panels. Output goes to plots/Supplementary_Figures/.
 #
 # Registry of the supplementary figures and where each is produced:
-#   Supp Fig 1  haplotype phylogenies (Note 1)          - mtDNA_mut_phasing.Rmd
-#   Supp Fig 2  in vitro colony growth drift (Note 2)   - full_analysis_scripts/Drift_during_colony_growth.R
-#   Supp Fig 3  HDP vs SigProfiler (Note 3)             - full_analysis_scripts/Mutational_signature_extraction_by_VAF.R
-#   Supp Fig 4  heteroplasmic oocyte mutations (Note 6) - full_analysis_scripts/Heteroplasmic_oocyte_mutation_analysis.R
-#   Supp Fig 5  drift from synonymous/non-coding muts   - THIS SCRIPT
-#   Supp Fig 6  mature cell phenotyping (Note 11)        - gating strategy, not code-generated
-#   Supp Fig 7  individual & sequential ABCs, 4 cohorts - THIS SCRIPT (was Extended Data Fig. 12)
-#   Notes 10-11 flow cytometry gating                   - not code-generated
+#   Supp Fig 1   haplotype phylogenies (Note 1)           - mtDNA_mut_phasing.Rmd
+#   Supp Fig 2   in vitro colony growth drift (Note 2)    - full_analysis_scripts/Drift_during_colony_growth.R
+#   Supp Fig 3   HDP vs SigProfiler (Note 3)              - full_analysis_scripts/Mutational_signature_extraction_by_VAF.R
+#   Supp Fig 4   cross-tissue mutation burdens (Note 5)   - not yet scripted
+#   Supp Fig 5   heteroplasmic oocyte mutations (Note 6)  - generate_figures/Generate_SuppFig5.R (a, b, e only)
+#   Supp Fig 6   drift from synonymous/non-coding muts (Note 7)  - THIS SCRIPT
+#   Supp Fig 7   VAF distributions across tissues (Note 8)   - not yet scripted
+#   Supp Fig 8   lineage-tracing heatmaps (Note 9)        - not yet scripted
+#   Supp Fig 9   HSPC flow sorting strategy (Note 10)     - gating strategy, not code-generated
+#   Supp Fig 10  mature cell phenotyping (Note 11)        - gating strategy, not code-generated
+#   Supp Fig 11  individual & sequential ABCs (Note 12)   - THIS SCRIPT (was Extended Data Fig. 12)
+#
+# The supplementary figures were renumbered in order of first appearance so that
+# the four figure sets in Notes 5, 8, 9 and 10, previously unnumbered, take their
+# place in the sequence. Old -> new: 4->5, 5->6, 6->10, 7->11.
 #-----------------------------------------------------------------------------------#
 
 suppressMessages({
@@ -58,7 +65,7 @@ all_sumstats[,new_VAF_groups] <- lapply(all_sumstats[,new_VAF_groups],
                                         function(x) ifelse(is.na(x), 0, x))
 
 #-----------------------------------------------------------------------------------#
-### Generate SUPPLEMENTARY FIG. 5 ---------
+### Generate SUPPLEMENTARY FIG. 6 ---------
 ### Drift inferred from synonymous and non-coding mutations only
 #-----------------------------------------------------------------------------------#
 # Sensitivity analysis for Supplementary Note 7: selection on protein-altering
@@ -132,18 +139,18 @@ report_drift <- function(post, tag) {
               tag, m@beta[2], ml, ci[2], ci[1]))
   list(model=m, ml=ml, ci=ci)
 }
-cat("\nSupplementary Fig. 5 - drift estimates (rejection ABC)\n")
+cat("\nSupplementary Fig. 6 - drift estimates (rejection ABC)\n")
 syn_fit <- report_drift(syn_posterior, "synonymous + non-coding")
 all_fit <- report_drift(all_posterior, "all mutations (control)")
 
-#--- Supp Fig 5a: inferred mutation rate per donor -------------------------------
+#--- Supp Fig 6a: inferred mutation rate per donor -------------------------------
 syn_rate <- syn_posterior %>% group_by(exp_ID) %>%
   summarise(Age = Age[1],
             med = median(muts_per_mitochondria_per_generation),
             lo  = quantile(muts_per_mitochondria_per_generation, 0.025),
             hi  = quantile(muts_per_mitochondria_per_generation, 0.975), .groups="drop")
 
-SuppFig5a <- syn_rate %>%
+SuppFig6a <- syn_rate %>%
   ggplot(aes(x=forcats::fct_reorder(exp_ID,Age), y=med, ymin=lo, ymax=hi))+
   geom_point(alpha=0.75,size=0.5)+
   geom_errorbar(width=0.3,alpha=0.5)+
@@ -157,11 +164,11 @@ SuppFig5a <- syn_rate %>%
   #self-explanatory from the tick labels.
   theme(axis.title.y = element_blank())+
   coord_flip()
-ggsave(paste0(supp_dir,"SuppFig5a.syn_noncoding_mutation_rate.pdf"), SuppFig5a, width=1.6, height=2)
+ggsave(paste0(supp_dir,"SuppFig6a.syn_noncoding_mutation_rate.pdf"), SuppFig6a, width=1.6, height=2)
 
-#--- Supp Fig 5b: WF generations against age -------------------------------------
+#--- Supp Fig 6b: WF generations against age -------------------------------------
 syn_band <- lmer_confidence_band(syn_fit$model, syn_posterior, predictor="Age")
-SuppFig5b <- syn_posterior %>%
+SuppFig6b <- syn_posterior %>%
   mutate(exp_ID = factor(exp_ID, levels = ref_df$Sample[order(ref_df$Age)])) %>%
   ggplot(aes(x=Age,y=total_generations))+
   geom_ribbon(data=syn_band, aes(x=Age,ymin=lower,ymax=upper),
@@ -176,18 +183,23 @@ SuppFig5b <- syn_posterior %>%
   labs(x="Age", y="Total WF generations\n(posterior distribution from ABC)", col="")+
   my_theme+
   theme(legend.key.size=unit(0.5,"mm"), legend.box.spacing=unit(0,"mm"))
-ggsave(paste0(supp_dir,"SuppFig5b.syn_noncoding_generations_by_age.pdf"), SuppFig5b, width=2.6, height=2)
+ggsave(paste0(supp_dir,"SuppFig6b.syn_noncoding_generations_by_age.pdf"), SuppFig6b, width=2.6, height=2)
 
 cat("Supplementary figures written to ", supp_dir, "\n", sep="")
 
 #-----------------------------------------------------------------------------------#
-### Generate SUPPLEMENTARY FIG. 7 ---------
+### Generate SUPPLEMENTARY FIG. 11 ---------
 ### Individual and sequential ABCs for inference of mitochondrial drift
 #-----------------------------------------------------------------------------------#
-# a  normal blood
-# b  MPN, including non-synonymous mutations
-# c  MPN, non-synonymous mutations excluded
-# d  CML
+# a  normal blood                       (10 mutations, 4 donors)
+# b  MPN, set including non-synonymous  ( 5 mutations, 5 donors)
+# c  MPN, a separate non-coding set     ( 5 mutations, 4 donors)
+# d  CML                                ( 3 mutations, 2 donors)
+#
+# b and c are not subset and superset: they are near-disjoint mutation sets
+# (only MT_2270_A_G is in both), so c is an independent replicate of b on
+# mutations that cannot be under protein-coding selection, not b with the
+# non-synonymous mutations removed.
 #
 # For each cohort: the posterior for every mutation fitted independently from the
 # initial prior ("individual"), and the sequential ABC in which each mutation's
@@ -195,8 +207,10 @@ cat("Supplementary figures written to ", supp_dir, "\n", sep="")
 # dark red distribution is the one shown in Fig. 6e.
 #
 # This was Extended Data Fig. 12; it moved to the Supplementary Information
-# when the Extended Data figures were renumbered. The former two-panel Supp
-# Fig 6 (MPN with and without non-synonymous mutations) is panels b and c here.
+# when the Extended Data figures were renumbered, and became Supp Fig 11 when
+# the supplementary figures were renumbered in order of appearance. The
+# two-panel figure that Supplementary Note 7 still calls "Supplementary Fig. 6"
+# (MPN with and without non-synonymous mutations) is panels b and c here.
 #
 # Posteriors are produced by
 #   simulation_scripts_for_ABCs/Mitochondrial_drift_through_tree_ABC_SEQ_local.R
@@ -213,12 +227,12 @@ sfx <- if (abc_method=="rejection") "_rejection" else ""
 set.seed(42)
 prior_gt <- 10^runif(1e4, min=-1, max=2.7)
 
-supp7_panels <- list(
+supp11_panels <- list(
   list(letter="a", cohort="normal",       muts="abc_muts_normal.csv"),
   list(letter="b", cohort="MPN",          muts="abc_muts_MPN.csv"),
   list(letter="c", cohort="MPN_nocoding", muts="abc_muts_MPN_nocoding.csv"),
   list(letter="d", cohort="CML",          muts="abc_muts_CML.csv"))
-supp7_dir <- function(cohort, kind) paste0("Drift_ABC_clonal_expansions/Drift_ABC_",
+supp11_dir <- function(cohort, kind) paste0("Drift_ABC_clonal_expansions/Drift_ABC_",
                                            cohort,"_",kind,sfx)
 
 load_posteriors <- function(dir, abc_muts) {
@@ -252,21 +266,21 @@ ridge_plot <- function(df, abc_type) {
     labs(x="Generation time (days)", y="Mutation")
 }
 
-for (p in supp7_panels) {
+for (p in supp11_panels) {
   muts_file <- paste0(root_dir,"/simulation_scripts_for_ABCs/",p$muts)
-  if (!file.exists(muts_file)) { cat("Supp Fig 7",p$letter,"- no manifest for",p$cohort,"- skipped\n"); next }
+  if (!file.exists(muts_file)) { cat("Supp Fig 11",p$letter,"- no manifest for",p$cohort,"- skipped\n"); next }
   abc_muts <- read_csv(muts_file, show_col_types=FALSE)
-  ind <- load_posteriors(supp7_dir(p$cohort,"individual"), abc_muts)
-  seq <- load_posteriors(supp7_dir(p$cohort,"sequential"), abc_muts)
-  if (is.null(ind) && is.null(seq)) { cat("Supp Fig 7",p$letter,"- no posteriors for",p$cohort,"- skipped\n"); next }
+  ind <- load_posteriors(supp11_dir(p$cohort,"individual"), abc_muts)
+  seq <- load_posteriors(supp11_dir(p$cohort,"sequential"), abc_muts)
+  if (is.null(ind) && is.null(seq)) { cat("Supp Fig 11",p$letter,"- no posteriors for",p$cohort,"- skipped\n"); next }
   #Height scales with mutation count. The ED Fig. 12 version used
   #1.1 + 0.28*n for a full-page stack; these are tighter for the Supplementary.
   h <- 0.75 + 0.20*nrow(abc_muts)
-  if (!is.null(ind)) ggsave(paste0(supp_dir,"SuppFig7",p$letter,".",p$cohort,"_individual_",abc_method,".pdf"),
+  if (!is.null(ind)) ggsave(paste0(supp_dir,"SuppFig11",p$letter,".",p$cohort,"_individual_",abc_method,".pdf"),
                             ridge_plot(ind,"individual"), width=3.3, height=h)
-  if (!is.null(seq)) ggsave(paste0(supp_dir,"SuppFig7",p$letter,".",p$cohort,"_sequential_",abc_method,".pdf"),
+  if (!is.null(seq)) ggsave(paste0(supp_dir,"SuppFig11",p$letter,".",p$cohort,"_sequential_",abc_method,".pdf"),
                             ridge_plot(seq,"sequential"), width=3.3, height=h)
-  cat("Supp Fig 7",p$letter,"-",p$cohort,": individual",!is.null(ind)," sequential",!is.null(seq),"\n")
+  cat("Supp Fig 11",p$letter,"-",p$cohort,": individual",!is.null(ind)," sequential",!is.null(seq),"\n")
 }
 
 cat("Supplementary figures written to ", supp_dir, "\n", sep="")

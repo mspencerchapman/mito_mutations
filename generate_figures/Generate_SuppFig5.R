@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------------#
-# Generate_SuppFig4.R
+# Generate_SuppFig5.R
 #
-# Supplementary Fig. 4a, b, e | Heteroplasmic oocyte mutations (Supplementary Note 6).
+# Supplementary Fig. 5a, b, e | Heteroplasmic oocyte mutations (Supplementary Note 6).
 # Panels c, d and f are not built here - see the notes further down.
 #
 #   a  Proportion of individuals inferred to carry at least one heteroplasmic
@@ -137,7 +137,7 @@ cat("Heteroplasmic oocyte mutations:",nrow(all_het_oocyte_mut_df),
 cat("Individuals assessed:",nrow(individuals_assessed),"\n")
 
 #-----------------------------------------------------------------------------------#
-# Supp Fig 4a | Proportion of individuals with an oocyte mutation above a threshold
+# Supp Fig 5a | Proportion of individuals with an oocyte mutation above a threshold
 #-----------------------------------------------------------------------------------#
 
 thresholds<-seq(0.005,0.9,0.005)
@@ -155,11 +155,11 @@ prop_of_samples_with_ho_mut<-data.frame(threshold=thresholds,n=n_samples_with_ho
   labs(x="Heteroplasmy level",
        y="Proportion of individuals with\n at least one heteroplasmic oocyte\nmutation above threshold")
 
-ggsave(filename=paste0(supp_dir,"SuppFig4a.prop_of_samples_with_ho_mut.pdf"),prop_of_samples_with_ho_mut,width=2.5,height=2)
-cat("Supp Fig 4a: written\n")
+ggsave(filename=paste0(supp_dir,"SuppFig5a.prop_of_samples_with_ho_mut.pdf"),prop_of_samples_with_ho_mut,width=2.5,height=2)
+cat("Supp Fig 5a: written\n")
 
 #-----------------------------------------------------------------------------------#
-# Supp Fig 4b | Number of oocyte mutations per individual at >1% heteroplasmy
+# Supp Fig 5b | Number of oocyte mutations per individual at >1% heteroplasmy
 #
 # Individuals with none still count, hence the right_join onto the full assessed
 # list followed by filling in zero.
@@ -180,8 +180,8 @@ n_of_het_oocyte_muts_plot<-all_het_oocyte_mut_df%>%
   my_theme+
   labs(x="Number of heteroplasmic oocyte mutations\nwith VAF inferred >1%",y="Number of individuals")
 
-ggsave(filename=paste0(supp_dir,"SuppFig4b.n_of_het_oocyte_muts_plot.pdf"),n_of_het_oocyte_muts_plot,width=2,height=1.8)
-cat("Supp Fig 4b: written\n")
+ggsave(filename=paste0(supp_dir,"SuppFig5b.n_of_het_oocyte_muts_plot.pdf"),n_of_het_oocyte_muts_plot,width=2,height=1.8)
+cat("Supp Fig 5b: written\n")
 
 #-----------------------------------------------------------------------------------#
 # PANEL c | not generated here
@@ -224,7 +224,7 @@ for(i in 1:nrow(panel_e_donors)) {
   plot_muts<-all_het_oocyte_mut_df%>%filter(exp_ID==this_id)%>%
     arrange(desc(ml_vaf))%>%pull(mut_ref)
   plot_muts<-plot_muts[plot_muts%in%rownames(list$matrices$vaf)]
-  if(!length(plot_muts)) {cat("Supp Fig 4e:",this_id,"- no oocyte mutations - skipped\n"); next}
+  if(!length(plot_muts)) {cat("Supp Fig 5e:",this_id,"- no oocyte mutations - skipped\n"); next}
 
   #Drop samples absent from the shearwater table (excluded for contamination)
   tree<-ape::keep.tip(list$tree,
@@ -243,15 +243,15 @@ for(i in 1:nrow(panel_e_donors)) {
   #Plain pdf(), not save_pdf(): the latter is gated by the notebooks' save_plots
   #flag and rescales the canvas, which shrinks base-R text. Figure scripts write
   #unconditionally at the stated size.
-  grDevices::pdf(file=paste0(supp_dir,"SuppFig4e.",this_id,"_oocyte_muts.pdf"),width=7,height=2.6)
+  grDevices::pdf(file=paste0(supp_dir,"SuppFig5e.",this_id,"_oocyte_muts.pdf"),width=7,height=2.6)
   tree<-plot_tree(tree=tree,cex.label=0,plot_axis=TRUE,vspace.reserve=1.1,
                   title=paste0(this_id," (",panel_e_donors$tissue[i],", n = ",
                                length(tree$tip.label)," samples)"))
   add_mito_mut_heatmap(tree=tree,heatmap=hm,border="gray",
                        heatmap_bar_height=0.1,cex.label=0.25)
   dev.off()
-  cat("Supp Fig 4e:",this_id,"-",length(plot_muts),"oocyte mutation(s) written\n")
+  cat("Supp Fig 5e:",this_id,"-",length(plot_muts),"oocyte mutation(s) written\n")
 }
 
-cat("\nSupplementary Fig. 4 panels a, b and e written to",supp_dir,"\n")
+cat("\nSupplementary Fig. 5 panels a, b and e written to",supp_dir,"\n")
 cat("Panels c, d and f not generated - see the note above and the script header.\n")
