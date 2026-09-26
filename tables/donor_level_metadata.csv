@@ -1,0 +1,130 @@
+Dataset,Tissue,Donor_ID,Sex,Age_years,Gestation_pcw,Disease_or_status,N_clonal_samples,N_mtDNA_mutations
+Bronchial epithelium,Bronchial epithelium,PD37455,Female,0.9,NA,Never-smoker,27,83
+Bronchial epithelium,Bronchial epithelium,PD37456,Female,1,NA,Never-smoker,28,48
+Bronchial epithelium,Bronchial epithelium,PD37453,Female,3,NA,Never-smoker,30,148
+Bronchial epithelium,Bronchial epithelium,PD34205,Male,54,NA,Ex-smoker,49,184
+Bronchial epithelium,Bronchial epithelium,PD37454,Male,59,NA,Never-smoker,30,136
+Bronchial epithelium,Bronchial epithelium,PD34204,Male,61,NA,Current smoker,60,232
+Bronchial epithelium,Bronchial epithelium,PD34207,Female,65,NA,Current smoker,48,189
+Bronchial epithelium,Bronchial epithelium,PD34210,Female,68,NA,Ex-smoker,45,187
+Bronchial epithelium,Bronchial epithelium,PD30160,Male,71,NA,Ex-smoker,11,65
+Bronchial epithelium,Bronchial epithelium,PD34215,Female,73,NA,Never-smoker,56,127
+Bronchial epithelium,Bronchial epithelium,PD34211,Male,74,NA,Current smoker,49,182
+Bronchial epithelium,Bronchial epithelium,PD34209,Female,75,NA,Never-smoker,55,194
+Bronchial epithelium,Bronchial epithelium,PD37452,Female,75,NA,Ex-smoker,36,169
+Bronchial epithelium,Bronchial epithelium,PD34206,Male,76,NA,Ex-smoker,54,211
+Bronchial epithelium,Bronchial epithelium,PD37451,Female,80,NA,Never-smoker,30,148
+Bronchial epithelium,Bronchial epithelium,PD26988,Male,81,NA,Ex-smoker,24,120
+Endometrium,Endometrial glands,PD37506,Female,19,NA,Post-mortem (traumatic injury),10,156
+Endometrium,Endometrial glands,PD40535,Female,24,NA,Transplant donor,7,357
+Endometrium,Endometrial glands,PD41871,Female,27,NA,Infertility clinic,17,2234
+Endometrium,Endometrial glands,PD37605,Female,29,NA,Infertility clinic,8,213
+Endometrium,Endometrial glands,PD37601,Female,31,NA,Infertility clinic,10,218
+Endometrium,Endometrial glands,PD41860,Female,31,NA,Infertility clinic,4,52
+Endometrium,Endometrial glands,PD37607,Female,34,NA,Infertility clinic,19,586
+Endometrium,Endometrial glands,PD41857,Female,34,NA,Infertility clinic,13,188
+Endometrium,Endometrial glands,PD39444,Female,35,NA,Transplant donor,10,434
+Endometrium,Endometrial glands,PD41865,Female,36,NA,Infertility clinic,2,27
+Endometrium,Endometrial glands,PD41868,Female,36,NA,Infertility clinic,6,84
+Endometrium,Endometrial glands,PD39953,Female,37,NA,Transplant donor,8,232
+Endometrium,Endometrial glands,PD37613,Female,39,NA,Infertility clinic,11,547
+Endometrium,Endometrial glands,PD41861,Female,39,NA,Infertility clinic,8,126
+Endometrium,Endometrial glands,PD41869,Female,40,NA,Infertility clinic,13,175
+Endometrium,Endometrial glands,PD37594,Female,42,NA,Infertility clinic,16,433
+Endometrium,Endometrial glands,PD39952,Female,44,NA,Transplant donor,11,309
+Endometrium,Endometrial glands,PD39954,Female,44,NA,Transplant donor,9,713
+Endometrium,Endometrial glands,PD37595,Female,46,NA,Infertility clinic,9,274
+Endometrium,Endometrial glands,PD36804,Female,47,NA,Hysterectomy for leiomyomata,12,3623
+Endometrium,Endometrial glands,PD36805,Female,49,NA,Hysterectomy for benign ovarian tumour,6,398
+Endometrium,Endometrial glands,PD38812,Female,54,NA,Post-mortem (traumatic injury),2,252
+Endometrium,Endometrial glands,PD37507,Female,60,NA,Post-mortem (peritonitis),14,1207
+Endometrium,Endometrial glands,PD42746,Female,67,NA,Transplant donor,2,68
+Endometrium,Endometrial glands,PD40107,Female,69,NA,Transplant donor,10,447
+Endometrium,Endometrial glands,PD42475,Female,74,NA,Transplant donor,8,1123
+Endometrium,Endometrial glands,PD40659,Female,81,NA,Post-mortem,4,140
+IBD-affected colon,Colonic crypts (IBD-affected),P34,Male,22,NA,UC,6,3500
+IBD-affected colon,Colonic crypts (IBD-affected),P4,Female,26,NA,CD,3,237
+IBD-affected colon,Colonic crypts (IBD-affected),P3,Female,27,NA,UC,11,1443
+IBD-affected colon,Colonic crypts (IBD-affected),P44,Female,29,NA,CD,8,2209
+IBD-affected colon,Colonic crypts (IBD-affected),P12,Male,31,NA,UC,21,4996
+IBD-affected colon,Colonic crypts (IBD-affected),P13,Male,31,NA,UC,4,2867
+IBD-affected colon,Colonic crypts (IBD-affected),P33,Female,31,NA,CD,16,2116
+IBD-affected colon,Colonic crypts (IBD-affected),P42,Female,31,NA,UC,3,44
+IBD-affected colon,Colonic crypts (IBD-affected),P49,Male,33,NA,UC,3,49
+IBD-affected colon,Colonic crypts (IBD-affected),P14,Female,35,NA,CD,3,680
+IBD-affected colon,Colonic crypts (IBD-affected),P43,Female,36,NA,CD,3,1034
+IBD-affected colon,Colonic crypts (IBD-affected),P50,Female,36,NA,UC,15,6654
+IBD-affected colon,Colonic crypts (IBD-affected),P31,Male,37,NA,UC,4,266
+IBD-affected colon,Colonic crypts (IBD-affected),P37,Female,37,NA,CD,32,3762
+IBD-affected colon,Colonic crypts (IBD-affected),P2,Male,38,NA,CD,5,2899
+IBD-affected colon,Colonic crypts (IBD-affected),P24,Male,38,NA,CD,6,464
+IBD-affected colon,Colonic crypts (IBD-affected),P46,Male,38,NA,UC,21,1678
+IBD-affected colon,Colonic crypts (IBD-affected),P28,Female,40,NA,UC,8,1461
+IBD-affected colon,Colonic crypts (IBD-affected),P30,Female,40,NA,CD,22,962
+IBD-affected colon,Colonic crypts (IBD-affected),P38,Female,40,NA,UC,4,1566
+IBD-affected colon,Colonic crypts (IBD-affected),P48,Female,40,NA,CD,13,1641
+IBD-affected colon,Colonic crypts (IBD-affected),P19,Male,42,NA,CD,3,435
+IBD-affected colon,Colonic crypts (IBD-affected),P41,Male,42,NA,CD,9,206
+IBD-affected colon,Colonic crypts (IBD-affected),P17,Male,44,NA,UC,21,3555
+IBD-affected colon,Colonic crypts (IBD-affected),P18,Female,45,NA,CD,4,817
+IBD-affected colon,Colonic crypts (IBD-affected),P29,Male,48,NA,UC,12,245
+IBD-affected colon,Colonic crypts (IBD-affected),P9,Female,49,NA,UC,4,1858
+IBD-affected colon,Colonic crypts (IBD-affected),P54,Female,50,NA,UC,6,2410
+IBD-affected colon,Colonic crypts (IBD-affected),P59,Female,50,NA,UC,4,75
+IBD-affected colon,Colonic crypts (IBD-affected),P10,Female,51,NA,UC,10,5078
+IBD-affected colon,Colonic crypts (IBD-affected),P45,Female,52,NA,CD,7,137
+IBD-affected colon,Colonic crypts (IBD-affected),P15,Male,58,NA,UC,5,886
+IBD-affected colon,Colonic crypts (IBD-affected),P22,Female,58,NA,UC,7,1693
+IBD-affected colon,Colonic crypts (IBD-affected),P40,Male,58,NA,CD,8,117
+IBD-affected colon,Colonic crypts (IBD-affected),P1,Female,59,NA,CD,20,4518
+IBD-affected colon,Colonic crypts (IBD-affected),P36,Female,61,NA,UC,19,2092
+IBD-affected colon,Colonic crypts (IBD-affected),P51,Male,61,NA,UC,9,6315
+IBD-affected colon,Colonic crypts (IBD-affected),P53,Male,61,NA,UC,6,723
+IBD-affected colon,Colonic crypts (IBD-affected),P16,Male,62,NA,UC,6,597
+IBD-affected colon,Colonic crypts (IBD-affected),P35,Male,66,NA,UC,11,405
+IBD-affected colon,Colonic crypts (IBD-affected),P52,Female,69,NA,UC,13,2413
+IBD-affected colon,Colonic crypts (IBD-affected),P26,Male,70,NA,UC,4,750
+IBD-affected colon,Colonic crypts (IBD-affected),P25,Female,77,NA,UC,5,405
+IBD-affected colon,Colonic crypts (IBD-affected),P11,Male,80,NA,CD,3,2305
+Lymphoid,Lymphoid Tonsil,TX001,Female,4,NA,tonsil,38,131
+Lymphoid,Lymphoid Tonsil,TX002,Female,4,NA,tonsil,8,89
+Lymphoid,Lymphoid BoneMarrowPeripheralBloodSpleen,KX001,Male,29,NA,bonemarrow;peripheralblood;spleen,185,310
+Lymphoid,Lymphoid BoneMarrowPeripheralBloodSpleen,KX002,Male,38,NA,bonemarrow;peripheralblood;spleen,71,504
+Lymphoid,Lymphoid PeripheralBlood,AX001,Male,63,NA,peripheralblood,245,485
+Lymphoid,Lymphoid BoneMarrowPeripheralBloodSpleen,KX003,Male,81,NA,bonemarrow;peripheralblood;spleen,23,82
+MUTYH-mutated colon,Colonic crypts (MUTYH-associated),PD44890,Male,16,NA,c.536 G>A; p.Y179C and c.1187 G>A; p.G396D,49,402
+MUTYH-mutated colon,Colonic crypts (MUTYH-associated),PD44889,Female,39,NA,p.Tyr104X (c.312C>A) HOM,31,312
+MUTYH-mutated colon,Colonic crypts (MUTYH-associated),PD44888,Male,49,NA,p.Tyr104X (c.312C>A) HOM,22,171
+MUTYH-mutated colon,Colonic crypts (MUTYH-associated),PD44887,Female,56,NA,c.536 G>A; p.Y179C and c.1187 G>A; p.G396D,31,395
+MUTYH-mutated colon,Colonic crypts (MUTYH-associated),PD44891,Male,69,NA,c.536 G>A; p.Y179C and c.1187 G>A; p.G396D,2,40
+Myeloproliferative neoplasms,Blood,PD7271,Female,23,NA,ET,76,1405
+Myeloproliferative neoplasms,Blood,PD5163,Female,31,NA,PV,70,682
+Myeloproliferative neoplasms,Blood,PD5847,Female,44,NA,PV,89,1287
+Myeloproliferative neoplasms,Blood,PD5182,Male,46,NA,PV,159,1360
+Myeloproliferative neoplasms,Blood,PD5179,Male,49,NA,PV=> MF,87,750
+Myeloproliferative neoplasms,Blood,PD6629,Male,61,NA,ET,57,618
+Myeloproliferative neoplasms,Blood,PD9478,Female,68,NA,PV,81,621
+Myeloproliferative neoplasms,Blood,PD5117,Female,81,NA,PV,60,753
+Myeloproliferative neoplasms,Blood,PD6646,Female,81,NA,ET,116,1492
+Myeloproliferative neoplasms,Blood,PD4781,Female,83,NA,PV,48,742
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),CB001,Female,0,NA,Adult_Cord,195,1183
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),CB002,Female,0,NA,Adult_Cord,379,1584
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX001,Male,29,NA,Adult_Cord,407,2969
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX002,Male,38,NA,Adult_Cord,380,2846
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),SX001,Male,48,NA,Adult_Cord,361,2571
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),AX001,Male,63,NA,Adult_Cord,361,3508
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX007,Male,75,NA,Adult_Cord,315,1537
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX008,Female,76,NA,Adult_Cord,367,2412
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX004,Female,77,NA,Adult_Cord,451,3082
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX003,Male,81,NA,Adult_Cord,322,2442
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (foetal liver / bone marrow),18pcw,Male,NA,18,Foetal,234,1360
+Normal ageing haematopoiesis / foetal haemopoiesis,Blood (foetal liver / bone marrow),8pcw,Male,NA,8,Foetal,277,4682
+Normal colon,Colonic crypts,PD34202,Male,13,NA,Control,6,62
+Normal colon,Colonic crypts,PD37449,Female,36,NA,Control,30,496
+Normal colon,Colonic crypts,PD34201,Male,38,NA,Control,56,681
+Normal colon,Colonic crypts,PD34200,Male,54,NA,Control,49,581
+Normal colon,Colonic crypts,PD37590,Female,55,NA,Control,43,825
+Normal colon,Colonic crypts,HLS,Female,60,NA,Control,6,129
+Normal colon,Colonic crypts,PD34199,Male,67,NA,Control,21,289
+Normal colon,Colonic crypts,PD37266,Female,67,NA,Control,19,317
+Normal colon,Colonic crypts,PD28690,Male,79,NA,Control,6,220
