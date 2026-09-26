@@ -6,6 +6,11 @@ during human development and ageing"*.
 This repository contains the mtDNA mutation-calling pipeline, the downstream
 analysis scripts, and the scripts that generate each manuscript figure.
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22983565.svg)](https://doi.org/10.5281/zenodo.22983565)
+
+Archived at Zenodo: [10.5281/zenodo.22983565](https://doi.org/10.5281/zenodo.22983565)
+(concept DOI - always resolves to the latest release).
+
 ---
 
 ## Quick start
@@ -330,6 +335,7 @@ Data for this project lives in three places:
 |---|---|---|
 | Raw sequencing data | European Genome-phenome Archive (EGA) | Managed access - see the manuscript's Data Availability statement |
 | Processed data objects (~270 MB) | Zenodo [10.5281/zenodo.22754723](https://doi.org/10.5281/zenodo.22754723) | `Rscript download_data.R` |
+| This analysis code, archived | Zenodo [10.5281/zenodo.22983565](https://doi.org/10.5281/zenodo.22983565) | snapshot of this repository at each release |
 | Metadata, phylogenies, references, analysis products | This repository | included in the clone |
 
 ### Fetching the processed data

@@ -79,9 +79,17 @@ keywords:
   - phylogenetics
   - approximate Bayesian computation
 license: MIT
-# TODO on acceptance: add the paper under references, and the Zenodo DOI as
-# identifiers, e.g.
-# identifiers:
-#   - type: doi
-#     value: 10.5281/zenodo.22754723
-#     description: Processed data deposit
+doi: 10.5281/zenodo.22983565
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22983565
+    description: >-
+      Concept DOI for this repository - always resolves to the most recent
+      release. Cite this one.
+  - type: doi
+    value: 10.5281/zenodo.22983566
+    description: Version DOI for release v1.0.0
+  - type: doi
+    value: 10.5281/zenodo.22754723
+    description: Processed data deposit
+# TODO on acceptance: add the paper itself under references, with its DOI.
