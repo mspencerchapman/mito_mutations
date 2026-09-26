@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 # Load packages (and install if they are not installed 
 cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal","ggpubr","VGAM","usethis","RColorBrewer","MCMCglmm","phangorn","spam","dichromat","ggridges","forcats","lmerTest","tidyverse","readr")
-bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene","Rsamtools","ggtree")
+bioconductor_packages=c("MutationalPatterns","Rsamtools","ggtree")
 
 for(package in cran_packages){
   if(!require(package, character.only=T,quietly = T, warn.conflicts = F)){
@@ -1166,7 +1166,7 @@ impact_comparison_df%>%
 ```
 
 
-```{r compare_misannotated_to_corrected4,,fig.height=7,fig.width=7}
+```{r compare_misannotated_to_corrected4,fig.height=7,fig.width=7}
 simple_impact_comparison_df<-impact_comparison_df%>%
   mutate(change=paste(impact_NUC,impact,sep=">"))%>%
   mutate(altered=ifelse(impact_NUC==impact,"unchanged","changed"))

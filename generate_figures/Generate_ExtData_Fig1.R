@@ -2,7 +2,7 @@
 # --------Load packages (and install if they are not installed yet)-------------------
 #-----------------------------------------------------------------------------------#
 cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal")
-bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene")
+bioconductor_packages=c("MutationalPatterns")
 
 for(package in cran_packages){
   if(!require(package, character.only=T,quietly = T, warn.conflicts = F)){

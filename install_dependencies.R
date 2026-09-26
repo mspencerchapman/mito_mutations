@@ -26,7 +26,9 @@ cran_packages <- c(
 
 bioc_packages <- c(
   "deepSNV",         # shearwater mutation calling
-  "ComplexHeatmap"
+  "ComplexHeatmap",
+  "MutationalPatterns",  # mutational signature utilities and palettes
+  "Rsamtools"            # scanFa(), used to read trinucleotide context from genomeFile
 )
 
 # Not on CRAN/Bioconductor - installed from GitHub.

@@ -11,7 +11,7 @@ options(stringsAsFactors = F)
 
 # Load packages (and install if they are not installed 
 cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal","ggpubr","VGAM","usethis","RColorBrewer","MCMCglmm","phangorn","spam","dichromat","ggridges","forcats","lmerTest","tidyverse","readr","patchwork","BuenColors","ggpmisc")
-bioconductor_packages=c("MutationalPatterns","BSgenome","BSgenome.Hsapiens.UCSC.hg19","TxDb.Hsapiens.UCSC.hg19.knownGene","Rsamtools","ggtree","ComplexHeatmap")
+bioconductor_packages=c("MutationalPatterns","Rsamtools","ggtree","ComplexHeatmap")
 
 for(package in cran_packages){
   if(!require(package, character.only=T,quietly = T, warn.conflicts = F)){

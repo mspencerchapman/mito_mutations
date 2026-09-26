@@ -146,7 +146,7 @@ cat("ED4a: written\n")
 sum_of_vaf_df<-Map(list=mito_data,Exp_ID=names(mito_data),function(list,Exp_ID){
   mat<-filtered_vaf_matrix(list)
   keep<-!grepl("DEL|INS",rownames(mat)) & !rownames(mat)%in%exclude_muts
-  as.data.frame(colSums(mat[keep,,drop=FALSE],na.rm=TRUE))%>%
+  as.data.frame(colSums(mat[keep,drop=FALSE],na.rm=TRUE))%>%
     tibble::rownames_to_column(var="Sample")%>%
     mutate(exp_ID=Exp_ID)%>%
     dplyr::rename(sum_of_vaf=2)%>%
@@ -330,7 +330,7 @@ all_sum_of_vaf_df<-dplyr::bind_rows(Map(dataset_mito_data=cohort_data,dataset=na
          matrix(rep(1,ncol(list$matrices$vaf)),nrow=1))
     keep<-!grepl("DEL|INS",rownames(list$matrices$vaf)) &
       !rownames(list$matrices$vaf)%in%c(exclude_muts,list$het_oocyte_muts)
-    mat<-(list$matrices$vaf*(list$matrices$vaf>vaf_cut_off)*list$matrices$SW*CN_removal)[keep,,drop=FALSE]
+    mat<-(list$matrices$vaf*(list$matrices$vaf>vaf_cut_off)*list$matrices$SW*CN_removal)[keep,drop=FALSE]
     as.data.frame(colSums(mat,na.rm=TRUE))%>%
       tibble::rownames_to_column(var="Sample")%>%
       mutate(exp_ID=Exp_ID)%>%

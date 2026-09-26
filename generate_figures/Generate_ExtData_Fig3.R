@@ -25,7 +25,9 @@
 #-----------------------------------------------------------------------------------#
 
 cran_packages=c("dplyr","tidyr","tibble","ggplot2","stringr","RColorBrewer","ggh4x")
-#trinucleotide_plot() additionally needs BSgenome/MutationalPatterns, loaded by the function itself
+#trinucleotide_plot() additionally needs Rsamtools (it reads the trinucleotide
+#context straight from genomeFile with scanFa) and MutationalPatterns (palette);
+#both are loaded by the function library.
 for(package in cran_packages){
   if(!require(package, character.only=T,quietly = T, warn.conflicts = F)){
     install.packages(as.character(package),repos = "http://cran.us.r-project.org")
@@ -117,7 +119,7 @@ if(nrow(components)>4) {
 
 #N1 is the genuine signature
 pdf(paste0(ed3_dir,"ExtDataFig3a.genuine_signature_N1.pdf"),width=7,height=sig_panel_height(1))
-print(colour_signature_strips(mitochondrial_extracted_signature_plot(components["N1",,drop=FALSE]),"N1"))
+print(colour_signature_strips(mitochondrial_extracted_signature_plot(components["N1",drop=FALSE]),"N1"))
 dev.off()
 cat("ED3a: written\n")
 

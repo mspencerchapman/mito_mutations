@@ -90,7 +90,7 @@ all_het_oocyte_mut_df<-dplyr::bind_rows(lapply(all_cohorts,function(dataset) {
     keep<-MRCA_mol_times<threshold_molecular_time
     high_vaf_het_oocyte_muts<-het_oocyte_muts[keep]
     if(length(high_vaf_het_oocyte_muts)==0) return(NULL)
-    ho_vaf_mat<-ho_vaf_mat[keep,,drop=FALSE]
+    ho_vaf_mat<-ho_vaf_mat[keep,drop=FALSE]
 
     #Estimate the oocyte VAF from one sample per independent post-developmental
     #clade, so that a single expanded clone cannot dominate the average
