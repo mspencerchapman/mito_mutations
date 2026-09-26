@@ -5,9 +5,9 @@
 # Extended Data panels. Output goes to plots/Supplementary_Figures/.
 #
 # Registry of the supplementary figures and where each is produced:
-#   Supp Fig 1  haplotype phylogenies (Note 1)          - not yet scripted
+#   Supp Fig 1  haplotype phylogenies (Note 1)          - mtDNA_mut_phasing.Rmd
 #   Supp Fig 2  in vitro colony growth drift (Note 2)   - full_analysis_scripts/Drift_during_colony_growth.R
-#   Supp Fig 3  HDP vs SigProfiler (Note 3)             - needs the SigProfiler output, not in the repo
+#   Supp Fig 3  HDP vs SigProfiler (Note 3)             - full_analysis_scripts/Mutational_signature_extraction_by_VAF.R
 #   Supp Fig 4  heteroplasmic oocyte mutations (Note 6) - full_analysis_scripts/Heteroplasmic_oocyte_mutation_analysis.R
 #   Supp Fig 5  drift from synonymous/non-coding muts   - THIS SCRIPT
 #   Supp Fig 6  mature cell phenotyping (Note 11)        - gating strategy, not code-generated
@@ -247,7 +247,9 @@ ridge_plot <- function(df, abc_type) {
     scale_x_log10(breaks=c(0.1,1,10,100), labels=c(0.1,1,10,100), limits=c(0.05,600))+
     theme_classic()+my_theme+
     theme(legend.position="none")+
-    labs(x="Generation time (days)", y="Count")
+    #The ridgeline axis is the mutation the posterior was fitted to (plus the
+    #shared prior), not a count.
+    labs(x="Generation time (days)", y="Mutation")
 }
 
 for (p in supp7_panels) {

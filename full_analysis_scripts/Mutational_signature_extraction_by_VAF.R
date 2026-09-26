@@ -409,7 +409,9 @@ HDP_Sigprofiler_correlation<-bind_rows(muts_per_bin_per_sample_SP%>%filter(Signa
   geom_abline(linetype=1,col="black")+
   theme_classic()+
   my_theme+
-  ggpmisc::stat_poly_eq(ggpmisc::use_label("eq"))
+  #Show R2 and the p-value on the panel as well as the equation: the editors
+  #ask for exact statistics on the figure, in the legend or in Source Data.
+  ggpmisc::stat_poly_eq(ggpmisc::use_label(c("eq","R2","P")),size=1.6)
   
 
 ggsave(filename = paste0(root_dir,"/plots/additional_plots/HDP_Sigprofiler_correlation.pdf"),plot = HDP_Sigprofiler_correlation,width=2.5,height=2)
