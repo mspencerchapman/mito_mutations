@@ -550,6 +550,12 @@ complete.annotated.mutation.table<-df_tidy_annotated%>%
   arrange(patientID,pos)%>% # order the dataframe
   tidyr::unite(col="mut_ref",chr,pos,ref,mut,sep="_",remove=F)
 
+#Cache the cross-tissue annotated mutation table. Supplementary Fig. 5c sets the
+#heteroplasmic oocyte mutations against this complete somatic set, and rebuilding
+#it there would mean duplicating the whole dndscv annotation chain above.
+saveRDS(complete.annotated.mutation.table,
+        paste0(root_dir,"/data/complete_annotated_mutation_table.Rds"))
+
 
 #-----------------------------------------------------------------------------------#
 ##--------Generate EXTENDED DATA FIG. 5C ---------------

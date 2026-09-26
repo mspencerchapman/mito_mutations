@@ -184,15 +184,107 @@ ggsave(filename=paste0(supp_dir,"SuppFig5b.n_of_het_oocyte_muts_plot.pdf"),n_of_
 cat("Supp Fig 5b: written\n")
 
 #-----------------------------------------------------------------------------------#
-# PANEL c | not generated here
+# Annotate the oocyte mutations | coding consequence and genome region
 #
-# The functional-category comparison (Mut_cat_comparison in the cross-tissue
-# notebook) sets the oocyte mutations against ALL somatic mutations, so it needs
-# complete.annotated.mutation.table - the full cross-tissue somatic mutation
-# table, annotated with dndscv against the mtDNA reference (data/mtref.rda) and
-# with mitovizR region coordinates. That table is the main product of the
-# notebook rather than a cached object, so it is not lifted here.
+# Needed by panels c and d. dndscv supplies the protein consequence; mitovizR
+# supplies the region boundaries (tRNA, rRNA, coding, D-loop).
 #-----------------------------------------------------------------------------------#
+
+suppressMessages({library(dndscv); library(mitovizR)})
+
+all_mtDNA_genes<-c("MT-CYB","MT-ND5","MT-ND2","MT-ND4","MT-ND1","MT-CO3","MT-ATP6",
+                   "MT-ND3","MT-ATP8","MT-ND4L","MT-CO2","MT-CO1","MT-ND6")
+mtref_rda_path<-paste0(root_dir,"/data/mtref.rda")
+
+oocyte_variant_data<-all_het_oocyte_mut_df%>%
+  tidyr::separate(mut_ref,c("chr","pos","ref","mut"),"_")%>%
+  mutate(pos=as.numeric(pos))%>%
+  dplyr::select("sampleID"=exp_ID,chr,pos,ref,mut)%>%
+  dplyr::filter(!duplicated(.))%>%
+  arrange(sampleID,pos)
+
+oocyte_dndsout<-suppressMessages(dndscv(oocyte_variant_data,gene_list=all_mtDNA_genes,
+  refdb=mtref_rda_path,numcode=2,max_coding_muts_per_sample=Inf,max_muts_per_gene_per_sample=Inf))
+
+#Region boundaries from mitovizR, used for both the functional categories in c
+#and the circular layout in d
+mito_domain_convert<-c("tRNA","rRNA","Coding","D-loop")
+names(mito_domain_convert)<-c("trna","rrna","cds","reg")
+mito_coords_reference_df<-mitovizR:::mito_df()%>%
+  dplyr::select(type,ymin,ymax)%>%
+  dplyr::mutate(Mutation_type=mito_domain_convert[type])
+region_of<-function(pos) sapply(pos,function(x)
+  mito_coords_reference_df$Mutation_type[mito_coords_reference_df$ymin<x & mito_coords_reference_df$ymax>=x])
+
+all_het_oocyte_mut_df_annotated<-all_het_oocyte_mut_df%>%
+  tidyr::separate(mut_ref,into=c("chr","pos","ref","mut"),sep="_")%>%
+  mutate(pos=as.numeric(pos))%>%
+  left_join(oocyte_dndsout$annotmuts,by=c("chr","pos","ref","mut"),relationship="many-to-many")%>%
+  tidyr::replace_na(replace=list(impact="Non-coding"))
+all_het_oocyte_mut_df_annotated$Mutation_type<-region_of(all_het_oocyte_mut_df_annotated$pos)
+
+#-----------------------------------------------------------------------------------#
+# PANEL c | Functional categories, oocyte mutations against all somatic mutations
+#
+# The somatic comparator is the complete cross-tissue annotated mutation table.
+# Rebuilding it here would mean repeating the whole per-tissue dndscv chain, so
+# Generate_ExtData_Fig5.R caches it and this script reads it back.
+#-----------------------------------------------------------------------------------#
+
+somatic_tbl_path<-paste0(root_dir,"/data/complete_annotated_mutation_table.Rds")
+if(!file.exists(somatic_tbl_path)) {
+  cat("Supp Fig 5c: no cached somatic mutation table - run Generate_ExtData_Fig5.R first - skipped\n")
+} else {
+  complete.annotated.mutation.table<-readRDS(somatic_tbl_path)
+  complete.annotated.mutation.table$Mutation_type<-region_of(complete.annotated.mutation.table$pos)
+
+  het_oocyte_mut_type_summary<-all_het_oocyte_mut_df_annotated%>%
+    dplyr::filter(!grepl("\\*",mut))%>%
+    dplyr::mutate(final_type=ifelse(is.na(impact)|impact=="Non-coding",Mutation_type,impact),
+                  cat=ifelse(ml_vaf>=0.01,"Heteroplasmic\noocyte\n(VAF≥1%)","Heteroplasmic\noocyte\n(VAF<1%)"))%>%
+    group_by(cat,final_type)%>%
+    dplyr::summarise(n=n(),.groups="drop_last")%>%
+    dplyr::mutate(prop=n/sum(n))%>%
+    ungroup()
+
+  Mut_type_levels<-c("D-loop","Synonymous","tRNA","rRNA","Missense","Stop_loss","Nonsense","Inconsistent\nannotation")
+  somatic_summary<-complete.annotated.mutation.table%>%
+    dplyr::mutate(final_type=ifelse(impact=="Non-Coding" & Mutation_type=="Coding","Inconsistent\nannotation",
+                             ifelse(is.na(impact)|impact=="Non-Coding",Mutation_type,impact)))%>%
+    group_by(final_type)%>%
+    dplyr::summarise(n=n(),.groups="drop")%>%
+    dplyr::mutate(prop=n/sum(n),cat="Somatic")
+
+  Mut_cat_comparison<-bind_rows(het_oocyte_mut_type_summary,somatic_summary)%>%
+    mutate(final_type=factor(final_type,levels=Mut_type_levels))%>%
+    ggplot(aes(x=cat,y=prop,fill=forcats::fct_rev(final_type)))+
+    geom_bar(stat="identity",position="fill",col="black",linewidth=0.2)+
+    theme_classic()+
+    scale_y_continuous(breaks=seq(0,1,0.1))+
+    scale_fill_brewer(palette="Set2",direction=-1)+
+    my_theme+
+    labs(fill="Mutation\ncategory",x="",y="Proportion")
+  ggsave(filename=paste0(supp_dir,"SuppFig5c.mut_category_comparison.pdf"),Mut_cat_comparison,width=3.6,height=2.5)
+
+  cat("Supp Fig 5c: written -",
+      paste(sprintf("%s n=%d",
+        c("oocyte <1%","oocyte >=1%","somatic"),
+        c(sum(het_oocyte_mut_type_summary$n[grepl("<1",het_oocyte_mut_type_summary$cat)]),
+          sum(het_oocyte_mut_type_summary$n[grepl("≥1",het_oocyte_mut_type_summary$cat)]),
+          sum(somatic_summary$n))),collapse=", "),"\n")
+}
+
+#-----------------------------------------------------------------------------------#
+# PANEL d | Positions of the oocyte mutations around the mitochondrial genome
+#-----------------------------------------------------------------------------------#
+
+mtDNA_mut_pos<-mitovizR::plot_df(all_het_oocyte_mut_df_annotated%>%
+    dplyr::filter(!grepl("\\*",mut))%>%
+    dplyr::mutate(SAMPLE="all")%>%
+    dplyr::select(SAMPLE,pos,ref,mut,"HF"=ml_vaf),
+  pos_col="pos",ref_col="ref",alt_col="mut")
+ggsave(filename=paste0(supp_dir,"SuppFig5d.mtDNA_mut_positions.pdf"),mtDNA_mut_pos,width=5,height=5)
+cat("Supp Fig 5d: written\n")
 
 #-----------------------------------------------------------------------------------#
 # PANEL e | Phylogenies with a heatmap of the heteroplasmic oocyte mutations
@@ -253,5 +345,54 @@ for(i in 1:nrow(panel_e_donors)) {
   cat("Supp Fig 5e:",this_id,"-",length(plot_muts),"oocyte mutation(s) written\n")
 }
 
-cat("\nSupplementary Fig. 5 panels a, b and e written to",supp_dir,"\n")
-cat("Panels c, d and f not generated - see the note above and the script header.\n")
+#-----------------------------------------------------------------------------------#
+# PANEL f | mtDNA-defined clone inference in two of the panel e individuals
+#
+# Clone assignments were produced by the Seurat SNN clustering described in
+# Supplementary Note 13 and are cached in data/mito_mut_clones/nonblood/; this
+# section draws them onto the phylogenies.
+#-----------------------------------------------------------------------------------#
+
+clone_dir<-paste0(root_dir,"/data/mito_mut_clones/nonblood/")
+panel_f_donors<-panel_e_donors%>%filter(exp_ID%in%c("PD5182","PD41857"))
+
+cluster_cols<-c("lightgray","#1f77b4","#d62728","#2ca02c","#ff7f0e","#9467bd","#8c564b",
+                "#e377c2","#7f7f7f","#bcbd22","#17becf","#ad494a","#e7ba52","#8ca252",
+                "#756bb1","#636363","#aec7e8",RColorBrewer::brewer.pal(12,"Paired"))
+
+for(i in 1:nrow(panel_f_donors)) {
+  this_id<-panel_f_donors$exp_ID[i]
+  f<-paste0(clone_dir,this_id,"_mtdna_clone_assignment.txt")
+  if(!file.exists(f)) {cat("Supp Fig 5f:",this_id,"- no clone assignment - skipped\n"); next}
+
+  list<-readRDS(paste0(root_dir,"/data/nonblood/mito_mutation_data_",
+                       panel_f_donors$dataset[i],".RDS"))[[this_id]]
+  exp_clones<-read.delim(f)
+  n_clones<-length(unique(exp_clones$cluster_id))
+  exp_cluster_cols<-cluster_cols[1:n_clones]
+  names(exp_cluster_cols)<-unique(exp_clones$cluster_id)
+
+  #The largest clone is drawn light grey, so swap it with whichever id is 0
+  biggest<-names(table(exp_clones$cluster_id))[which.max(table(exp_clones$cluster_id))]
+  was_0<-which(exp_clones$cluster_id==0)
+  is_biggest<-which(as.character(exp_clones$cluster_id)==biggest)
+  exp_clones$cluster_id[is_biggest]<-0
+  exp_clones$cluster_id[was_0]<-as.integer(biggest)
+
+  grDevices::pdf(file=paste0(supp_dir,"SuppFig5f.Inferred_clones_",this_id,".pdf"),width=7,height=3)
+  par(mfrow=c(1,1))
+  tree<-plot_tree(tree=list$tree,cex.label=0)
+  clone_hm<-matrix(NA,nrow=1,ncol=length(tree$tip.label),
+                   dimnames=list("Clones",tree$tip.label))
+  for(k in 1:nrow(exp_clones)) {
+    if(exp_clones$sample_id[k]%in%tree$tip.label)
+      clone_hm[1,exp_clones$sample_id[k]]<-exp_cluster_cols[as.character(exp_clones$cluster_id[k])]
+  }
+  add_heatmap(tree=tree,heatmap=clone_hm,border="gray",cex.label=1)
+  legend("topleft",inset=c(.01,.01),title="Clone no.",names(exp_cluster_cols),
+         fill=exp_cluster_cols,horiz=FALSE,cex=0.7,ncol=1)
+  dev.off()
+  cat("Supp Fig 5f:",this_id,"-",n_clones,"clones written\n")
+}
+
+cat("\nSupplementary Fig. 5 panels a-f written to",supp_dir,"\n")
