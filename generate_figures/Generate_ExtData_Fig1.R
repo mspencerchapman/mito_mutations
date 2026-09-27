@@ -1,4 +1,25 @@
 #-----------------------------------------------------------------------------------#
+# Generate_ExtData_Fig1.R
+#
+# Extended Data Fig. 1 - sequencing coverage of the mitochondrial genome and its
+# uniformity. Panels are written to plots/Extended_Data_Figure_01/.
+#
+#   a  median mtDNA coverage per colony, by individual (normal HSPC dataset)
+#   b  coverage uniformity per colony, by individual
+#   c  median coverage per sample, aggregated by dataset   - NOT built here
+#   d  coverage uniformity per sample, aggregated by dataset - NOT built here
+#   e  median coverage by mitochondrial genome position    - NOT built here
+#
+# Panels c-e cover the comparator datasets and come from the cross-tissue
+# notebook; only a and b are produced by this script. The two per-individual
+# coverage histograms it also writes are diagnostics rather than figure panels
+# and go to plots/additional_plots/.
+#
+# The copy-number-against-age panel that used to sit in this figure is now
+# Extended Data Fig. 2c, produced by Generate_ExtData_Fig2.R.
+#-----------------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------------#
 # --------Load packages (and install if they are not installed yet)-------------------
 #-----------------------------------------------------------------------------------#
 cran_packages=c("devtools","ape","stringr","dplyr","tidyr","ggplot2","gridExtra","phylosignal")
@@ -77,7 +98,8 @@ exclude_muts=c("MT_302_A_C","MT_311_C_T","MT_567_A_C","MT_574_A_C","MT_16181_A_C
 #----------------MITOCHONDRIAL COVERAGE STATISTICS----------------
 #-----------------------------------------------------------------------------------#
 
-#Generate the coverage histograms
+#Per-individual coverage histograms. These are diagnostics rather than panels
+#of Extended Data Fig. 1, so they are written to additional_plots/.
 coverage.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
   ggplot(aes(x=bedtools_mtDNA_coverage))+
@@ -88,7 +110,7 @@ coverage.plot<-mito_cn%>%
   my_theme+
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Mean mitochondrial DNA coverage",y="Count")
-ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_01/Coverage_mean_plot.pdf"),coverage.plot,width=4,height=3)
+ggsave(filename=paste0(plots_dir,"additional_plots/Coverage_mean_histogram.pdf"),coverage.plot,width=4,height=3)
 
 median.coverage.plot<-mito_cn%>%
   dplyr::filter(Study%in%ref_df$Canapps.project & Sample%in% unlist(lapply(mito_data,function(list) list$tree$tip.label)))%>%
@@ -100,7 +122,7 @@ median.coverage.plot<-mito_cn%>%
   my_theme+
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="Count")
-ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_01/Coverage_median_plot.pdf"),median.coverage.plot,width=7,height=2)
+ggsave(filename=paste0(plots_dir,"additional_plots/Coverage_median_histogram.pdf"),median.coverage.plot,width=7,height=2)
 
 ### Generate EXTENDED DATA FIG. 1A ---------
 median.coverage.ridges.plot<-mito_cn%>%
@@ -112,7 +134,7 @@ median.coverage.ridges.plot<-mito_cn%>%
   my_theme+
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Median mitochondrial DNA coverage",y="")
-ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_01/median.coverage.ridges.plot.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
+ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_01/ExtDataFig1a.median_coverage_ridges.pdf"),median.coverage.ridges.plot,width=3.3,height=2.5)
 
 ### Generate EXTENDED DATA FIG. 1B ---------
 uniformity_ridges.plot<-mito_cn%>%
@@ -124,7 +146,7 @@ uniformity_ridges.plot<-mito_cn%>%
   my_theme+
   theme(axis.text.x = element_text(angle=90),strip.text.x = element_text(size=6,margin = margin(1,0,1,0, "mm")))+
   labs(x="Coverage uniformity\n(proportion of mtDNA genome with coverage >80% of mean)",y="")
-ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_01/Uniformity_perc80_ridges_plot.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
+ggsave(filename=paste0(plots_dir,"Extended_Data_Figure_01/ExtDataFig1b.coverage_uniformity_ridges.pdf"),uniformity_ridges.plot,width=3.3,height=2.5)
 
 #Print coverage summary statistics
 mito_cn%>%
