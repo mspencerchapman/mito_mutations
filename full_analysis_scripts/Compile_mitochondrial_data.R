@@ -82,6 +82,10 @@ mito_data<-Map(list=mito_data,Exp_ID=names(mito_data),function(list,Exp_ID) {
   if(is.null(list$phylosignal)) {
     tree.noancestral<-drop.tip(list$tree.ultra,"Ancestral")
     tree.4d<-phylobase::phylo4d(tree.noancestral,tip.data=t(list$matrices$vaf[,tree.noancestral$tip.label]))
+    #phyloSignal() permutes (999 reps by default), so seed it: without this the
+    #p-values shift between runs and mutations sitting on the 0.05 threshold move
+    #in and out of the figures built from them.
+    set.seed(42)
     list$phylosignal<-phyloSignal(tree.4d)
   }
   return(list)

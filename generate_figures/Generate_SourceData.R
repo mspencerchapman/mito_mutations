@@ -124,8 +124,16 @@ heatmap_source <- function(l, with_signal) {
 #the sourced environment so the tables cannot drift from the panels. Bars are
 #drawn from the unmasked VAF matrix, so that is what is tabulated.
 fig3_sheets <- function(e) {
-  muts <- tryCatch(get("het_oocyte_muts", envir = e), error = function(err) NULL)
-  md   <- tryCatch(get("mito_data", envir = e), error = function(err) NULL)
+  md <- tryCatch(get("mito_data", envir = e), error = function(err) NULL)
+  #data/het_oocyte_muts.Rds records the mutations the published panels show.
+  #With phyloSignal() now seeded and the threshold inclusive, a live run
+  #reproduces it exactly for 8pcw, 18pcw and CB002; CB001 differs, three of its
+  #eight mutations no longer reaching significance under the current data (see
+  #the note in Generate_Fig3.R). The published list is used so that the source
+  #data matches the figure.
+  f <- paste0(root_dir, "/data/het_oocyte_muts.Rds")
+  muts <- if (file.exists(f)) readRDS(f) else
+    tryCatch(get("het_oocyte_muts", envir = e), error = function(err) NULL)
   if (is.null(muts) || is.null(md)) return(list())
   out <- list()
   for (id in names(muts)) {

@@ -250,6 +250,9 @@ mito_data<-Map(list=mito_data,exp_ID=names(mito_data), function(list,exp_ID) {
     res_cor<-list$phylosignal
   } else {
     tree4d<-phylobase::phylo4d(drop.tip(tree.ultra,"Ancestral"),tip.data=t(vaf.filt[shared_muts,list$tree$tip.label]))
+    #Seeded: phyloSignal() permutes, and the counts quoted in the legend
+    #depend on how many mutations fall below p = 0.05.
+    set.seed(42)
     res_cor=phyloSignal(tree4d)
   }
   

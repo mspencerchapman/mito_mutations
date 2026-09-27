@@ -110,6 +110,9 @@ mito_data_young<-Map(list=mito_data[young_IDs],exp_ID=young_IDs,function(list,ex
     
     tree.noancestral<-drop.tip(list$tree.ultra,"Ancestral")
     tree.4d<-phylobase::phylo4d(tree.noancestral,tip.data=t(list$matrices[[VAF_measure]][list$stats_df$mut_ref,tree.noancestral$tip.label]))
+    #Seeded: phyloSignal() permutes, and which mutations are drawn depends on
+    #whether their p-value falls on the 0.05 threshold.
+    set.seed(42)
     phylosignal<-phyloSignal(tree.4d)
     
     list$stats_df$Cmean_pvalue<-phylosignal$pvalue$Cmean
@@ -139,7 +142,10 @@ het_oocyte_muts<-lapply(young_IDs,function(Exp_ID) {
     dplyr::filter(n_pos>=2 & !grepl("INS|DEL",mut_ref))%>%
     mutate(Cmean_qvalue=p.adjust(Cmean_pvalue,method = "BH"))%>%
     dplyr::filter(!mut_ref%in%exclude_muts)%>%
-    dplyr::filter(max_vaf>0.01 & Cmean_pvalue<0.05)%>%
+    #<= rather than <: with 999 permutations the p-values are multiples of
+    #0.001, and the 18pcw mutation sits on 0.05 exactly, so a strict comparison
+    #dropped that panel entirely.
+    dplyr::filter(max_vaf>0.01 & Cmean_pvalue<=0.05)%>%
     dplyr::filter(!(mean_vaf>0.003&Cmean_pvalue>=0.005&rho_val<=5e-3))%>% #Final filter to take out a few remaining artefacts that are present at fairly high global vaf but are not phylocorrelated and have low dispersion
     filter(exp_ID==Exp_ID)%>%
     pull(mut_ref)
