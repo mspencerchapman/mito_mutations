@@ -20,6 +20,19 @@ git clone <repository-url>
 cd mito_mutations
 Rscript install_dependencies.R     # one-off; see SESSIONINFO.md for versions
 Rscript download_data.R            # fetch the processed data objects from Zenodo (~270 MB)
+Rscript generate_figures/Generate_Fig1.R
+```
+
+**Running interactively.** Open `mito_mutations.Rproj` in RStudio, or start R
+with the repository as the working directory, and the scripts source
+correctly. `here` fixes the project root the first time it loads, taking it
+from the working directory at that moment, and a later `setwd()` does not
+change it - so if R started somewhere else, `here::here("config.R")` will look
+in the wrong place. Re-anchor it in an existing session with:
+
+```r
+setwd("path/to/mito_mutations")
+here::i_am("config.R")
 ```
 
 **Configuration.** Every script begins with `source(here::here("config.R"))`,
