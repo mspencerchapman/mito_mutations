@@ -117,6 +117,33 @@ heatmap_source <- function(l, with_signal) {
         as.data.frame(round(vaf, 4), check.names = FALSE, stringsAsFactors = FALSE))
 }
 
+#Figure 3 shows, for each of the four youngest individuals, the variant allele
+#fraction of a handful of low-level heteroplasmic oocyte mutations along the
+#phylogeny. The mutations drawn are those whose positive samples coalesce at
+#the root; the script holds them in het_oocyte_muts, which is read here from
+#the sourced environment so the tables cannot drift from the panels. Bars are
+#drawn from the unmasked VAF matrix, so that is what is tabulated.
+fig3_sheets <- function(e) {
+  muts <- tryCatch(get("het_oocyte_muts", envir = e), error = function(err) NULL)
+  md   <- tryCatch(get("mito_data", envir = e), error = function(err) NULL)
+  if (is.null(muts) || is.null(md)) return(list())
+  out <- list()
+  for (id in names(muts)) {
+    m <- muts[[id]]
+    l <- md[[id]]
+    if (is.null(l) || !length(m)) next
+    m <- m[m %in% rownames(l$matrices$vaf)]
+    if (!length(m)) next
+    tips <- l$tree.ultra$tip.label
+    tips <- tips[tips %in% colnames(l$matrices$vaf)]
+    vaf  <- l$matrices$vaf[m, tips, drop = FALSE]
+    out[[substr(paste0("Fig3_", gsub("[^A-Za-z0-9]", "", id)), 1, 31)]] <-
+      cbind(mutation = rownames(vaf),
+            as.data.frame(round(vaf, 4), check.names = FALSE, stringsAsFactors = FALSE))
+  }
+  out
+}
+
 #Donors whose heatmaps appear in each figure, and the panel they belong to
 heatmap_panels <- list(
   "5"  = c(Fig5a_KX004 = "KX004"),
@@ -175,9 +202,10 @@ build <- function(fig_number, kind = "main") {
     sheets[[nm]] <- d
   }
 
-  #Heatmap panels have no ggplot object; add their tables here
-  hms <- heatmap_sheets(fig_number, kind)
-  for (nm in names(hms)) if (!nm %in% names(sheets)) sheets[[nm]] <- hms[[nm]]
+  #Panels drawn with base graphics have no ggplot object; add their tables here
+  extra <- c(heatmap_sheets(fig_number, kind),
+             if (kind == "main" && fig_number == 3) fig3_sheets(e) else list())
+  for (nm in names(extra)) if (!nm %in% names(sheets)) sheets[[nm]] <- extra[[nm]]
 
   if (!length(sheets)) { cat(sprintf("%s: no ggplot panels captured\n", label)); return(invisible(NULL)) }
   f <- paste0(out_dir, outnm)
