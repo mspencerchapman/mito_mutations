@@ -136,6 +136,18 @@ mito_data_young<-Map(list=mito_data[young_IDs],exp_ID=young_IDs,function(list,ex
 
 #Now pull out the shared mutations for which the MRCA is the tree root and visualize
 resave_plots=T
+#NB CB001. This script selects 5 mutations for CB001, where the published
+#panel shows 8. The three absent have Cmean p-values of 0.076, 0.095 and 0.904,
+#so this is not the threshold effect that removed the 18pcw mutation, and it is
+#not a missing rescue rule either: admitting high-VAF mutations regardless of
+#phylogenetic signal over-recruits in the other three individuals (max_vaf>0.02
+#gives 8/2/9/8 against the published 6/1/8/6). All three have only 2-4 positive
+#samples out of 195, where Abouheif's Cmean has very little power, so a small
+#change in which samples are called positive moves the p-value a long way; the
+#likeliest explanation is that CB001's underlying calls have shifted since the
+#figure was made. The published selection is preserved in
+#data/het_oocyte_muts.Rds and is what the source data workbook tabulates.
+#8pcw, 18pcw and CB002 are reproduced exactly.
 het_oocyte_muts<-lapply(young_IDs,function(Exp_ID) {
   low_level_het_muts<-mito_data_young[[Exp_ID]]$stats_df%>%
     dplyr::bind_rows()%>%
