@@ -86,6 +86,64 @@ sheet_name <- function(file) {
   substr(gsub("[^A-Za-z0-9_ ]", "_", paste0(panel, if (nchar(rest)) paste0("_", rest))), 1, 31)
 }
 
+#-----------------------------------------------------------------------------------#
+### Mutation heatmaps
+#
+# These panels are drawn with base graphics, so there is no ggplot object to
+# read. They are reconstructed here from the same inputs the figure scripts
+# use: one row per mutation, one column per sample, values the variant allele
+# fraction after shearwater filtering.
+#
+# Rows are in the hierarchical-clustering order the panel displays, and columns
+# in the order the samples appear along the plotted (ultrametric) tree, since
+# add_mito_mut_heatmap() places each column by matching its name against that
+# tree's tips.
+#
+# Note the figures apply a 1% display floor, below which a cell is drawn white;
+# the underlying fractions are given here unfloored.
+#-----------------------------------------------------------------------------------#
+
+heatmap_source <- function(l, with_signal) {
+  muts <- l$shared_muts_df
+  muts <- if (with_signal) muts$mut[muts$Cmean_pval < 0.05] else muts$mut[muts$Cmean_pval > 0.05]
+  muts <- muts[!is.na(muts) & muts %in% rownames(l$matrices$vaf)]
+  if (!length(muts)) return(NULL)
+  vaf <- (l$matrices$vaf * l$matrices$SW)[muts, l$tree$tip.label, drop = FALSE]
+  ord <- if (length(muts) >= 2) stats::hclust(stats::dist(vaf))$order else 1
+  vaf <- vaf[ord, , drop = FALSE]
+  tips <- l$tree.ultra$tip.label
+  vaf <- vaf[, tips[tips %in% colnames(vaf)], drop = FALSE]
+  cbind(mutation = rownames(vaf),
+        as.data.frame(round(vaf, 4), check.names = FALSE, stringsAsFactors = FALSE))
+}
+
+#Donors whose heatmaps appear in each figure, and the panel they belong to
+heatmap_panels <- list(
+  "5"  = c(Fig5a_KX004 = "KX004"),
+  "7"  = c(ExtDataFig7a_KX003 = "KX003",
+           ExtDataFig7b_KX007 = "KX007",
+           ExtDataFig7c_KX008 = "KX008"))
+
+heatmap_sheets <- function(fig_number, kind) {
+  key <- as.character(fig_number)
+  if ((kind == "main" && key != "5") || (kind == "ED" && key != "7")) return(list())
+  donors <- heatmap_panels[[key]]
+  if (is.null(donors)) return(list())
+  md <- readRDS(paste0(root_dir, "/data/mito_data.Rds"))
+  out <- list()
+  for (i in seq_along(donors)) {
+    l <- md[[donors[i]]]
+    if (is.null(l)) next
+    for (sig in c(TRUE, FALSE)) {
+      d <- heatmap_source(l, sig)
+      if (is.null(d)) next
+      nm <- substr(paste0(names(donors)[i], if (sig) "_signal" else "_nosignal"), 1, 31)
+      out[[nm]] <- d
+    }
+  }
+  out
+}
+
 #kind is "main" or "ED"; the scripts name their panels FigNx. and ExtDataFigNx.
 #respectively, which is what identifies a captured plot as a panel of a figure.
 build <- function(fig_number, kind = "main") {
@@ -116,6 +174,10 @@ build <- function(fig_number, kind = "main") {
     if (nm %in% names(sheets)) nm <- substr(paste0(nm, "_2"), 1, 31)
     sheets[[nm]] <- d
   }
+
+  #Heatmap panels have no ggplot object; add their tables here
+  hms <- heatmap_sheets(fig_number, kind)
+  for (nm in names(hms)) if (!nm %in% names(sheets)) sheets[[nm]] <- hms[[nm]]
 
   if (!length(sheets)) { cat(sprintf("%s: no ggplot panels captured\n", label)); return(invisible(NULL)) }
   f <- paste0(out_dir, outnm)
