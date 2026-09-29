@@ -58,6 +58,14 @@ for(d in c("Figure_06")) dir.create(paste0(plots_dir,d),showWarnings=FALSE,recur
 fig6_dir=paste0(plots_dir,"Figure_06/")
 dir.create(fig6_dir,showWarnings=FALSE,recursive=TRUE)
 
+#Drift is summarised as the product of mtDNA population size and generation
+#time ("mitochondria days"). Wright-Fisher variance accumulates as t/(N x g),
+#so only the product is identified by the data; each panel below therefore
+#keeps its measured mtDNA copy number and derives the generation time from the
+#inferred drift parameter.
+drift_adult  <- 18000   #mitochondria days, adult life
+drift_foetal <- 2100    #mitochondria days, foetal life
+
 set.seed(42) #the panels below are stochastic simulations; fix the seed so the figure is reproducible
 #rsimpop draws from its own C-level generator, which set.seed() does not reach,
 #so panel c needs initSimPop() as well or the simulated expansions differ on
@@ -68,9 +76,9 @@ if(have_rsimpop) initSimPop(42, bForce = TRUE)
 # Fig 6a | VAF distribution of a heteroplasmic oocyte mutation through life
 #
 # Drift is modelled in two phases because the rate is not constant through life:
-#   development  - population size 450 x generation time 2.67 = 1,200 mito days
-#                  (the drift parameter inferred for the 8pcw fetus)
-#   post-natal   - population size 675 x generation time 23    = 15,500 mito days
+#   development  - population size 450, generation time drift_foetal/450
+#                  (the drift parameter inferred for foetal life)
+#   post-natal   - population size 675, generation time drift_adult/675
 #                  (the adult drift parameter)
 # 274 days covers conception to birth; the remaining time is post-natal.
 #-----------------------------------------------------------------------------------#
@@ -80,10 +88,10 @@ years_to_test=c(1,5,10,20,40,80)
 
 sim_df<-lapply(years_to_test,function(years) {
   #Initial drift during development (here defined as pre-conception)
-  vafs=sapply(1:5000,function(j) fisher_wright_drift(starting_oocyte_vaf,population_size=450,generation_time=2.67,total_time=274))
+  vafs=sapply(1:5000,function(j) fisher_wright_drift(starting_oocyte_vaf,population_size=450,generation_time=drift_foetal/450,total_time=274))
   #Subsequent drift during post-conception life
   final_vafs=Map(starting_vaf=vafs,years=years,f=function(starting_vaf,years) {
-    vaf=fisher_wright_drift(starting_vaf,population_size=675,generation_time=23,total_time=((365*years) - 140))
+    vaf=fisher_wright_drift(starting_vaf,population_size=675,generation_time=drift_adult/675,total_time=((365*years) - 140))
     return(vaf)
   })
   return(data.frame(years=years,VAF=unlist(final_vafs)))
@@ -120,7 +128,7 @@ vaf_df_het_oocyte=get_mito_mut_vaf_df(tree.ultra,
                                       node=tree.ultra$edge[1,1],
                                       starting_vaf=starting_oocyte_vaf,
                                       mito_cn=675,
-                                      generation_time=23)
+                                      generation_time=drift_adult/675)
 sample_vafs=vaf_df_het_oocyte$vaf[order(vaf_df_het_oocyte$node)][1:length(tree.ultra$tip.label)]
 names(sample_vafs)<-tree.ultra$tip.label
 
@@ -135,9 +143,9 @@ dev.off()
 # Two expansions are simulated to the same final clone size but over different
 # durations, by pairing the driver acquisition time with a fitness value: a long,
 # gradual expansion (35 yr, lower fitness) and a rapid one (2 yr, higher fitness).
-# The mtDNA copy number (1000) and generation time (20 days) are the highest
-# density posterior estimates from the phylogeny-aware ABC, and the starting VAF
-# in the MRCA is fixed at 0.2 for comparability across panels.
+# The mtDNA copy number is 1000 and the generation time is derived from the
+# adult drift parameter, and the starting VAF in the MRCA is fixed at 0.2 for
+# comparability across panels.
 #-----------------------------------------------------------------------------------#
 
 #Wrapper: detect the expanded clade, drop other tips, and drift from its MRCA
@@ -211,7 +219,7 @@ if(have_rsimpop) {
     }
     fn<-paste0(fig6_dir,"Fig6c.simulation_plot_",starting_vaf,"_",years,"years.pdf")
     pdf(fn,width=2,height = 2.5)
-    ok<-tryCatch({simulated_expansion_mito_vafs(tree,starting_vaf=starting_vaf,mito_cn=1000,generation_time=20);TRUE},
+    ok<-tryCatch({simulated_expansion_mito_vafs(tree,starting_vaf=starting_vaf,mito_cn=1000,generation_time=drift_adult/1000);TRUE},
                  error=function(e){cat("Fig 6c:",years,"yr failed -",conditionMessage(e),"\n");FALSE})
     dev.off()
     if(!ok) unlink(fn) else cat("Fig 6c: wrote",years,"yr panel\n")
@@ -309,7 +317,11 @@ drift_rate_comparison<-Map(setting=names(abc_dirs),abc_dir=abc_dirs,f=function(s
   data.frame(generation_time=post$generation_time,setting=setting)
 })%>%dplyr::bind_rows()
 
-#The prior: log-uniform over 0.1-500 days, i.e. flat on the log10 axis used below
+#The prior: log-uniform over 0.1-500 days, i.e. flat on the log10 axis used below.
+#Re-seeded here so this draw does not depend on how many random numbers the
+#panels above happened to consume - otherwise changing a drift parameter in
+#panel a or c silently redraws the prior shown in this panel.
+set.seed(42)
 prior<-data.frame(generation_time=10^runif(1e4,min=-1,max=2.7),setting="prior")
 
 normal_disease_comparison_ridges_plot<-drift_rate_comparison%>%
