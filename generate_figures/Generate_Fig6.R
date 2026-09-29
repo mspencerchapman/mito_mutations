@@ -71,6 +71,13 @@ drift_adult     <- 18000   #mitochondria days, adult life (VAF-distribution ABC)
 drift_foetal    <- 2100    #mitochondria days, foetal life
 drift_expansion <- 11200   #mitochondria days, clonal expansions (phylogeny-aware ABC)
 
+#Copy number is fixed rather than inferred in every ABC, because it is only
+#jointly identifiable with generation time. Use the same values here, so that
+#the generation times derived below are the ones the posteriors describe
+#rather than an arbitrary decomposition of the same product.
+mtDNA_CN_adult  <- 600     #fixed at 600 in both adult ABCs
+mtDNA_CN_foetal <- 450     #fixed at 450 in the foetal ABC
+
 set.seed(42) #the panels below are stochastic simulations; fix the seed so the figure is reproducible
 #rsimpop draws from its own C-level generator, which set.seed() does not reach,
 #so panel c needs initSimPop() as well or the simulated expansions differ on
@@ -81,10 +88,8 @@ if(have_rsimpop) initSimPop(42, bForce = TRUE)
 # Fig 6a | VAF distribution of a heteroplasmic oocyte mutation through life
 #
 # Drift is modelled in two phases because the rate is not constant through life:
-#   development  - population size 450, generation time drift_foetal/450
-#                  (the drift parameter inferred for foetal life)
-#   post-natal   - population size 675, generation time drift_adult/675
-#                  (the adult drift parameter)
+#   development  - the foetal copy number and drift parameter
+#   post-natal   - the adult copy number and drift parameter
 # 274 days covers conception to birth; the remaining time is post-natal.
 #-----------------------------------------------------------------------------------#
 
@@ -93,10 +98,10 @@ years_to_test=c(1,5,10,20,40,80)
 
 sim_df<-lapply(years_to_test,function(years) {
   #Initial drift during development (here defined as pre-conception)
-  vafs=sapply(1:5000,function(j) fisher_wright_drift(starting_oocyte_vaf,population_size=450,generation_time=drift_foetal/450,total_time=274))
+  vafs=sapply(1:5000,function(j) fisher_wright_drift(starting_oocyte_vaf,population_size=mtDNA_CN_foetal,generation_time=drift_foetal/mtDNA_CN_foetal,total_time=274))
   #Subsequent drift during post-conception life
   final_vafs=Map(starting_vaf=vafs,years=years,f=function(starting_vaf,years) {
-    vaf=fisher_wright_drift(starting_vaf,population_size=675,generation_time=drift_adult/675,total_time=((365*years) - 140))
+    vaf=fisher_wright_drift(starting_vaf,population_size=mtDNA_CN_adult,generation_time=drift_adult/mtDNA_CN_adult,total_time=((365*years) - 140))
     return(vaf)
   })
   return(data.frame(years=years,VAF=unlist(final_vafs)))
@@ -132,8 +137,8 @@ tree.ultra<-mito_data[[exp_ID]]$tree.ultra
 vaf_df_het_oocyte=get_mito_mut_vaf_df(tree.ultra,
                                       node=tree.ultra$edge[1,1],
                                       starting_vaf=starting_oocyte_vaf,
-                                      mito_cn=675,
-                                      generation_time=drift_adult/675)
+                                      mito_cn=mtDNA_CN_adult,
+                                      generation_time=drift_adult/mtDNA_CN_adult)
 sample_vafs=vaf_df_het_oocyte$vaf[order(vaf_df_het_oocyte$node)][1:length(tree.ultra$tip.label)]
 names(sample_vafs)<-tree.ultra$tip.label
 
@@ -148,7 +153,7 @@ dev.off()
 # Two expansions are simulated to the same final clone size but over different
 # durations, by pairing the driver acquisition time with a fitness value: a long,
 # gradual expansion (35 yr, lower fitness) and a rapid one (2 yr, higher fitness).
-# The mtDNA copy number is 1000 and the generation time is derived from
+# The mtDNA copy number is the adult value and the generation time derives from
 # drift_expansion, the estimate from the phylogeny-aware ABC, which is the one
 # that applies to drift along the lineages of an expansion. The starting VAF in
 # the MRCA is fixed at 0.2 for comparability across panels.
@@ -225,7 +230,7 @@ if(have_rsimpop) {
     }
     fn<-paste0(fig6_dir,"Fig6c.simulation_plot_",starting_vaf,"_",years,"years.pdf")
     pdf(fn,width=2,height = 2.5)
-    ok<-tryCatch({simulated_expansion_mito_vafs(tree,starting_vaf=starting_vaf,mito_cn=1000,generation_time=drift_expansion/1000);TRUE},
+    ok<-tryCatch({simulated_expansion_mito_vafs(tree,starting_vaf=starting_vaf,mito_cn=mtDNA_CN_adult,generation_time=drift_expansion/mtDNA_CN_adult);TRUE},
                  error=function(e){cat("Fig 6c:",years,"yr failed -",conditionMessage(e),"\n");FALSE})
     dev.off()
     if(!ok) unlink(fn) else cat("Fig 6c: wrote",years,"yr panel\n")
