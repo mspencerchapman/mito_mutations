@@ -108,9 +108,11 @@ sim_df<-lapply(years_to_test,function(years) {
 })%>%
   dplyr::bind_rows()
 
+#"1 years" reads wrong once the strip labels are horizontal
+year_label<-function(y) ifelse(y==1,"1 year",paste(y,"years"))
 VAF.distribution.histogram<-sim_df%>%
-  mutate(years=paste(years,"years"))%>%
-  mutate(years=factor(years,levels=paste(years_to_test,"years")))%>%
+  mutate(years=year_label(years))%>%
+  mutate(years=factor(years,levels=year_label(years_to_test)))%>%
   ggplot(aes(x=VAF))+
   geom_histogram(bins = 50,col="black",linewidth=0.2)+
   theme_classic()+
@@ -118,9 +120,15 @@ VAF.distribution.histogram<-sim_df%>%
   scale_fill_brewer(palette="Set3")+
   scale_y_log10()+ #the distribution becomes strongly bimodal (loss/fixation), so a log count axis keeps the middle visible
   my_theme+
+  #Horizontal strip labels: rotated text was being clipped, because the length
+  #available to it is the panel height and there are six panels in 3 inches.
+  #Tighter panel spacing recovers the room this costs.
+  theme(strip.text.y=element_text(angle=0,hjust=0,
+                                  margin=margin(t=0.5,b=0.5,l=1.2,r=1.2,unit="mm")),
+        panel.spacing=unit(0.6,"mm"))+
   labs(x="VAF distribution",y="Count",fill="Time from\nconception\n(Years)")
 
-ggsave(paste0(fig6_dir,"Fig6a.VAF_distribution_histogram.pdf"),VAF.distribution.histogram,height=3,width=2.5)
+ggsave(paste0(fig6_dir,"Fig6a.VAF_distribution_histogram.pdf"),VAF.distribution.histogram,height=3,width=2.8)
 
 #-----------------------------------------------------------------------------------#
 # Fig 6b | The same mutation drifted through a real adult phylogeny (KX004)
