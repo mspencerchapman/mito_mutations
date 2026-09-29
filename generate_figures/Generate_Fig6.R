@@ -214,7 +214,16 @@ if(have_rsimpop) {
         seltree100=get_subsampled_tree(get_tree_from_simpop(selsim),100)
         #Convert the tree to elapsed time, so branch lengths are comparable to the
         #molecular-time trees the drift model expects
-        get_elapsed_time_tree(seltree100,mutrateperdivision=0.65,backgroundrate=16/365)
+        et<-get_elapsed_time_tree(seltree100,mutrateperdivision=0.65,backgroundrate=16/365)
+        #The panels show ultrametric trees, rescaled by the mean mutation burden
+        #of the elapsed-time tree, as in Implications_of_drift_analysis.R. Without
+        #this the tips do not line up and the branch lengths are in elapsed time
+        #rather than mutations.
+        tu<-make.ultrametric.tree(et)
+        tu$coords<-NULL
+        tu$edge.length[is.infinite(tu$edge.length)]<-0
+        tu$edge.length<-tu$edge.length*mean(get_mut_burden(et))
+        tu
       },error=function(e) NULL)
       if(!is.null(tree_m) && length(get_expanded_clade_nodes(tree_m,min_clonal_fraction=0.1)$nodes)) {
         cat("Fig 6c:",p$years,"yr scenario - expansion found on attempt",attempt,"\n")
