@@ -49,3 +49,6 @@ Rplots.pdf
 
 # Excel lock files
 ~$*
+
+# Local assistant configuration; not part of the analysis
+CLAUDE.md
