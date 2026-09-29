@@ -27,7 +27,7 @@ mutCN_cutoff <- 25
 
 #Cohort codes to the dataset names used in Supplementary Table 1
 cohort_names <- c(
-  blood = "Normal ageing haematopoiesis / foetal haemopoiesis",
+  blood = "Normal aging hematopoiesis / fetal hemopoiesis",
   lymph = "Lymphoid",
   NW    = "Myeloproliferative neoplasms",
   LM    = "Endometrium",
@@ -38,7 +38,7 @@ cohort_names <- c(
 
 tissue_names <- c(
   Adult_Cord = "Blood (adult and cord)",
-  Foetal     = "Blood (foetal liver / bone marrow)",
+  Foetal     = "Blood (fetal liver / bone marrow)",
   MPN        = "Blood",
   Endometrium= "Endometrial glands",
   Bronchial  = "Bronchial epithelium",
@@ -105,7 +105,7 @@ donor_metadata <- all_counts %>%
                               gsub("_", " ", Tissue_type))),
     Donor_ID  = ID,
     Sex       = recode(Sex, F = "Female", M = "Male", .missing = NA_character_),
-    #Foetal donors carry a negative age, in years relative to birth. Their
+    #Fetal donors carry a negative age, in years relative to birth. Their
     #gestational age is taken from the donor identifier rather than converted
     #from that figure, which is approximate and gives 8.8 and 18.6 pcw.
     Age_years = ifelse(Age < 0, NA_real_, round(Age, 1)),
@@ -129,7 +129,7 @@ print(donor_metadata %>%
         summarise(donors = n(),
                   samples = sum(N_clonal_samples),
                   mutations = sum(N_mtDNA_mutations),
-                  age_range = ifelse(all(is.na(Age_years)), "foetal",
+                  age_range = ifelse(all(is.na(Age_years)), "fetal",
                                      paste0(min(Age_years, na.rm = TRUE), "-",
                                             max(Age_years, na.rm = TRUE))),
                   n_female = sum(Sex == "Female", na.rm = TRUE),

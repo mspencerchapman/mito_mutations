@@ -107,18 +107,18 @@ Myeloproliferative neoplasms,Blood,PD9478,Female,68,NA,PV,81,621
 Myeloproliferative neoplasms,Blood,PD5117,Female,81,NA,PV,60,753
 Myeloproliferative neoplasms,Blood,PD6646,Female,81,NA,ET,116,1492
 Myeloproliferative neoplasms,Blood,PD4781,Female,83,NA,PV,48,742
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),CB001,Female,0,NA,Adult_Cord,195,1183
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),CB002,Female,0,NA,Adult_Cord,379,1584
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX001,Male,29,NA,Adult_Cord,407,2969
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX002,Male,38,NA,Adult_Cord,380,2846
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),SX001,Male,48,NA,Adult_Cord,361,2571
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),AX001,Male,63,NA,Adult_Cord,361,3508
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX007,Male,75,NA,Adult_Cord,315,1537
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX008,Female,76,NA,Adult_Cord,367,2412
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX004,Female,77,NA,Adult_Cord,451,3082
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (adult and cord),KX003,Male,81,NA,Adult_Cord,322,2442
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (foetal liver / bone marrow),18pcw,Male,NA,18,Foetal,234,1360
-Normal ageing haematopoiesis / foetal haemopoiesis,Blood (foetal liver / bone marrow),8pcw,Male,NA,8,Foetal,277,4682
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),CB001,Female,0,NA,Adult_Cord,195,1183
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),CB002,Female,0,NA,Adult_Cord,379,1584
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),KX001,Male,29,NA,Adult_Cord,407,2969
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),KX002,Male,38,NA,Adult_Cord,380,2846
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),SX001,Male,48,NA,Adult_Cord,361,2571
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),AX001,Male,63,NA,Adult_Cord,361,3508
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),KX007,Male,75,NA,Adult_Cord,315,1537
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),KX008,Female,76,NA,Adult_Cord,367,2412
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),KX004,Female,77,NA,Adult_Cord,451,3082
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (adult and cord),KX003,Male,81,NA,Adult_Cord,322,2442
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (fetal liver / bone marrow),18pcw,Male,NA,18,Foetal,234,1360
+Normal aging hematopoiesis / fetal hemopoiesis,Blood (fetal liver / bone marrow),8pcw,Male,NA,8,Foetal,277,4682
 Normal colon,Colonic crypts,PD34202,Male,13,NA,Control,6,62
 Normal colon,Colonic crypts,PD37449,Female,36,NA,Control,30,496
 Normal colon,Colonic crypts,PD34201,Male,38,NA,Control,56,681

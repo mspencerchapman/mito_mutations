@@ -1,7 +1,7 @@
-# Mitochondrial mutation, drift and selection during human development and ageing
+# Mitochondrial mutation, drift and selection during human development and aging
 
 Code accompanying the manuscript *"Mitochondrial mutation, drift and selection
-during human development and ageing"*.
+during human development and aging"*.
 
 This repository contains the mtDNA mutation-calling pipeline, the downstream
 analysis scripts, and the scripts that generate each manuscript figure.
@@ -215,7 +215,7 @@ and each has a rendered `.html` you can read without running anything:
 
 | Notebook | Covers |
 |---|---|
-| `mtDNA_mutations_blood.Rmd` | Coverage and copy number, mutation calling and filtering, burden with age, mutational signatures - the normal haematopoiesis dataset |
+| `mtDNA_mutations_blood.Rmd` | Coverage and copy number, mutation calling and filtering, burden with age, mutational signatures - the normal hematopoiesis dataset |
 | `mtDNA_mutations_comparator_tissues.Rmd` | The same for the cross-tissue cohorts, plus tissue comparisons and heteroplasmic oocyte mutations |
 | `Mitochondrial_drift_analysis.Rmd` | Drift inference from VAF distributions with age |
 | `Nonblood_mtDNA_drift_analysis.Rmd` | Drift and homoplasmy across tissues |

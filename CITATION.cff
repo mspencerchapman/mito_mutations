@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 title: >-
   Code and processed data for "Mitochondrial mutation, drift and selection
-  during human development and ageing"
+  during human development and aging"
 message: >-
   If you use this software or the accompanying data, please cite both the
   repository and the associated publication.
@@ -65,7 +65,7 @@ authors:
 repository-code: 'https://github.com/mspencerchapman/mito_mutations'
 abstract: >-
   Analysis code for the study of somatic mitochondrial DNA mutation, genetic
-  drift and selection across human development and ageing. Includes the mtDNA
+  drift and selection across human development and aging. Includes the mtDNA
   mutation calling pipeline, mutational signature extraction, dN/dS selection
   analysis, and approximate Bayesian computation inference of mitochondrial
   drift rates through phylogenies of clonal expansions. The accompanying
@@ -75,7 +75,7 @@ keywords:
   - heteroplasmy
   - somatic mutation
   - genetic drift
-  - clonal haematopoiesis
+  - clonal hematopoiesis
   - phylogenetics
   - approximate Bayesian computation
 license: MIT
