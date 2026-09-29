@@ -63,8 +63,13 @@ dir.create(fig6_dir,showWarnings=FALSE,recursive=TRUE)
 #so only the product is identified by the data; each panel below therefore
 #keeps its measured mtDNA copy number and derives the generation time from the
 #inferred drift parameter.
-drift_adult  <- 18000   #mitochondria days, adult life
-drift_foetal <- 2100    #mitochondria days, foetal life
+#Two ABCs estimate drift and they are not interchangeable: the VAF-distribution
+#ABC gives the whole-population estimate used for drift through life (panels a
+#and b), while the phylogeny-aware ABC estimates drift along the lineages of a
+#clonal expansion (panel c).
+drift_adult     <- 18000   #mitochondria days, adult life (VAF-distribution ABC)
+drift_foetal    <- 2100    #mitochondria days, foetal life
+drift_expansion <- 11200   #mitochondria days, clonal expansions (phylogeny-aware ABC)
 
 set.seed(42) #the panels below are stochastic simulations; fix the seed so the figure is reproducible
 #rsimpop draws from its own C-level generator, which set.seed() does not reach,
@@ -143,9 +148,10 @@ dev.off()
 # Two expansions are simulated to the same final clone size but over different
 # durations, by pairing the driver acquisition time with a fitness value: a long,
 # gradual expansion (35 yr, lower fitness) and a rapid one (2 yr, higher fitness).
-# The mtDNA copy number is 1000 and the generation time is derived from the
-# adult drift parameter, and the starting VAF in the MRCA is fixed at 0.2 for
-# comparability across panels.
+# The mtDNA copy number is 1000 and the generation time is derived from
+# drift_expansion, the estimate from the phylogeny-aware ABC, which is the one
+# that applies to drift along the lineages of an expansion. The starting VAF in
+# the MRCA is fixed at 0.2 for comparability across panels.
 #-----------------------------------------------------------------------------------#
 
 #Wrapper: detect the expanded clade, drop other tips, and drift from its MRCA
@@ -219,7 +225,7 @@ if(have_rsimpop) {
     }
     fn<-paste0(fig6_dir,"Fig6c.simulation_plot_",starting_vaf,"_",years,"years.pdf")
     pdf(fn,width=2,height = 2.5)
-    ok<-tryCatch({simulated_expansion_mito_vafs(tree,starting_vaf=starting_vaf,mito_cn=1000,generation_time=drift_adult/1000);TRUE},
+    ok<-tryCatch({simulated_expansion_mito_vafs(tree,starting_vaf=starting_vaf,mito_cn=1000,generation_time=drift_expansion/1000);TRUE},
                  error=function(e){cat("Fig 6c:",years,"yr failed -",conditionMessage(e),"\n");FALSE})
     dev.off()
     if(!ok) unlink(fn) else cat("Fig 6c: wrote",years,"yr panel\n")
